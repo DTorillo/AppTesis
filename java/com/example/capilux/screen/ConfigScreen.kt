@@ -31,9 +31,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.capilux.components.ProfileImageLarge
+import com.example.capilux.components.SettingItem
 import com.example.capilux.ui.theme.BaseDialog
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.SecondaryButton
@@ -72,7 +76,14 @@ fun ConfigScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Color(0xFF6A11CB), Color(0xFF2575FC))
+                )
+            )
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -100,20 +111,9 @@ fun ConfigScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Opción de Notificaciones
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Notificaciones",
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyLarge
-            )
+        SettingItem(title = "Notificaciones") {
             Switch(
-                checked = notificationsEnabled, // Cambiado de darkModeEnabled
+                checked = notificationsEnabled,
                 onCheckedChange = { isEnabled ->
                     notificationsEnabled = isEnabled
                     sharedPreferences.edit().putBoolean("notifications_enabled", isEnabled).apply()
@@ -122,23 +122,12 @@ fun ConfigScreen(
         }
 
         // Opción de Modo Oscuro
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Modo Oscuro",
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyLarge
-            )
+        SettingItem(title = "Modo Oscuro") {
             Switch(
                 checked = darkModeEnabled,
                 onCheckedChange = {
                     darkModeEnabled = it
-                    darkModeState.value = it  // Actualiza el estado global
+                    darkModeState.value = it
                     sharedPreferences.edit().putBoolean("dark_mode_enabled", it).apply()
                 }
             )
@@ -146,21 +135,12 @@ fun ConfigScreen(
 
         // Opción de Idioma
         var showLanguageDialog by remember { mutableStateOf(false) }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .clickable { showLanguageDialog = true },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+        SettingItem(
+            title = "Idioma",
+            modifier = Modifier.clickable { showLanguageDialog = true }
         ) {
             Text(
-                text = "Idioma",
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                text = when(currentLanguage) {
+                text = when (currentLanguage) {
                     "es" -> "Español"
                     "en" -> "English"
                     else -> "Español"
