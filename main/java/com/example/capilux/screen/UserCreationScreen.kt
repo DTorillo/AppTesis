@@ -252,6 +252,9 @@ fun UserCreationScreen(navController: NavHostController) {
                             val editor = sharedPreferences.edit()
                             editor.putString("username", username)
                             imageUri?.let { editor.putString("imageUri", it.toString()) }
+                            if (!sharedPreferences.contains("pin")) {
+                                editor.putString("pin", "1234")
+                            }
                             editor.apply()
 
                             // Navegar a la pantalla principal

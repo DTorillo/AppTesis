@@ -15,6 +15,7 @@ import com.example.capilux.screen.ResultsScreen
 import com.example.capilux.screen.ExplanationScreen
 import com.example.capilux.screen.FavoritesScreen
 import com.example.capilux.screen.UserCreationScreen
+import com.example.capilux.screen.AuthScreen
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -33,6 +34,9 @@ fun AppNavigation(
         }
         composable("userCreation") {
             UserCreationScreen(navController)
+        }
+        composable("auth") {
+            AuthScreen(navController)
         }
         composable("main/{username}") { backStackEntry ->
             // 1. Obtener el nombre de usuario de los argumentos de navegación

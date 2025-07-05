@@ -32,8 +32,8 @@ class MainActivity : ComponentActivity() {
             }
             CapiluxTheme(darkTheme = darkModeState.value) {
                 if (username != null) {
-                    // Si hay usuario, ir directamente a MainScreen
-                    AppNavigation(darkModeState, startDestination = "main/$username")
+                    // Si hay usuario, solicitar autenticación
+                    AppNavigation(darkModeState, startDestination = "auth")
                 } else {
                     // Si no, comenzar en ExplanationScreen
                     AppNavigation(darkModeState)
