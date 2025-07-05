@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import com.example.capilux.MainActivity
+import com.example.capilux.ui.theme.ThemeStyle
 import java.util.Locale
 
 fun Context.restartApp() {
@@ -27,4 +28,11 @@ fun getInitialDarkModePreference(context: Context): Boolean {
     val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     return sharedPreferences.getBoolean("dark_mode_enabled", false)
 }
+
+fun getInitialThemeStylePreference(context: Context): ThemeStyle {
+    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    val styleName = sharedPreferences.getString("theme_style", ThemeStyle.DEFAULT.name) ?: ThemeStyle.DEFAULT.name
+    return ThemeStyle.valueOf(styleName)
+}
+
 

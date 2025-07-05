@@ -10,7 +10,9 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.capilux.navigation.AppNavigation
 import com.example.capilux.screen.resetDialogFlag
 import com.example.capilux.ui.theme.CapiluxTheme
+import com.example.capilux.ui.theme.ThemeStyle
 import com.example.capilux.utils.getInitialDarkModePreference
+import com.example.capilux.utils.getInitialThemeStylePreference
 import com.example.capilux.utils.isCameraPermissionGranted
 import com.example.capilux.utils.requestCameraPermission
 
@@ -22,6 +24,9 @@ class MainActivity : ComponentActivity() {
             val darkModeState = remember {
                 mutableStateOf(getInitialDarkModePreference(this))
             }
+            val themeStyleState = remember {
+                mutableStateOf(getInitialThemeStylePreference(this))
+            }
 
             // Verificar si hay un usuario guardado
             val sharedPrefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
@@ -30,13 +35,16 @@ class MainActivity : ComponentActivity() {
                 // Solicitar permisos si no están concedidos
                 requestCameraPermission(this)
             }
-            CapiluxTheme(darkTheme = darkModeState.value) {
+            CapiluxTheme(
+                darkTheme = darkModeState.value,
+                themeStyle = themeStyleState.value
+            ) {
                 if (username != null) {
                     // Si hay usuario, ir directamente a MainScreen
-                    AppNavigation(darkModeState, startDestination = "main/$username")
+                    AppNavigation(darkModeState, themeStyleState, startDestination = "main/$username")
                 } else {
                     // Si no, comenzar en ExplanationScreen
-                    AppNavigation(darkModeState)
+                    AppNavigation(darkModeState, themeStyleState)
                 }
             }
         }

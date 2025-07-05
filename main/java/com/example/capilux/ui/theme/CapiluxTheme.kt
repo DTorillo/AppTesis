@@ -12,19 +12,30 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 @Composable
 fun CapiluxTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    themeStyle: ThemeStyle = ThemeStyle.DEFAULT,
     content: @Composable () -> Unit
 ) {
     val systemUiController = rememberSystemUiController()
+    val colorScheme = when(themeStyle) {
+        ThemeStyle.DEFAULT -> if (darkTheme) DarkColorScheme else LightColorScheme
+        ThemeStyle.GRADIENT -> GradientColorScheme
+        ThemeStyle.METALLIC -> MetallicColorScheme
+    }
 
-    LaunchedEffect(darkTheme) {
+    LaunchedEffect(darkTheme, themeStyle) {
+        val barColor = when(themeStyle) {
+            ThemeStyle.GRADIENT -> GradientPurple
+            ThemeStyle.METALLIC -> Color.Black
+            ThemeStyle.DEFAULT -> if (darkTheme) Color.Black else Color.White
+        }
         systemUiController.setSystemBarsColor(
-            color = if (darkTheme) Color.Black else Color.White,
-            darkIcons = !darkTheme
+            color = barColor,
+            darkIcons = themeStyle == ThemeStyle.DEFAULT && !darkTheme
         )
     }
 
     MaterialTheme(
-        colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
+        colorScheme = colorScheme,
         typography = Typography,
         content = content
     )

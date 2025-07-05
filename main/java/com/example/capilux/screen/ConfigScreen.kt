@@ -20,6 +20,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,21 +39,25 @@ import com.example.capilux.components.ProfileImageLarge
 import com.example.capilux.ui.theme.BaseDialog
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.SecondaryButton
+import com.example.capilux.ui.theme.ThemeStyle
 import com.example.capilux.utils.restartApp
 import com.example.capilux.utils.setAppLocale
 import com.example.capilux.utils.compressImage
+import java.util.Locale
 
 @Composable
 fun ConfigScreen(
     navController: NavHostController,
     username: String,
     imageUri: Uri?,
-    darkModeState: MutableState<Boolean> // Recibimos el estado del tema
+    darkModeState: MutableState<Boolean>, // Estado de modo oscuro
+    themeStyleState: MutableState<ThemeStyle>
 ) {
     val context = LocalContext.current
     val sharedPreferences = remember { context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE) }
     val sharedPrefs = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
     var currentImageUri by remember { mutableStateOf(imageUri) }
+    var editableName by remember { mutableStateOf(username) }
 
     // Estado para las configuraciones
     var notificationsEnabled by remember {
@@ -61,6 +67,7 @@ fun ConfigScreen(
     var currentLanguage by remember {
         mutableStateOf(sharedPreferences.getString("language", "es") ?: "es")
     }
+    var selectedTheme by remember { mutableStateOf(themeStyleState.value) }
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
@@ -81,10 +88,14 @@ fun ConfigScreen(
             ProfileImageLarge(imageUri = currentImageUri)
         }
         // Nombre de usuario
-        Text(
-            text = username,
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.titleLarge
+        OutlinedTextField(
+            value = editableName,
+            onValueChange = { editableName = it },
+            label = { Text("Nombre de usuario") },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -118,6 +129,31 @@ fun ConfigScreen(
                     notificationsEnabled = isEnabled
                     sharedPreferences.edit().putBoolean("notifications_enabled", isEnabled).apply()
                 }
+            )
+        }
+
+        // Opción de Tema
+        var showThemeDialog by remember { mutableStateOf(false) }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .clickable { showThemeDialog = true },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Tema",
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = when(selectedTheme) {
+                    ThemeStyle.DEFAULT -> "Original"
+                    ThemeStyle.GRADIENT -> "Morado"
+                    ThemeStyle.METALLIC -> "Metálico"
+                },
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
             )
         }
 
@@ -174,8 +210,20 @@ fun ConfigScreen(
         PrimaryButton(
             text = "Guardar cambios",
             onClick = {
-                // ... (guardar configuraciones) ...
-                navController.popBackStack()
+                sharedPrefs.edit().putString("username", editableName).apply()
+                sharedPreferences.edit()
+                    .putBoolean("dark_mode_enabled", darkModeEnabled)
+                    .putString("language", currentLanguage)
+                    .putString("theme_style", selectedTheme.name)
+                    .apply()
+                themeStyleState.value = selectedTheme
+                darkModeState.value = darkModeEnabled
+                if (currentLanguage != Locale.getDefault().language) {
+                    setAppLocale(context, currentLanguage)
+                    restartApp(context)
+                } else {
+                    navController.popBackStack()
+                }
             }
         )
 
@@ -192,12 +240,59 @@ fun ConfigScreen(
                 title = "Seleccionar idioma",
                 onDismiss = { showLanguageDialog = false },
                 content = {
-                    // ... (contenido del selector de idioma) ...
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(selected = currentLanguage == "es", onClick = { currentLanguage = "es" })
+                            Text("Español")
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(selected = currentLanguage == "en", onClick = { currentLanguage = "en" })
+                            Text("English")
+                        }
+                    }
                 },
                 confirmButton = {
                     SecondaryButton(
                         text = "Cerrar",
                         onClick = { showLanguageDialog = false }
+                    )
+                }
+            )
+        }
+
+        // Diálogo de tema
+        if (showThemeDialog) {
+            BaseDialog(
+                title = "Seleccionar tema",
+                onDismiss = { showThemeDialog = false },
+                content = {
+                    Column {
+                        ThemeStyle.values().forEach { style ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { selectedTheme = style }
+                            ) {
+                                RadioButton(
+                                    selected = selectedTheme == style,
+                                    onClick = { selectedTheme = style }
+                                )
+                                Text(
+                                    text = when(style) {
+                                        ThemeStyle.DEFAULT -> "Original"
+                                        ThemeStyle.GRADIENT -> "Morado"
+                                        ThemeStyle.METALLIC -> "Metálico"
+                                    }
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    SecondaryButton(
+                        text = "Cerrar",
+                        onClick = { showThemeDialog = false }
                     )
                 }
             )

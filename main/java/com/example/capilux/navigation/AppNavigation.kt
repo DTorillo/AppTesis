@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.capilux.ui.theme.ThemeStyle
 import com.example.capilux.screen.ConfigScreen
 import com.example.capilux.screen.MainScreen
 import com.example.capilux.screen.ResultsScreen
@@ -22,6 +23,7 @@ import java.util.Locale
 @Composable
 fun AppNavigation(
     darkModeState: MutableState<Boolean>,
+    themeStyleState: MutableState<ThemeStyle>,
     startDestination: String = "explanation" // Valor por defecto
 ) {
     val navController = rememberNavController()
@@ -58,8 +60,14 @@ fun AppNavigation(
             val imageUri = savedImageUriString?.let { Uri.parse(it) }
             val savedUsername = sharedPreferences.getString("username", "") ?: ""
 
-            // Pasamos darkModeState a ConfigScreen
-            ConfigScreen(navController, savedUsername, imageUri, darkModeState)
+            // Pasamos los estados a ConfigScreen
+            ConfigScreen(
+                navController,
+                savedUsername,
+                imageUri,
+                darkModeState,
+                themeStyleState
+            )
         }
         composable("results/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
