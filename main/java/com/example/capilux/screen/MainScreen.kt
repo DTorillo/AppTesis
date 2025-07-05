@@ -85,6 +85,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.capilux.components.CameraPreview
 import com.example.capilux.components.PhotoRecommendationDialog
 import com.example.capilux.ui.theme.IconTextButton
+import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.takePhoto
 import kotlinx.coroutines.launch
@@ -110,20 +111,18 @@ fun resetDialogFlag(context: Context) {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun MainScreen(navController: NavHostController,
-               username: String,
-               profileImageUri: Uri?) {
+fun MainScreen(
+    navController: NavHostController,
+    username: String,
+    profileImageUri: Uri?,
+    useAltTheme: Boolean
+) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var showErrorDialog by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
 
-    // Gradiente para el fondo
-    val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFF6A11CB), Color(0xFF2575FC)),
-        startY = 0f,
-        endY = 1000f
-    )
+    val gradient = backgroundGradient(useAltTheme)
 
     val cameraController = remember {
         LifecycleCameraController(context).apply {
@@ -174,11 +173,7 @@ fun MainScreen(navController: NavHostController,
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(Color(0xFF6A11CB), Color(0xFF2575FC))
-                                )
-                            )
+                            .background(gradient)
                             .padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -382,7 +377,7 @@ fun MainScreen(navController: NavHostController,
 
                         // Versión de la app
                         Text(
-                            text = "Capilux v0.25.0",
+                            text = "Capilux v0.26.0",
                             color = Color.White.copy(alpha = 0.6f),
                             fontSize = 12.sp
                         )

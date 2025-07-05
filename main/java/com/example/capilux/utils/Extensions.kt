@@ -28,3 +28,8 @@ fun getInitialDarkModePreference(context: Context): Boolean {
     return sharedPreferences.getBoolean("dark_mode_enabled", false)
 }
 
+fun getInitialThemePreference(context: Context): Boolean {
+    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    return sharedPreferences.getBoolean("alt_theme_enabled", false)
+}
+
