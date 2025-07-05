@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.capilux.navigation.AppNavigation
+import com.example.capilux.auth.AuthScreen
 import com.example.capilux.screen.resetDialogFlag
 import com.example.capilux.ui.theme.CapiluxTheme
 import com.example.capilux.utils.getInitialDarkModePreference
@@ -22,21 +23,22 @@ class MainActivity : ComponentActivity() {
             val darkModeState = remember {
                 mutableStateOf(getInitialDarkModePreference(this))
             }
+            val isAuthenticated = remember { mutableStateOf(false) }
 
-            // Verificar si hay un usuario guardado
-            val sharedPrefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-            val username = sharedPrefs.getString("username", null)
-            if (!isCameraPermissionGranted(this)) {
-                // Solicitar permisos si no están concedidos
-                requestCameraPermission(this)
-            }
             CapiluxTheme(darkTheme = darkModeState.value) {
-                if (username != null) {
-                    // Si hay usuario, ir directamente a MainScreen
-                    AppNavigation(darkModeState, startDestination = "main/$username")
+                if (!isAuthenticated.value) {
+                    AuthScreen { isAuthenticated.value = true }
                 } else {
-                    // Si no, comenzar en ExplanationScreen
-                    AppNavigation(darkModeState)
+                    val sharedPrefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                    val username = sharedPrefs.getString("username", null)
+                    if (!isCameraPermissionGranted(this)) {
+                        requestCameraPermission(this)
+                    }
+                    if (username != null) {
+                        AppNavigation(darkModeState, startDestination = "main/$username")
+                    } else {
+                        AppNavigation(darkModeState)
+                    }
                 }
             }
         }
