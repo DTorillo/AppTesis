@@ -377,7 +377,7 @@ fun MainScreen(
 
                         // Versión de la app
                         Text(
-                            text = "Capilux v0.25.0",
+                            text = "Capilux v0.26.0",
                             color = Color.White.copy(alpha = 0.6f),
                             fontSize = 12.sp
                         )
