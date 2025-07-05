@@ -22,6 +22,7 @@ import java.util.Locale
 @Composable
 fun AppNavigation(
     darkModeState: MutableState<Boolean>,
+    altThemeState: MutableState<Boolean>,
     startDestination: String = "explanation" // Valor por defecto
 ) {
     val navController = rememberNavController()
@@ -29,10 +30,10 @@ fun AppNavigation(
 
     NavHost(navController, startDestination = startDestination) {
         composable("explanation") {
-            ExplanationScreen(navController)
+            ExplanationScreen(navController, altThemeState.value)
         }
         composable("userCreation") {
-            UserCreationScreen(navController)
+            UserCreationScreen(navController, altThemeState.value)
         }
         composable("main/{username}") { backStackEntry ->
             // 1. Obtener el nombre de usuario de los argumentos de navegación
@@ -48,7 +49,8 @@ fun AppNavigation(
             MainScreen(
                 navController = navController,
                 username = username,
-                profileImageUri = imageUri
+                profileImageUri = imageUri,
+                useAltTheme = altThemeState.value
             )
         }
         composable("config") {
@@ -58,8 +60,8 @@ fun AppNavigation(
             val imageUri = savedImageUriString?.let { Uri.parse(it) }
             val savedUsername = sharedPreferences.getString("username", "") ?: ""
 
-            // Pasamos darkModeState a ConfigScreen
-            ConfigScreen(navController, savedUsername, imageUri, darkModeState)
+            // Pasamos darkModeState y altThemeState a ConfigScreen
+            ConfigScreen(navController, savedUsername, imageUri, darkModeState, altThemeState)
         }
         composable("results/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""

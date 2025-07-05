@@ -10,8 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -24,24 +22,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.capilux.R // Asegúrate de tener un recurso de logo
 import com.example.capilux.ui.theme.PrimaryButton
+import com.example.capilux.ui.theme.backgroundGradient
 
 @Composable
-fun ExplanationScreen(navController: NavHostController) {
-    // Gradiente para el fondo
-    val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFF6A11CB), Color(0xFF2575FC)),
-        startY = 0f,
-        endY = 1000f
-    )
+fun ExplanationScreen(navController: NavHostController, useAltTheme: Boolean) {
+    val gradient = backgroundGradient(useAltTheme)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(Color(0xFF6A11CB), Color(0xFF2575FC))
-                )
-            )
+            .background(gradient)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

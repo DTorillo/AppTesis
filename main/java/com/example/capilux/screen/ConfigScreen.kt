@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -37,6 +38,7 @@ import com.example.capilux.components.ProfileImageLarge
 import com.example.capilux.ui.theme.BaseDialog
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.SecondaryButton
+import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.restartApp
 import com.example.capilux.utils.setAppLocale
 import com.example.capilux.utils.compressImage
@@ -46,7 +48,8 @@ fun ConfigScreen(
     navController: NavHostController,
     username: String,
     imageUri: Uri?,
-    darkModeState: MutableState<Boolean> // Recibimos el estado del tema
+    darkModeState: MutableState<Boolean>, // Recibimos el estado del tema
+    altThemeState: MutableState<Boolean>
 ) {
     val context = LocalContext.current
     val sharedPreferences = remember { context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE) }
@@ -58,6 +61,7 @@ fun ConfigScreen(
         mutableStateOf(sharedPreferences.getBoolean("notifications_enabled", true))
     }
     var darkModeEnabled by remember { mutableStateOf(darkModeState.value) } // Usamos el estado pasado
+    var altThemeEnabled by remember { mutableStateOf(altThemeState.value) }
     var currentLanguage by remember {
         mutableStateOf(sharedPreferences.getString("language", "es") ?: "es")
     }
@@ -72,7 +76,9 @@ fun ConfigScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(backgroundGradient(altThemeEnabled)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -81,10 +87,12 @@ fun ConfigScreen(
             ProfileImageLarge(imageUri = currentImageUri)
         }
         // Nombre de usuario
-        Text(
-            text = username,
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.titleLarge
+        var editedUsername by remember { mutableStateOf(username) }
+        OutlinedTextField(
+            value = editedUsername,
+            onValueChange = { editedUsername = it },
+            label = { Text("Nombre") },
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -144,6 +152,29 @@ fun ConfigScreen(
             )
         }
 
+        // Opción de Tema Alternativo
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Tema degradado",
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Switch(
+                checked = altThemeEnabled,
+                onCheckedChange = {
+                    altThemeEnabled = it
+                    altThemeState.value = it
+                    sharedPreferences.edit().putBoolean("alt_theme_enabled", it).apply()
+                }
+            )
+        }
+
         // Opción de Idioma
         var showLanguageDialog by remember { mutableStateOf(false) }
         Row(
@@ -174,7 +205,8 @@ fun ConfigScreen(
         PrimaryButton(
             text = "Guardar cambios",
             onClick = {
-                // ... (guardar configuraciones) ...
+                sharedPrefs.edit().putString("username", editedUsername).apply()
+                currentImageUri?.let { sharedPrefs.edit().putString("imageUri", it.toString()).apply() }
                 navController.popBackStack()
             }
         )
@@ -192,12 +224,26 @@ fun ConfigScreen(
                 title = "Seleccionar idioma",
                 onDismiss = { showLanguageDialog = false },
                 content = {
-                    // ... (contenido del selector de idioma) ...
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(selected = currentLanguage == "es", onClick = { currentLanguage = "es" })
+                            Text("Español")
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(selected = currentLanguage == "en", onClick = { currentLanguage = "en" })
+                            Text("English")
+                        }
+                    }
                 },
                 confirmButton = {
-                    SecondaryButton(
-                        text = "Cerrar",
-                        onClick = { showLanguageDialog = false }
+                    PrimaryButton(
+                        text = "Aplicar",
+                        onClick = {
+                            sharedPreferences.edit().putString("language", currentLanguage).apply()
+                            setAppLocale(context, currentLanguage)
+                            showLanguageDialog = false
+                            restartApp(context)
+                        }
                     )
                 }
             )

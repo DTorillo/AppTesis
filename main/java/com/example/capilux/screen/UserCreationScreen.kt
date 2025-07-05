@@ -48,7 +48,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -65,10 +64,11 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.capilux.R
 import com.example.capilux.components.TermsAndConditionsDialog
 import com.example.capilux.ui.theme.PrimaryButton
+import com.example.capilux.ui.theme.backgroundGradient
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserCreationScreen(navController: NavHostController) {
+fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean) {
     var username by remember { mutableStateOf("") }
     var isTermsAccepted by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
@@ -82,12 +82,7 @@ fun UserCreationScreen(navController: NavHostController) {
     }
     val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
-    // Gradiente para el fondo
-    val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFF6A11CB), Color(0xFF2575FC)),
-        startY = 0f,
-        endY = 1000f
-    )
+    val gradient = backgroundGradient(useAltTheme)
 
     Scaffold(
         topBar = {
