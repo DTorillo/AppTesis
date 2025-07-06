@@ -47,7 +47,7 @@ fun takePhoto(
                     .putString("last_captured_image", savedUri.toString()).apply()
 
                 val faceShapes = listOf("ovalada", "redonda", "cuadrada", "alargada")
-                navController.navigate("results/${faceShapes.random()}")
+                navController.navigate("processing/${faceShapes.random()}")
             }
 
             override fun onError(exc: ImageCaptureException) {

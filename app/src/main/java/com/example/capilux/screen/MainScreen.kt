@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
+import androidx.camera.core.ImageAnalysis
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -74,6 +75,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -83,11 +85,13 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.capilux.components.CameraPreview
+import com.example.capilux.components.FaceBoxOverlay
 import com.example.capilux.components.PhotoRecommendationDialog
 import com.example.capilux.ui.theme.IconTextButton
 import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.takePhoto
+import com.example.capilux.utils.FaceDetectionAnalyzer
 import kotlinx.coroutines.launch
 import androidx.compose.material3.AlertDialog as MaterialAlertDialog
 
@@ -127,8 +131,15 @@ fun MainScreen(
     val cameraController = remember {
         LifecycleCameraController(context).apply {
             // Configurar los casos de uso para la cámara
-            setEnabledUseCases(CameraController.IMAGE_CAPTURE)
+            setEnabledUseCases(CameraController.IMAGE_CAPTURE or CameraController.IMAGE_ANALYSIS)
         }
+    }
+    var faceAligned by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        cameraController.setImageAnalysisAnalyzer(
+            ContextCompat.getMainExecutor(context),
+            FaceDetectionAnalyzer { aligned -> faceAligned = aligned }
+        )
     }
     var isFrontCamera by remember { mutableStateOf(false) }
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -139,7 +150,8 @@ fun MainScreen(
                 val sharedPrefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
                 sharedPrefs.edit().putString("last_captured_image", compressedUri.toString())
                     .apply()
-                navController.navigate("results/ovalada")
+                val faceShapes = listOf("ovalada", "redonda", "cuadrada", "alargada")
+                navController.navigate("processing/${faceShapes.random()}")
             }
         }
     )
@@ -448,14 +460,18 @@ fun MainScreen(
                                 )
                             },
                             onClick = {
-                                takePhoto(
-                                    cameraController = cameraController,
-                                    context = context,
-                                    navController = navController,
-                                    onError = { error ->
-                                        showErrorDialog = error
-                                    }
-                                )
+                                if (!faceAligned) {
+                                    showErrorDialog = "Coloca tu rostro en el marco"
+                                } else {
+                                    takePhoto(
+                                        cameraController = cameraController,
+                                        context = context,
+                                        navController = navController,
+                                        onError = { error ->
+                                            showErrorDialog = error
+                                        }
+                                    )
+                                }
                             }
                         )
                     }
@@ -525,6 +541,11 @@ fun MainScreen(
                         CameraPreview(
                             modifier = Modifier.fillMaxSize(),
                             cameraController = cameraController
+                        )
+
+                        FaceBoxOverlay(
+                            faceAligned = faceAligned,
+                            modifier = Modifier.fillMaxSize()
                         )
 
                         // Botón para cambiar cámara

@@ -11,10 +11,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.capilux.screen.ConfigScreen
 import com.example.capilux.screen.MainScreen
-import com.example.capilux.screen.ResultsScreen
 import com.example.capilux.screen.ExplanationScreen
 import com.example.capilux.screen.FavoritesScreen
 import com.example.capilux.screen.UserCreationScreen
+import com.example.capilux.screen.ProcessingScreen
+import com.example.capilux.screen.ParametersScreen
+import com.example.capilux.screen.FilterScreen
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -62,15 +64,17 @@ fun AppNavigation(
             // Pasamos estados para que la configuración pueda modificarlos
             ConfigScreen(navController, usernameState, imageUri, darkModeState, altThemeState)
         }
-        composable("results/{faceShape}") { backStackEntry ->
+        composable("processing/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
-            val recommendedStyles = getRecommendedStyles(faceShape)
-            val context = LocalContext.current
-            val sharedPrefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-            val imageUriString = sharedPrefs.getString("last_captured_image", null)
-            val imageUri = imageUriString?.let { Uri.parse(it) }
-
-            ResultsScreen(faceShape, recommendedStyles, imageUri)
+            ProcessingScreen(navController, faceShape)
+        }
+        composable("parameters/{faceShape}") { backStackEntry ->
+            val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
+            ParametersScreen(navController, faceShape)
+        }
+        composable("filters/{faceShape}") { backStackEntry ->
+            val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
+            FilterScreen(navController, faceShape)
         }
         composable("favorites") {
             // Nueva pantalla de Estilos Favoritos
