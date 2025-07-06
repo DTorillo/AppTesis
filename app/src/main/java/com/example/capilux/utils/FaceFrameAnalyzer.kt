@@ -26,7 +26,18 @@ class FaceFrameAnalyzer(private val onResult: (Boolean) -> Unit) : ImageAnalysis
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
             detector.process(image)
                 .addOnSuccessListener { faces ->
-                    onResult(faces.isNotEmpty())
+                    val width = image.width
+                    val height = image.height
+                    val centerRegion = Rect(
+                        (width * 0.25f).toInt(),
+                        (height * 0.2f).toInt(),
+                        (width * 0.75f).toInt(),
+                        (height * 0.8f).toInt()
+                    )
+                    val inside = faces.any { face ->
+                        centerRegion.contains(face.boundingBox.centerX(), face.boundingBox.centerY())
+                    }
+                    onResult(inside)
                 }
                 .addOnCompleteListener { imageProxy.close() }
         } else {

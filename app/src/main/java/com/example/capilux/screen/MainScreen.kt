@@ -544,39 +544,40 @@ fun MainScreen(
                         Canvas(
                             modifier = Modifier
                                 .align(Alignment.Center)
-                                .size(220.dp)
+                                .fillMaxWidth(0.7f)
+                                .aspectRatio(1f)
                         ) {
                             val strokeWidth = 4.dp.toPx()
                             val path = Path().apply {
                                 moveTo(size.width / 2f, strokeWidth / 2)
                                 cubicTo(
-                                    size.width * 0.8f,
+                                    size.width * 0.75f,
                                     strokeWidth / 2,
-                                    size.width,
+                                    size.width * 0.95f,
                                     size.height * 0.25f,
-                                    size.width,
+                                    size.width * 0.95f,
                                     size.height * 0.55f
                                 )
                                 cubicTo(
-                                    size.width,
-                                    size.height,
-                                    size.width * 0.8f,
+                                    size.width * 0.95f,
+                                    size.height * 0.85f,
+                                    size.width * 0.75f,
                                     size.height - strokeWidth / 2,
                                     size.width / 2f,
                                     size.height - strokeWidth / 2
                                 )
                                 cubicTo(
-                                    size.width * 0.2f,
+                                    size.width * 0.25f,
                                     size.height - strokeWidth / 2,
-                                    0f,
-                                    size.height,
-                                    0f,
+                                    size.width * 0.05f,
+                                    size.height * 0.85f,
+                                    size.width * 0.05f,
                                     size.height * 0.55f
                                 )
                                 cubicTo(
-                                    0f,
+                                    size.width * 0.05f,
                                     size.height * 0.25f,
-                                    size.width * 0.2f,
+                                    size.width * 0.25f,
                                     strokeWidth / 2,
                                     size.width / 2f,
                                     strokeWidth / 2
