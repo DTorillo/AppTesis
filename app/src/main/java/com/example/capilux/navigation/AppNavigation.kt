@@ -68,7 +68,7 @@ fun AppNavigation(
         }
         composable("processing/{imageUri}") { backStackEntry ->
             val uri = backStackEntry.arguments?.getString("imageUri") ?: ""
-            ProcessingScreen(uri, navController)
+            ProcessingScreen(uri, altThemeState.value, navController)
         }
         composable("analysisResult/{faceShape}/{ratio}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""

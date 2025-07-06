@@ -47,8 +47,6 @@ class FaceAnalyzer {
         }
         return FaceAnalysisResult.Success(shape, ratio)
     }
-
-    annotation class V
 }
 
 sealed class FaceAnalysisResult {

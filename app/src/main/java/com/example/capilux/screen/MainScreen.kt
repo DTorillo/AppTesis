@@ -72,6 +72,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -537,13 +540,55 @@ fun MainScreen(
                             cameraController = cameraController
                         )
 
-                        // Marco guía
-                        Box(
+                        // Marco guía con forma de rostro
+                        Canvas(
                             modifier = Modifier
                                 .align(Alignment.Center)
-                                .size(200.dp)
-                                .border(2.dp, if (faceInsideFrame.value) Color.Green else Color.Red, RoundedCornerShape(8.dp))
-                        )
+                                .size(220.dp)
+                        ) {
+                            val strokeWidth = 4.dp.toPx()
+                            val path = Path().apply {
+                                moveTo(size.width / 2f, strokeWidth / 2)
+                                cubicTo(
+                                    size.width * 0.8f,
+                                    strokeWidth / 2,
+                                    size.width,
+                                    size.height * 0.25f,
+                                    size.width,
+                                    size.height * 0.55f
+                                )
+                                cubicTo(
+                                    size.width,
+                                    size.height,
+                                    size.width * 0.8f,
+                                    size.height - strokeWidth / 2,
+                                    size.width / 2f,
+                                    size.height - strokeWidth / 2
+                                )
+                                cubicTo(
+                                    size.width * 0.2f,
+                                    size.height - strokeWidth / 2,
+                                    0f,
+                                    size.height,
+                                    0f,
+                                    size.height * 0.55f
+                                )
+                                cubicTo(
+                                    0f,
+                                    size.height * 0.25f,
+                                    size.width * 0.2f,
+                                    strokeWidth / 2,
+                                    size.width / 2f,
+                                    strokeWidth / 2
+                                )
+                                close()
+                            }
+                            drawPath(
+                                path = path,
+                                color = if (faceInsideFrame.value) Color.Green else Color.White,
+                                style = Stroke(width = strokeWidth)
+                            )
+                        }
 
                         Text(
                             text = if (faceInsideFrame.value) "Puedes tomar la foto" else "Coloca tu cara en el marco",
