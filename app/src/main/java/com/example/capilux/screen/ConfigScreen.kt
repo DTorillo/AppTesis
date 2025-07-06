@@ -29,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -68,10 +69,6 @@ fun ConfigScreen(
     var currentImageUri by remember { mutableStateOf(imageUri) }
 
     // Estado para las configuraciones
-    var notificationsEnabled by remember {
-        mutableStateOf(sharedPreferences.getBoolean("notifications_enabled", true))
-    }
-    var darkModeEnabled by remember { mutableStateOf(darkModeState.value) } // Usamos el estado pasado
     var altThemeEnabled by remember { mutableStateOf(altThemeState.value) }
     var currentLanguage by remember {
         mutableStateOf(sharedPreferences.getString("language", "es") ?: "es")
@@ -122,7 +119,18 @@ fun ConfigScreen(
         OutlinedTextField(
             value = editedUsername,
             onValueChange = { editedUsername = it },
-            label = { Text("Nombre") },
+            label = { Text("Nombre", color = Color.White) },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedLabelColor = Color.White,
+                unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+                focusedIndicatorColor = Color.White,
+                unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
+                cursorColor = Color.White
+            ),
             singleLine = true
         )
 
@@ -131,57 +139,14 @@ fun ConfigScreen(
         // Configuraciones
         Text(
             text = "Configuraciones",
-            color = MaterialTheme.colorScheme.onBackground,
+            color = Color.White,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Opción de Notificaciones
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Notificaciones",
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Switch(
-                checked = notificationsEnabled, // Cambiado de darkModeEnabled
-                onCheckedChange = { isEnabled ->
-                    notificationsEnabled = isEnabled
-                    sharedPreferences.edit().putBoolean("notifications_enabled", isEnabled).apply()
-                }
-            )
-        }
-
-        // Opción de Modo Oscuro
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Modo Oscuro",
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Switch(
-                checked = darkModeEnabled,
-                onCheckedChange = {
-                    darkModeEnabled = it
-                    darkModeState.value = it  // Actualiza el estado global
-                    sharedPreferences.edit().putBoolean("dark_mode_enabled", it).apply()
-                }
-            )
-        }
+        // Opciones de tema
 
         // Opción de Tema Alternativo
         Row(
@@ -192,8 +157,8 @@ fun ConfigScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Tema degradado",
-                color = MaterialTheme.colorScheme.onBackground,
+                text = "Degradado",
+                color = Color.White,
                 style = MaterialTheme.typography.bodyLarge
             )
             Switch(
@@ -201,8 +166,15 @@ fun ConfigScreen(
                 onCheckedChange = {
                     altThemeEnabled = it
                     altThemeState.value = it
-                    sharedPreferences.edit().putBoolean("alt_theme_enabled", it).apply()
-                }
+                    sharedPreferences.edit()
+                        .putBoolean("alt_theme_enabled", it).apply()
+                },
+                colors = androidx.compose.material3.SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    uncheckedThumbColor = Color.White,
+                    checkedTrackColor = Color.White.copy(alpha = 0.5f),
+                    uncheckedTrackColor = Color.White.copy(alpha = 0.3f)
+                )
             )
         }
 
@@ -218,7 +190,7 @@ fun ConfigScreen(
         ) {
             Text(
                 text = "Idioma",
-                color = MaterialTheme.colorScheme.onBackground,
+                color = Color.White,
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
@@ -227,7 +199,7 @@ fun ConfigScreen(
                     "en" -> "English"
                     else -> "Español"
                 },
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                color = Color.White.copy(alpha = 0.7f)
             )
         }
 
@@ -258,12 +230,26 @@ fun ConfigScreen(
                 content = {
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(selected = currentLanguage == "es", onClick = { currentLanguage = "es" })
-                            Text("Español")
+                            RadioButton(
+                                selected = currentLanguage == "es",
+                                onClick = { currentLanguage = "es" },
+                                colors = androidx.compose.material3.RadioButtonDefaults.colors(
+                                    selectedColor = Color.White,
+                                    unselectedColor = Color.White
+                                )
+                            )
+                            Text("Español", color = Color.White)
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(selected = currentLanguage == "en", onClick = { currentLanguage = "en" })
-                            Text("English")
+                            RadioButton(
+                                selected = currentLanguage == "en",
+                                onClick = { currentLanguage = "en" },
+                                colors = androidx.compose.material3.RadioButtonDefaults.colors(
+                                    selectedColor = Color.White,
+                                    unselectedColor = Color.White
+                                )
+                            )
+                            Text("English", color = Color.White)
                         }
                     }
                 },
