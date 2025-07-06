@@ -47,7 +47,7 @@ import com.example.capilux.utils.compressImage
 @Composable
 fun ConfigScreen(
     navController: NavHostController,
-    username: String,
+    usernameState: MutableState<String>,
     imageUri: Uri?,
     darkModeState: MutableState<Boolean>, // Recibimos el estado del tema
     altThemeState: MutableState<Boolean>
@@ -88,7 +88,7 @@ fun ConfigScreen(
             ProfileImageLarge(imageUri = currentImageUri)
         }
         // Nombre de usuario
-        var editedUsername by remember { mutableStateOf(username) }
+        var editedUsername by remember { mutableStateOf(usernameState.value) }
         OutlinedTextField(
             value = editedUsername,
             onValueChange = { editedUsername = it },
@@ -206,6 +206,7 @@ fun ConfigScreen(
         PrimaryButton(
             text = "Guardar cambios",
             onClick = {
+                usernameState.value = editedUsername
                 sharedPrefs.edit().putString("username", editedUsername).apply()
                 currentImageUri?.let { sharedPrefs.edit().putString("imageUri", it.toString()).apply() }
                 navController.popBackStack()

@@ -23,6 +23,7 @@ import java.util.Locale
 fun AppNavigation(
     darkModeState: MutableState<Boolean>,
     altThemeState: MutableState<Boolean>,
+    usernameState: MutableState<String>,
     startDestination: String = "explanation" // Valor por defecto
 ) {
     val navController = rememberNavController()
@@ -33,35 +34,36 @@ fun AppNavigation(
             ExplanationScreen(navController, altThemeState.value)
         }
         composable("userCreation") {
-            UserCreationScreen(navController, altThemeState.value)
+            UserCreationScreen(navController, altThemeState.value, usernameState)
         }
-        composable("main/{username}") { backStackEntry ->
-            // 1. Obtener el nombre de usuario de los argumentos de navegación
-            val username = backStackEntry.arguments?.getString("username") ?: ""
 
-            // 2. Obtener la URI de la imagen desde SharedPreferences
+        composable("main") {
             val context = LocalContext.current
             val sharedPrefs = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
             val imageUriString = sharedPrefs.getString("imageUri", null)
             val imageUri = imageUriString?.let { Uri.parse(it) }
 
-            // 3. Pasar ambos a MainScreen
             MainScreen(
                 navController = navController,
-                username = username,
+                username = usernameState.value,
                 profileImageUri = imageUri,
                 useAltTheme = altThemeState.value
             )
         }
+
         composable("config") {
             val context = LocalContext.current
             val sharedPreferences = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
             val savedImageUriString = sharedPreferences.getString("imageUri", null)
             val imageUri = savedImageUriString?.let { Uri.parse(it) }
-            val savedUsername = sharedPreferences.getString("username", "") ?: ""
 
-            // Pasamos darkModeState y altThemeState a ConfigScreen
-            ConfigScreen(navController, savedUsername, imageUri, darkModeState, altThemeState)
+            ConfigScreen(
+                navController = navController,
+                usernameState = usernameState,
+                imageUri = imageUri,
+                darkModeState = darkModeState,
+                altThemeState = altThemeState
+            )
         }
         composable("results/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
