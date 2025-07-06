@@ -40,17 +40,18 @@ class FaceAnalyzer {
         val height = boundingBox.height().toFloat()
         val ratio = width / height
 
-        return when {
-            ratio > 1.1 -> FaceAnalysisResult.Success("alargada")
-            ratio < 0.9 -> FaceAnalysisResult.Success("ovalada")
-            else -> FaceAnalysisResult.Success("redonda")
+        val shape = when {
+            ratio > 1.1 -> "alargada"
+            ratio < 0.9 -> "ovalada"
+            else -> "redonda"
         }
+        return FaceAnalysisResult.Success(shape, ratio)
     }
 
     annotation class V
 }
 
 sealed class FaceAnalysisResult {
-    data class Success(val faceShape: String) : FaceAnalysisResult()
+    data class Success(val faceShape: String, val ratio: Float) : FaceAnalysisResult()
     data class Error(val message: String) : FaceAnalysisResult()
 }

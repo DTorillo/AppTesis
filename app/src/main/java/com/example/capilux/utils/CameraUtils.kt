@@ -29,7 +29,7 @@ object CameraUtils {
 fun takePhoto(
     cameraController: LifecycleCameraController,
     context: Context,
-    navController: NavHostController,
+    onSuccess: (Uri) -> Unit,
     onError: (String) -> Unit
 ) {
     val outputDir = CameraUtils.getOutputDirectory(context)
@@ -45,9 +45,7 @@ fun takePhoto(
                 val savedUri = Uri.fromFile(photoFile)
                 context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE).edit()
                     .putString("last_captured_image", savedUri.toString()).apply()
-
-                val faceShapes = listOf("ovalada", "redonda", "cuadrada", "alargada")
-                navController.navigate("results/${faceShapes.random()}")
+                onSuccess(savedUri)
             }
 
             override fun onError(exc: ImageCaptureException) {

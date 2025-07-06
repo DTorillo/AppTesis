@@ -86,6 +86,7 @@ import com.example.capilux.components.CameraPreview
 import com.example.capilux.components.PhotoRecommendationDialog
 import com.example.capilux.ui.theme.IconTextButton
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.FaceFrameAnalyzer
 import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.takePhoto
 import kotlinx.coroutines.launch
@@ -126,9 +127,16 @@ fun MainScreen(
 
     val cameraController = remember {
         LifecycleCameraController(context).apply {
-            // Configurar los casos de uso para la cámara
-            setEnabledUseCases(CameraController.IMAGE_CAPTURE)
+            // Configurar casos de uso para captura y análisis en tiempo real
+            setEnabledUseCases(CameraController.IMAGE_CAPTURE or CameraController.IMAGE_ANALYSIS)
         }
+    }
+    val faceInsideFrame = remember { mutableStateOf(false) }
+    val analysisExecutor = remember { java.util.concurrent.Executors.newSingleThreadExecutor() }
+    LaunchedEffect(Unit) {
+        cameraController.setImageAnalysisAnalyzer(analysisExecutor, FaceFrameAnalyzer {
+            faceInsideFrame.value = it
+        })
     }
     var isFrontCamera by remember { mutableStateOf(false) }
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -139,7 +147,7 @@ fun MainScreen(
                 val sharedPrefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
                 sharedPrefs.edit().putString("last_captured_image", compressedUri.toString())
                     .apply()
-                navController.navigate("results/ovalada")
+                navController.navigate("processing/${Uri.encode(compressedUri.toString())}")
             }
         }
     )
@@ -451,7 +459,9 @@ fun MainScreen(
                                 takePhoto(
                                     cameraController = cameraController,
                                     context = context,
-                                    navController = navController,
+                                    onSuccess = { uri ->
+                                        navController.navigate("processing/${Uri.encode(uri.toString())}")
+                                    },
                                     onError = { error ->
                                         showErrorDialog = error
                                     }
@@ -525,6 +535,22 @@ fun MainScreen(
                         CameraPreview(
                             modifier = Modifier.fillMaxSize(),
                             cameraController = cameraController
+                        )
+
+                        // Marco guía
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(200.dp)
+                                .border(2.dp, if (faceInsideFrame.value) Color.Green else Color.Red, RoundedCornerShape(8.dp))
+                        )
+
+                        Text(
+                            text = if (faceInsideFrame.value) "Puedes tomar la foto" else "Coloca tu cara en el marco",
+                            color = Color.White,
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .padding(top = 16.dp)
                         )
 
                         // Botón para cambiar cámara
