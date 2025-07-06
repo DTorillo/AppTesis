@@ -41,6 +41,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,7 +69,7 @@ import com.example.capilux.ui.theme.backgroundGradient
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean) {
+fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, usernameState: MutableState<String>) {
     var username by remember { mutableStateOf("") }
     var isTermsAccepted by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
@@ -249,8 +250,9 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean) {
                             imageUri?.let { editor.putString("imageUri", it.toString()) }
                             editor.apply()
 
-                            // Navegar a la pantalla principal
-                            navController.navigate("main/$username")
+                            // Actualizar estado de usuario y navegar
+                            usernameState.value = username
+                            navController.navigate("main")
                         }
                     }
                 },

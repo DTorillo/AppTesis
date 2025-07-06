@@ -31,17 +31,15 @@ class MainActivity : ComponentActivity() {
             // Verificar si hay un usuario guardado
             val sharedPrefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
             val username = sharedPrefs.getString("username", null)
+            val usernameState = remember { mutableStateOf(username ?: "") }
             if (!isCameraPermissionGranted(this)) {
                 // Solicitar permisos si no están concedidos
                 requestCameraPermission(this)
             }
             CapiluxTheme(darkTheme = darkModeState.value) {
-                if (username != null) {
-                    AppNavigation(darkModeState, altThemeState, startDestination = "main/$username")
-                } else {
-                    AppNavigation(darkModeState, altThemeState)
+                val startDestination = if (username != null) "main" else "explanation"
+                AppNavigation(darkModeState, altThemeState, usernameState, startDestination = startDestination)
                 }
-            }
         }
     }
     override fun onStop() {
