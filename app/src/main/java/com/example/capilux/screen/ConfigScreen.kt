@@ -16,14 +16,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -32,9 +39,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import com.example.capilux.components.ProfileImageLarge
 import com.example.capilux.ui.theme.BaseDialog
 import com.example.capilux.ui.theme.PrimaryButton
@@ -47,7 +57,7 @@ import com.example.capilux.utils.compressImage
 @Composable
 fun ConfigScreen(
     navController: NavHostController,
-    username: String,
+    usernameState: MutableState<String>,
     imageUri: Uri?,
     darkModeState: MutableState<Boolean>, // Recibimos el estado del tema
     altThemeState: MutableState<Boolean>
@@ -76,19 +86,39 @@ fun ConfigScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundGradient(altThemeEnabled)),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Configuración", color = Color.White) },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atrás", tint = Color.White)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = Color.White
+                )
+            )
+        },
+        containerColor = Color.Transparent
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(backgroundGradient(altThemeEnabled))
+                .verticalScroll(rememberScrollState())
+                .padding(innerPadding)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
         Box(
             modifier = Modifier.clickable { galleryLauncher.launch("image/*") }
         ) {
             ProfileImageLarge(imageUri = currentImageUri)
         }
         // Nombre de usuario
-        var editedUsername by remember { mutableStateOf(username) }
+        var editedUsername by remember { mutableStateOf(usernameState.value) }
         OutlinedTextField(
             value = editedUsername,
             onValueChange = { editedUsername = it },
@@ -207,6 +237,7 @@ fun ConfigScreen(
             text = "Guardar cambios",
             onClick = {
                 sharedPrefs.edit().putString("username", editedUsername).apply()
+                usernameState.value = editedUsername
                 currentImageUri?.let { sharedPrefs.edit().putString("imageUri", it.toString()).apply() }
                 navController.popBackStack()
             }

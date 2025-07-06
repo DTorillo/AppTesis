@@ -45,15 +45,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.capilux.ui.theme.PrimaryButton
+import com.example.capilux.ui.theme.backgroundGradient
 
 @Composable
-fun TermsAndConditionsDialog(onDismiss: () -> Unit) {
-    // Gradiente para el fondo principal
-    val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFF6A11CB), Color(0xFF2575FC)),
-        startY = 0f,
-        endY = 1000f
-    )
+fun TermsAndConditionsDialog(onDismiss: () -> Unit, useAltTheme: Boolean) {
+    // Gradiente para el fondo principal que respeta la configuración
+    val gradient = backgroundGradient(useAltTheme)
 
     // Estado para el scroll
     val scrollState = rememberScrollState()
