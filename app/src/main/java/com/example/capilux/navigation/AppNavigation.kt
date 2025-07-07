@@ -19,6 +19,7 @@ import com.example.capilux.screen.UserCreationScreen
 import com.example.capilux.screen.ProcessingScreen
 import com.example.capilux.screen.AnalysisResultScreen
 import com.example.capilux.screen.FilterPreviewScreen
+import com.example.capilux.screen.ConfirmPhotoScreen
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -65,6 +66,10 @@ fun AppNavigation(
 
             // Pasamos estados para que la configuración pueda modificarlos
             ConfigScreen(navController, usernameState, imageUri, darkModeState, altThemeState)
+        }
+        composable("confirmPhoto/{imageUri}") { backStackEntry ->
+            val uri = backStackEntry.arguments?.getString("imageUri") ?: ""
+            ConfirmPhotoScreen(uri, altThemeState.value, navController)
         }
         composable("processing/{imageUri}") { backStackEntry ->
             val uri = backStackEntry.arguments?.getString("imageUri") ?: ""

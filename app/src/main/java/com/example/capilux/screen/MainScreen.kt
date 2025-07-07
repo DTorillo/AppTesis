@@ -150,7 +150,7 @@ fun MainScreen(
                 val sharedPrefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
                 sharedPrefs.edit().putString("last_captured_image", compressedUri.toString())
                     .apply()
-                navController.navigate("processing/${Uri.encode(compressedUri.toString())}")
+                navController.navigate("confirmPhoto/${Uri.encode(compressedUri.toString())}")
             }
         }
     )
@@ -463,7 +463,7 @@ fun MainScreen(
                                     cameraController = cameraController,
                                     context = context,
                                     onSuccess = { uri ->
-                                        navController.navigate("processing/${Uri.encode(uri.toString())}")
+                                        navController.navigate("confirmPhoto/${Uri.encode(uri.toString())}")
                                     },
                                     onError = { error ->
                                         showErrorDialog = error
