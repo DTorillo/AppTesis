@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -15,6 +16,12 @@ import com.example.capilux.screen.ResultsScreen
 import com.example.capilux.screen.ExplanationScreen
 import com.example.capilux.screen.FavoritesScreen
 import com.example.capilux.screen.UserCreationScreen
+import com.example.capilux.screen.ProcessingScreen
+import com.example.capilux.screen.AnalysisResultScreen
+import com.example.capilux.screen.FilterPreviewScreen
+import com.example.capilux.screen.ConfirmPhotoScreen
+import com.example.capilux.screen.BiometricSetupScreen
+import com.example.capilux.screen.LoginScreen
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -35,6 +42,12 @@ fun AppNavigation(
         }
         composable("userCreation") {
             UserCreationScreen(navController, altThemeState.value, usernameState)
+        }
+        composable("setupSecurity") {
+            BiometricSetupScreen(navController, altThemeState.value)
+        }
+        composable("login") {
+            LoginScreen(navController, altThemeState.value)
         }
         composable("main") {
             val username = usernameState.value
@@ -61,6 +74,23 @@ fun AppNavigation(
 
             // Pasamos estados para que la configuración pueda modificarlos
             ConfigScreen(navController, usernameState, imageUri, darkModeState, altThemeState)
+        }
+        composable("confirmPhoto/{imageUri}") { backStackEntry ->
+            val uri = backStackEntry.arguments?.getString("imageUri") ?: ""
+            ConfirmPhotoScreen(uri, altThemeState.value, navController)
+        }
+        composable("processing/{imageUri}") { backStackEntry ->
+            val uri = backStackEntry.arguments?.getString("imageUri") ?: ""
+            ProcessingScreen(uri, altThemeState.value, navController)
+        }
+        composable("analysisResult/{faceShape}/{ratio}") { backStackEntry ->
+            val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
+            val ratio = backStackEntry.arguments?.getString("ratio")?.toFloatOrNull() ?: 1f
+            AnalysisResultScreen(faceShape, ratio, navController)
+        }
+        composable("filterPreview/{faceShape}") { backStackEntry ->
+            val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
+            FilterPreviewScreen(faceShape, navController)
         }
         composable("results/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
@@ -101,4 +131,8 @@ fun getRecommendedStyles(faceShape: String): List<String> {
         "alargada" -> listOf("Flequillo", "Corte con volumen a los lados", "Ondas naturales")
         else -> listOf("Corte clásico", "Corte moderno", "Estilo versátil")
     }
+}
+
+fun getRecommendedFilters(faceShape: String): List<Color> {
+    return listOf(Color.Transparent, Color(0x8800FF00), Color(0x88FF8800))
 }

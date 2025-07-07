@@ -72,6 +72,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -86,6 +89,7 @@ import com.example.capilux.components.CameraPreview
 import com.example.capilux.components.PhotoRecommendationDialog
 import com.example.capilux.ui.theme.IconTextButton
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.FaceFrameAnalyzer
 import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.takePhoto
 import kotlinx.coroutines.launch
@@ -126,9 +130,16 @@ fun MainScreen(
 
     val cameraController = remember {
         LifecycleCameraController(context).apply {
-            // Configurar los casos de uso para la cámara
-            setEnabledUseCases(CameraController.IMAGE_CAPTURE)
+            // Configurar casos de uso para captura y análisis en tiempo real
+            setEnabledUseCases(CameraController.IMAGE_CAPTURE or CameraController.IMAGE_ANALYSIS)
         }
+    }
+    val faceInsideFrame = remember { mutableStateOf(false) }
+    val analysisExecutor = remember { java.util.concurrent.Executors.newSingleThreadExecutor() }
+    LaunchedEffect(Unit) {
+        cameraController.setImageAnalysisAnalyzer(analysisExecutor, FaceFrameAnalyzer {
+            faceInsideFrame.value = it
+        })
     }
     var isFrontCamera by remember { mutableStateOf(false) }
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -139,7 +150,7 @@ fun MainScreen(
                 val sharedPrefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
                 sharedPrefs.edit().putString("last_captured_image", compressedUri.toString())
                     .apply()
-                navController.navigate("results/ovalada")
+                navController.navigate("confirmPhoto/${Uri.encode(compressedUri.toString())}")
             }
         }
     )
@@ -451,7 +462,9 @@ fun MainScreen(
                                 takePhoto(
                                     cameraController = cameraController,
                                     context = context,
-                                    navController = navController,
+                                    onSuccess = { uri ->
+                                        navController.navigate("confirmPhoto/${Uri.encode(uri.toString())}")
+                                    },
                                     onError = { error ->
                                         showErrorDialog = error
                                     }
@@ -525,6 +538,65 @@ fun MainScreen(
                         CameraPreview(
                             modifier = Modifier.fillMaxSize(),
                             cameraController = cameraController
+                        )
+
+                        // Marco guía con forma de rostro
+                        Canvas(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxWidth(0.7f)
+                                .aspectRatio(1f)
+                        ) {
+                            val strokeWidth = 4.dp.toPx()
+                            val path = Path().apply {
+                                moveTo(size.width / 2f, strokeWidth / 2)
+                                cubicTo(
+                                    size.width * 0.75f,
+                                    strokeWidth / 2,
+                                    size.width * 0.95f,
+                                    size.height * 0.25f,
+                                    size.width * 0.95f,
+                                    size.height * 0.55f
+                                )
+                                cubicTo(
+                                    size.width * 0.95f,
+                                    size.height * 0.85f,
+                                    size.width * 0.75f,
+                                    size.height - strokeWidth / 2,
+                                    size.width / 2f,
+                                    size.height - strokeWidth / 2
+                                )
+                                cubicTo(
+                                    size.width * 0.25f,
+                                    size.height - strokeWidth / 2,
+                                    size.width * 0.05f,
+                                    size.height * 0.85f,
+                                    size.width * 0.05f,
+                                    size.height * 0.55f
+                                )
+                                cubicTo(
+                                    size.width * 0.05f,
+                                    size.height * 0.25f,
+                                    size.width * 0.25f,
+                                    strokeWidth / 2,
+                                    size.width / 2f,
+                                    strokeWidth / 2
+                                )
+                                close()
+                            }
+                            drawPath(
+                                path = path,
+                                color = if (faceInsideFrame.value) Color.Green else Color.White,
+                                style = Stroke(width = strokeWidth)
+                            )
+                        }
+
+                        Text(
+                            text = if (faceInsideFrame.value) "Puedes tomar la foto" else "Coloca tu cara en el marco",
+                            color = Color.White,
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .padding(top = 16.dp)
                         )
 
                         // Botón para cambiar cámara

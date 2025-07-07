@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                 requestCameraPermission(this)
             }
             CapiluxTheme(darkTheme = darkModeState.value) {
-                val startDestination = if (username != null) "main" else "explanation"
+                val startDestination = if (username != null) "login" else "explanation"
                 AppNavigation(darkModeState, altThemeState, usernameState, startDestination = startDestination)
                 }
         }

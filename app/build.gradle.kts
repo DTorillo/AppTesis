@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.androidx.camera.extensions)
     implementation(libs.androidx.exifinterface)
     implementation(libs.face.detection)
+    implementation(libs.androidx.biometric)
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
 
 }
