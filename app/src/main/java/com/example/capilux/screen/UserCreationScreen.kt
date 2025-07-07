@@ -252,7 +252,7 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
 
                             // Actualizar estado de usuario y navegar
                             usernameState.value = username
-                            navController.navigate("main")
+                            navController.navigate("setupSecurity")
                         }
                     }
                 },

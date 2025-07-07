@@ -20,6 +20,8 @@ import com.example.capilux.screen.ProcessingScreen
 import com.example.capilux.screen.AnalysisResultScreen
 import com.example.capilux.screen.FilterPreviewScreen
 import com.example.capilux.screen.ConfirmPhotoScreen
+import com.example.capilux.screen.BiometricSetupScreen
+import com.example.capilux.screen.LoginScreen
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -40,6 +42,12 @@ fun AppNavigation(
         }
         composable("userCreation") {
             UserCreationScreen(navController, altThemeState.value, usernameState)
+        }
+        composable("setupSecurity") {
+            BiometricSetupScreen(navController, altThemeState.value)
+        }
+        composable("login") {
+            LoginScreen(navController, altThemeState.value)
         }
         composable("main") {
             val username = usernameState.value
