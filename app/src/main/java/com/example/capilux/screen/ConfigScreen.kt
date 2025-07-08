@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.capilux.components.ProfileImageLarge
 import com.example.capilux.ui.theme.BaseDialog
 import com.example.capilux.ui.theme.PrimaryButton
@@ -55,6 +56,7 @@ import com.example.capilux.utils.restartApp
 import com.example.capilux.utils.setAppLocale
 import com.example.capilux.utils.compressImage
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfigScreen(
     navController: NavHostController,
@@ -64,7 +66,8 @@ fun ConfigScreen(
     altThemeState: MutableState<Boolean>
 ) {
     val context = LocalContext.current
-    val sharedPreferences = remember { context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE) }
+    val sharedPreferences =
+        remember { context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE) }
     val sharedPrefs = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
     var currentImageUri by remember { mutableStateOf(imageUri) }
 
@@ -89,7 +92,11 @@ fun ConfigScreen(
                 title = { Text("Configuración", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atrás", tint = Color.White)
+                        Icon(
+                            Icons.Filled.ArrowBack,
+                            contentDescription = "Atrás",
+                            tint = Color.White
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -109,162 +116,166 @@ fun ConfigScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-        Box(
-            modifier = Modifier.clickable { galleryLauncher.launch("image/*") }
-        ) {
-            ProfileImageLarge(imageUri = currentImageUri)
-        }
-        // Nombre de usuario
-        var editedUsername by remember { mutableStateOf(usernameState.value) }
-        OutlinedTextField(
-            value = editedUsername,
-            onValueChange = { editedUsername = it },
-            label = { Text("Nombre", color = Color.White) },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedLabelColor = Color.White,
-                unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                focusedIndicatorColor = Color.White,
-                unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
-                cursorColor = Color.White
-            ),
-            singleLine = true
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Configuraciones
-        Text(
-            text = "Configuraciones",
-            color = Color.White,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Opciones de tema
-
-        // Opción de Tema Alternativo
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Degradado",
-                color = Color.White,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Switch(
-                checked = altThemeEnabled,
-                onCheckedChange = {
-                    altThemeEnabled = it
-                    altThemeState.value = it
-                    sharedPreferences.edit()
-                        .putBoolean("alt_theme_enabled", it).apply()
-                },
-                colors = androidx.compose.material3.SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    uncheckedThumbColor = Color.White,
-                    checkedTrackColor = Color.White.copy(alpha = 0.5f),
-                    uncheckedTrackColor = Color.White.copy(alpha = 0.3f)
-                )
-            )
-        }
-
-        // Opción de Idioma
-        var showLanguageDialog by remember { mutableStateOf(false) }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .clickable { showLanguageDialog = true },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Idioma",
-                color = Color.White,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                text = when(currentLanguage) {
-                    "es" -> "Español"
-                    "en" -> "English"
-                    else -> "Español"
-                },
-                color = Color.White.copy(alpha = 0.7f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        PrimaryButton(
-            text = "Guardar cambios",
-            onClick = {
-                sharedPrefs.edit().putString("username", editedUsername).apply()
-                usernameState.value = editedUsername
-                currentImageUri?.let { sharedPrefs.edit().putString("imageUri", it.toString()).apply() }
-                navController.popBackStack()
+            Box(
+                modifier = Modifier.clickable { galleryLauncher.launch("image/*") }
+            ) {
+                ProfileImageLarge(imageUri = currentImageUri)
             }
-        )
+            // Nombre de usuario
+            var editedUsername by remember { mutableStateOf(usernameState.value) }
+            OutlinedTextField(
+                value = editedUsername,
+                onValueChange = { editedUsername = it },
+                label = { Text("Nombre", color = Color.White) },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+                    focusedIndicatorColor = Color.White,
+                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
+                    cursorColor = Color.White
+                ),
+                singleLine = true
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-        SecondaryButton(
-            text = "Volver",
-            onClick = { navController.popBackStack() }
-        )
+            // Configuraciones
+            Text(
+                text = "Configuraciones",
+                color = Color.White,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        // Diálogo de idioma
-        if (showLanguageDialog) {
-            BaseDialog(
-                title = "Seleccionar idioma",
-                onDismiss = { showLanguageDialog = false },
-                content = {
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(
-                                selected = currentLanguage == "es",
-                                onClick = { currentLanguage = "es" },
-                                colors = androidx.compose.material3.RadioButtonDefaults.colors(
-                                    selectedColor = Color.White,
-                                    unselectedColor = Color.White
-                                )
-                            )
-                            Text("Español", color = Color.White)
-                        }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(
-                                selected = currentLanguage == "en",
-                                onClick = { currentLanguage = "en" },
-                                colors = androidx.compose.material3.RadioButtonDefaults.colors(
-                                    selectedColor = Color.White,
-                                    unselectedColor = Color.White
-                                )
-                            )
-                            Text("English", color = Color.White)
-                        }
-                    }
-                },
-                confirmButton = {
-                    PrimaryButton(
-                        text = "Aplicar",
-                        onClick = {
-                            sharedPreferences.edit().putString("language", currentLanguage).apply()
-                            setAppLocale(context, currentLanguage)
-                            showLanguageDialog = false
-                            context.restartApp()
-                        }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Opciones de tema
+
+            // Opción de Tema Alternativo
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Degradado",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Switch(
+                    checked = altThemeEnabled,
+                    onCheckedChange = {
+                        altThemeEnabled = it
+                        altThemeState.value = it
+                        sharedPreferences.edit()
+                            .putBoolean("alt_theme_enabled", it).apply()
+                    },
+                    colors = androidx.compose.material3.SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        uncheckedThumbColor = Color.White,
+                        checkedTrackColor = Color.White.copy(alpha = 0.5f),
+                        uncheckedTrackColor = Color.White.copy(alpha = 0.3f)
                     )
+                )
+            }
+
+            // Opción de Idioma
+            var showLanguageDialog by remember { mutableStateOf(false) }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .clickable { showLanguageDialog = true },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Idioma",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = when (currentLanguage) {
+                        "es" -> "Español"
+                        "en" -> "English"
+                        else -> "Español"
+                    },
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            PrimaryButton(
+                text = "Guardar cambios",
+                onClick = {
+                    sharedPrefs.edit().putString("username", editedUsername).apply()
+                    usernameState.value = editedUsername
+                    currentImageUri?.let {
+                        sharedPrefs.edit().putString("imageUri", it.toString()).apply()
+                    }
+                    navController.popBackStack()
                 }
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SecondaryButton(
+                text = "Volver",
+                onClick = { navController.popBackStack() }
+            )
+
+            // Diálogo de idioma
+            if (showLanguageDialog) {
+                BaseDialog(
+                    title = "Seleccionar idioma",
+                    onDismiss = { showLanguageDialog = false },
+                    content = {
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                RadioButton(
+                                    selected = currentLanguage == "es",
+                                    onClick = { currentLanguage = "es" },
+                                    colors = androidx.compose.material3.RadioButtonDefaults.colors(
+                                        selectedColor = Color.White,
+                                        unselectedColor = Color.White
+                                    )
+                                )
+                                Text("Español", color = Color.White)
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                RadioButton(
+                                    selected = currentLanguage == "en",
+                                    onClick = { currentLanguage = "en" },
+                                    colors = androidx.compose.material3.RadioButtonDefaults.colors(
+                                        selectedColor = Color.White,
+                                        unselectedColor = Color.White
+                                    )
+                                )
+                                Text("English", color = Color.White)
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        PrimaryButton(
+                            text = "Aplicar",
+                            onClick = {
+                                sharedPreferences.edit().putString("language", currentLanguage)
+                                    .apply()
+                                setAppLocale(context, currentLanguage)
+                                showLanguageDialog = false
+                                context.restartApp()
+                            }
+                        )
+                    }
+                )
+            }
         }
     }
 }
