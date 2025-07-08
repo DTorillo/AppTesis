@@ -17,6 +17,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,6 +44,17 @@ fun LoginScreen(navController: NavHostController, useAltTheme: Boolean) {
     val error = remember { mutableStateOf<String?>(null) }
 
     val gradient = backgroundGradient(useAltTheme)
+
+    LaunchedEffect(Unit) {
+        if (useBiometric) {
+            val activity = context as? FragmentActivity
+            if (activity != null) {
+                showBiometric(activity)
+            } else {
+                error.value = "No se pudo iniciar la autenticación"
+            }
+        }
+    }
 
     fun showBiometric(activity: FragmentActivity) {
         val executor = ContextCompat.getMainExecutor(activity)
