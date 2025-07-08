@@ -35,7 +35,7 @@ import com.example.capilux.ui.theme.backgroundGradient
 
 /**
  * Pantalla de configuración de seguridad.
- * Permite activar biometría y definir un PIN de 4 dígitos.
+ * Permite activar biometría y definir un PIN de 6 dígitos.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,10 +105,10 @@ fun BiometricSetupScreen(
             )
         }
 
-        /* Campo de PIN (4 dígitos) */
+        /* Campo de PIN (6 dígitos) */
         OutlinedTextField(
             value = pin,
-            onValueChange = { pin = it.filter(Char::isDigit).take(4) },
+            onValueChange = { pin = it.filter(Char::isDigit).take(6) },
             label = { Text("PIN", color = Color.White) },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -130,7 +130,7 @@ fun BiometricSetupScreen(
         PrimaryButton(
             text = "Guardar",
             onClick = {
-                if (pin.length < 4) {
+                if (pin.length < 6) {
                     showError = true
                 } else {
                     prefs.edit()
@@ -144,7 +144,7 @@ fun BiometricSetupScreen(
                     }
                 }
             },
-            enabled = pin.length == 4,
+            enabled = pin.length == 6,
             modifier = Modifier.padding(top = 24.dp)
         )
 
@@ -153,7 +153,7 @@ fun BiometricSetupScreen(
             AlertDialog(
                 onDismissRequest = { showError = false },
                 title = { Text("Error") },
-                text = { Text("El PIN debe tener 4 dígitos") },
+                text = { Text("El PIN debe tener 6 dígitos") },
                 confirmButton = {
                     Button(onClick = { showError = false }) { Text("OK") }
                 }

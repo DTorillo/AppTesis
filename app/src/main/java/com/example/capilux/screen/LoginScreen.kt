@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.biometric.BiometricPrompt
 import androidx.biometric.BiometricManager
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -24,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import com.example.capilux.R
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -91,46 +96,59 @@ fun LoginScreen(navController: NavHostController, useAltTheme: Boolean) {
                 titleContentColor = Color.White
             )
         )
-        if (useBiometric) {
-            PrimaryButton(text = "Usar huella", onClick = {
-                val activity = context as? FragmentActivity
-                if (activity != null) {
-                    showBiometric(activity)
-                } else {
-                    error.value = "No se pudo iniciar la autenticación"
-                }
-            }, modifier = Modifier.padding(top = 32.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "Logo Capilux",
+                modifier = Modifier.size(120.dp)
+            )
+            if (useBiometric) {
+                PrimaryButton(text = "Usar huella", onClick = {
+                    val activity = context as? FragmentActivity
+                    if (activity != null) {
+                        showBiometric(activity)
+                    } else {
+                        error.value = "No se pudo iniciar la autenticación"
+                    }
+                }, modifier = Modifier.padding(top = 32.dp))
+            }
+            OutlinedTextField(
+                value = pinState.value,
+                onValueChange = { pinState.value = it.filter { ch -> ch.isDigit() }.take(6) },
+                label = { Text("PIN", color = Color.White) },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedIndicatorColor = Color.White,
+                    unfocusedIndicatorColor = Color.White,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.White
+                ),
+                modifier = Modifier.padding(top = 24.dp)
+            )
+            PrimaryButton(
+                text = "Entrar",
+                onClick = {
+                    if (pinState.value == storedPin && pinState.value.isNotEmpty()) {
+                        navController.navigate("main") { popUpTo("login") { inclusive = true } }
+                    } else {
+                        error.value = "PIN incorrecto"
+                    }
+                },
+                enabled = pinState.value.length == 6,
+                modifier = Modifier.padding(top = 24.dp)
+            )
         }
-        OutlinedTextField(
-            value = pinState.value,
-            onValueChange = { pinState.value = it.filter { ch -> ch.isDigit() }.take(4) },
-            label = { Text("PIN", color = Color.White) },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-            colors = TextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedIndicatorColor = Color.White,
-                unfocusedIndicatorColor = Color.White,
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedLabelColor = Color.White,
-                unfocusedLabelColor = Color.White
-            ),
-            modifier = Modifier.padding(top = 24.dp)
-        )
-        PrimaryButton(
-            text = "Entrar",
-            onClick = {
-                if (pinState.value == storedPin && pinState.value.isNotEmpty()) {
-                    navController.navigate("main") { popUpTo("login") { inclusive = true } }
-                } else {
-                    error.value = "PIN incorrecto"
-                }
-            },
-            enabled = pinState.value.length == 4,
-            modifier = Modifier.padding(top = 24.dp)
-        )
         error.value?.let { msg ->
             AlertDialog(
                 onDismissRequest = { error.value = null },
