@@ -57,6 +57,10 @@ fun LoginScreen(navController: NavHostController, useAltTheme: Boolean) {
         val info = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Acceso biométrico")
             .setNegativeButtonText("Cancelar")
+            .setAllowedAuthenticators(
+                BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                        BiometricManager.Authenticators.BIOMETRIC_WEAK
+            )
             .build()
         prompt.authenticate(info)
     }
