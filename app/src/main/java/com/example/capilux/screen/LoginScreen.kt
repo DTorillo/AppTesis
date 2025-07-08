@@ -2,6 +2,7 @@ package com.example.capilux.screen
 
 import android.content.Context
 import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,7 +57,10 @@ fun LoginScreen(navController: NavHostController, useAltTheme: Boolean) {
             })
         val info = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Acceso biométrico")
-            .setNegativeButtonText("Cancelar")
+            .setAllowedAuthenticators(
+                BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                    BiometricManager.Authenticators.DEVICE_CREDENTIAL
+            )
             .build()
         prompt.authenticate(info)
     }
