@@ -79,5 +79,6 @@ dependencies {
     implementation(libs.face.detection)
     implementation(libs.androidx.biometric)
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+    implementation("androidx.biometric:biometric:1.1.0")
 
 }

@@ -48,6 +48,27 @@ fun LoginScreen(navController: NavHostController, useAltTheme: Boolean) {
     val pinState = remember { mutableStateOf("") }
     val error = remember { mutableStateOf<String?>(null) }
 
+    fun showBiometric(activity: FragmentActivity) {
+        val executor = ContextCompat.getMainExecutor(activity)
+        val biometricPrompt = BiometricPrompt(activity, executor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    navController.navigate("main") { popUpTo("login") { inclusive = true } }
+                }
+
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    super.onAuthenticationError(errorCode, errString)
+                    error.value = errString.toString()
+                }
+            })
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Acceso biométrico")
+            .setSubtitle("Autentícate usando tu huella digital")
+            .setNegativeButtonText("Usar PIN")
+            .build()
+        biometricPrompt.authenticate(promptInfo)
+    }
     val gradient = backgroundGradient(useAltTheme)
 
     LaunchedEffect(Unit) {
@@ -59,27 +80,6 @@ fun LoginScreen(navController: NavHostController, useAltTheme: Boolean) {
                 error.value = "No se pudo iniciar la autenticación"
             }
         }
-    }
-
-    fun showBiometric(activity: FragmentActivity) {
-        val executor = ContextCompat.getMainExecutor(activity)
-        val prompt = BiometricPrompt(activity, executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    navController.navigate("main") { popUpTo("login") { inclusive = true } }
-                }
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    error.value = errString.toString()
-                }
-            })
-        val info = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Acceso biométrico")
-            .setAllowedAuthenticators(
-                BiometricManager.Authenticators.BIOMETRIC_WEAK or
-                    BiometricManager.Authenticators.DEVICE_CREDENTIAL
-            )
-            .build()
-        prompt.authenticate(info)
     }
 
     Column(
