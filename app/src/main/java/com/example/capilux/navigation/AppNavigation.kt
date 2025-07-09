@@ -6,14 +6,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.capilux.screen.*
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @Composable
 fun AppNavigation(
@@ -68,11 +66,15 @@ fun AppNavigation(
             val uri = backStackEntry.arguments?.getString("imageUri") ?: ""
             ProcessingScreen(uri, altThemeState.value, navController)
         }
-        composable("analysisResult/{faceShape}/{ratio}") { backStackEntry ->
-            val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
-            val ratio = backStackEntry.arguments?.getString("ratio")?.toFloatOrNull() ?: 1f
-            AnalysisResultScreen(faceShape, ratio, navController)
+        composable(
+            route = "analysisResult/{resultado}",
+            arguments = listOf(navArgument("resultado") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val raw = backStackEntry.arguments?.getString("resultado") ?: ""
+            val resultado = Uri.decode(raw)
+            AnalysisResultScreen(resultado = resultado, navController = navController)
         }
+
         composable("filterPreview/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
             FilterPreviewScreen(faceShape, navController)
@@ -92,17 +94,28 @@ fun AppNavigation(
     }
 }
 
-// Utilidades
+// ✅ Estilos recomendados para 10 tipos de rostro
 fun getRecommendedStyles(faceShape: String): List<String> {
     return when (faceShape.lowercase()) {
-        "ovalada" -> listOf("Corte clásico", "Peinado hacia atrás", "Corte degradado")
-        "redonda" -> listOf("Corte con volumen arriba", "Undercut", "Peinado con raya al lado")
-        "cuadrada" -> listOf("Corte buzz", "Fade", "Corte texturizado")
-        "alargada" -> listOf("Flequillo", "Corte con volumen a los lados", "Ondas naturales")
-        else -> listOf("Corte clásico", "Corte moderno", "Estilo versátil")
+        "ovalado"     -> listOf("Pompadour", "Undercut", "Corte clásico")
+        "redondo"     -> listOf("Volumen arriba", "Raya al lado", "Corte angular")
+        "cuadrado"    -> listOf("Fade", "Buzz cut", "Peinado hacia atrás")
+        "alargado"    -> listOf("Flequillo", "Laterales con volumen", "Corte balanceado")
+        "triangular"  -> listOf("Volumen superior", "Texturizado", "Peinado con caída")
+        "corazon"     -> listOf("Desconectado", "Peinado ligero", "Fade con barba")
+        "diamante"    -> listOf("Side part", "Corte alto con forma", "Textura arriba")
+        "rectangular" -> listOf("Pompadour", "Militar", "Despeinado superior")
+        "trapecio"    -> listOf("Fade alto", "Peinado balanceado", "Contornos suaves")
+        "perla"       -> listOf("Corte creativo", "Estilo personalizado", "Diseño libre")
+        else          -> listOf("Corte moderno", "Corte clásico", "Estilo versátil")
     }
 }
 
-fun getRecommendedFilters(faceShape: String): List<Color> {
-    return listOf(Color.Transparent, Color(0x8800FF00), Color(0x88FF8800))
+// ✅ Filtros visuales recomendados (ejemplo simple)
+fun getRecommendedFilters(faceShape: String): List<androidx.compose.ui.graphics.Color> {
+    return listOf(
+        androidx.compose.ui.graphics.Color.Transparent,
+        androidx.compose.ui.graphics.Color(0x882575FC),
+        androidx.compose.ui.graphics.Color(0x88FF8800)
+    )
 }

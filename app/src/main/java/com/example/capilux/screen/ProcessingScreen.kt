@@ -1,29 +1,15 @@
 package com.example.capilux.screen
 
-import android.graphics.BitmapFactory
 import android.net.Uri
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import android.util.Log
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,12 +18,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.scale
 import androidx.navigation.NavHostController
-import com.example.capilux.FaceAnalyzer
-import com.example.capilux.FaceAnalysisResult
 import com.example.capilux.R
+import com.example.capilux.network.ServerApi
 import com.example.capilux.ui.theme.backgroundGradient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.io.File
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 @Composable
 fun ProcessingScreen(imageUri: String, useAltTheme: Boolean, navController: NavHostController) {
@@ -46,29 +35,49 @@ fun ProcessingScreen(imageUri: String, useAltTheme: Boolean, navController: NavH
 
     LaunchedEffect(imageUri) {
         processing.value = true
-        val result = withContext(Dispatchers.IO) {
-            val inputStream = context.contentResolver.openInputStream(Uri.parse(imageUri))
-            val bitmap = inputStream?.use { BitmapFactory.decodeStream(it) }
-            if (bitmap != null) {
-                FaceAnalyzer().analyzeFace(bitmap)
-            } else {
-                FaceAnalysisResult.Error("No se pudo abrir la imagen")
-            }
+        try {
+            val decodedUri = Uri.parse(URLDecoder.decode(imageUri, "UTF-8"))
+            val imageFile = File(decodedUri.path ?: "")
+
+            Log.d("ProcessingScreen", "Archivo enviado: ${imageFile.path}")
+
+            ServerApi.enviarImagen(
+                context = context,
+                imageUri = decodedUri,
+                onResult = { response ->
+                    try {
+                        Log.d("ProcessingScreen", "Respuesta del servidor: $response")
+
+                        val json = JSONObject(response)
+                        val resultado = json.optString("resultado")
+
+                        if (resultado.contains("Forma del rostro:")) {
+                            val resultadoCodificado = Uri.encode(resultado)
+                            navController.navigate("analysisResult/$resultadoCodificado") {
+                                popUpTo("processing/{imageUri}") { inclusive = true }
+                            }
+                        } else {
+                            Log.e("ProcessingScreen", "La respuesta no contiene forma válida.")
+                            navController.popBackStack()
+                        }
+                    } catch (e: Exception) {
+                        Log.e("ProcessingScreen", "Error al procesar JSON: ${e.message}")
+                        navController.popBackStack()
+                    }
+                },
+                onError = { error ->
+                    Log.e("ProcessingScreen", "Error al enviar imagen: $error")
+                    navController.popBackStack()
+                }
+            )
+        } catch (e: Exception) {
+            Log.e("ProcessingScreen", "Excepción general: ${e.message}")
+            navController.popBackStack()
         }
         processing.value = false
-        when (result) {
-            is FaceAnalysisResult.Success -> {
-                navController.navigate("analysisResult/${result.faceShape}/${result.ratio}") {
-                    popUpTo("processing/{imageUri}") { inclusive = true }
-                }
-            }
-            is FaceAnalysisResult.Error -> {
-                // En caso de error vuelve a la pantalla principal
-                navController.popBackStack()
-            }
-        }
     }
 
+    // Animación visual de carga
     val gradient = backgroundGradient(useAltTheme)
     val infiniteTransition = rememberInfiniteTransition()
     val scale = infiniteTransition.animateFloat(
@@ -105,7 +114,7 @@ fun ProcessingScreen(imageUri: String, useAltTheme: Boolean, navController: NavH
                 )
             }
             Text(
-                text = "Cargando",
+                text = "Procesando análisis facial...",
                 color = Color.White,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier

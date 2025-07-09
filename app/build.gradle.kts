@@ -86,7 +86,6 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
-
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
@@ -97,4 +96,7 @@ dependencies {
     implementation(libs.androidx.biometric)
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okio:okio:3.6.0")
+
 }
