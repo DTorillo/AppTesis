@@ -12,9 +12,9 @@ import com.example.capilux.screen.resetDialogFlag
 import com.example.capilux.ui.theme.CapiluxTheme
 import com.example.capilux.utils.getInitialDarkModePreference
 import com.example.capilux.utils.getInitialThemePreference
-import com.example.capilux.utils.getInitialThemePreference
 import com.example.capilux.utils.isCameraPermissionGranted
 import com.example.capilux.utils.requestCameraPermission
+import com.example.capilux.utils.EncryptedPrefs
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,23 +28,24 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf(getInitialThemePreference(this))
             }
 
-            // Verificar si hay un usuario guardado
-            val sharedPrefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+            // Verificar si hay un usuario guardado con preferencias cifradas
+            val sharedPrefs = EncryptedPrefs.get(this)
             val username = sharedPrefs.getString("username", null)
             val usernameState = remember { mutableStateOf(username ?: "") }
+
             if (!isCameraPermissionGranted(this)) {
-                // Solicitar permisos si no están concedidos
                 requestCameraPermission(this)
             }
+
             CapiluxTheme(darkTheme = darkModeState.value) {
                 val startDestination = if (username != null) "login" else "explanation"
                 AppNavigation(darkModeState, altThemeState, usernameState, startDestination = startDestination)
-                }
+            }
         }
     }
+
     override fun onStop() {
         super.onStop()
-        // Restablecer la bandera cuando la app se cierra
-        resetDialogFlag(this)  // Aquí restablecemos la bandera en SharedPreferences
+        resetDialogFlag(this)
     }
 }

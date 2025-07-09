@@ -18,6 +18,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // ✅ Opcional: solo incluir arm64-v8a si deseas reducir tamaño
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
     }
 
     buildTypes {
@@ -29,20 +34,32 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
+    }
+
+    // ✅ Compatibilidad con 16 KB sin error de compilación
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -69,7 +86,7 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
-    val cameraxVersion = "1.3.0"
+
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
@@ -79,5 +96,5 @@ dependencies {
     implementation(libs.face.detection)
     implementation(libs.androidx.biometric)
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
-
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 }

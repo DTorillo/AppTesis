@@ -37,6 +37,9 @@ fun takePhoto(
 
     val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
+    // 🔥 Activar máxima calidad
+    cameraController.imageCaptureMode = ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
+
     cameraController.takePicture(
         outputOptions,
         ContextCompat.getMainExecutor(context),
@@ -54,3 +57,4 @@ fun takePhoto(
         }
     )
 }
+

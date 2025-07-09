@@ -6,55 +6,25 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.capilux.components.ProfileImageLarge
-import com.example.capilux.ui.theme.BaseDialog
-import com.example.capilux.ui.theme.PrimaryButton
-import com.example.capilux.ui.theme.SecondaryButton
-import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.ui.theme.*
+import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.restartApp
 import com.example.capilux.utils.setAppLocale
-import com.example.capilux.utils.compressImage
+import com.example.capilux.utils.EncryptedPrefs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,26 +32,29 @@ fun ConfigScreen(
     navController: NavHostController,
     usernameState: MutableState<String>,
     imageUri: Uri?,
-    darkModeState: MutableState<Boolean>, // Recibimos el estado del tema
+    darkModeState: MutableState<Boolean>,
     altThemeState: MutableState<Boolean>
 ) {
     val context = LocalContext.current
-    val sharedPreferences =
-        remember { context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE) }
-    val sharedPrefs = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
-    var currentImageUri by remember { mutableStateOf(imageUri) }
 
-    // Estado para las configuraciones
+    // 🔐 Preferencias seguras
+    val sharedPrefs = remember { EncryptedPrefs.get(context) }
+
+    // 🌓 Preferencias normales (no sensibles)
+    val sharedPreferences = remember { context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE) }
+
+    var currentImageUri by remember { mutableStateOf(imageUri) }
     var altThemeEnabled by remember { mutableStateOf(altThemeState.value) }
     var currentLanguage by remember {
         mutableStateOf(sharedPreferences.getString("language", "es") ?: "es")
     }
+
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
             val compressedUri = compressImage(context, it)
-            currentImageUri = compressedUri // Actualizar estado local
+            currentImageUri = compressedUri
             sharedPrefs.edit().putString("imageUri", compressedUri.toString()).apply()
         }
     }
@@ -92,11 +65,7 @@ fun ConfigScreen(
                 title = { Text("Configuración", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            Icons.Filled.ArrowBack,
-                            contentDescription = "Atrás",
-                            tint = Color.White
-                        )
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atrás", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -116,12 +85,11 @@ fun ConfigScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier.clickable { galleryLauncher.launch("image/*") }
-            ) {
+            Box(modifier = Modifier.clickable { galleryLauncher.launch("image/*") }) {
                 ProfileImageLarge(imageUri = currentImageUri)
             }
-            // Nombre de usuario
+
+            // Campo editable de nombre
             var editedUsername by remember { mutableStateOf(usernameState.value) }
             OutlinedTextField(
                 value = editedUsername,
@@ -143,40 +111,25 @@ fun ConfigScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Configuraciones
-            Text(
-                text = "Configuraciones",
-                color = Color.White,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Text("Configuraciones", color = Color.White, style = MaterialTheme.typography.titleMedium)
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Opciones de tema
-
-            // Opción de Tema Alternativo
+            // Degradado
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "Degradado",
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                Text("Degradado", color = Color.White)
                 Switch(
                     checked = altThemeEnabled,
                     onCheckedChange = {
                         altThemeEnabled = it
                         altThemeState.value = it
-                        sharedPreferences.edit()
-                            .putBoolean("alt_theme_enabled", it).apply()
+                        sharedPreferences.edit().putBoolean("alt_theme_enabled", it).apply()
                     },
-                    colors = androidx.compose.material3.SwitchDefaults.colors(
+                    colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
                         uncheckedThumbColor = Color.White,
                         checkedTrackColor = Color.White.copy(alpha = 0.5f),
@@ -185,27 +138,16 @@ fun ConfigScreen(
                 )
             }
 
-            // Opción de Idioma
+            // Idioma
             var showLanguageDialog by remember { mutableStateOf(false) }
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .clickable { showLanguageDialog = true },
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).clickable { showLanguageDialog = true },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                Text("Idioma", color = Color.White)
                 Text(
-                    text = "Idioma",
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = when (currentLanguage) {
-                        "es" -> "Español"
-                        "en" -> "English"
-                        else -> "Español"
-                    },
+                    text = if (currentLanguage == "es") "Español" else "English",
                     color = Color.White.copy(alpha = 0.7f)
                 )
             }
@@ -231,7 +173,6 @@ fun ConfigScreen(
                 onClick = { navController.popBackStack() }
             )
 
-            // Diálogo de idioma
             if (showLanguageDialog) {
                 BaseDialog(
                     title = "Seleccionar idioma",
@@ -242,7 +183,7 @@ fun ConfigScreen(
                                 RadioButton(
                                     selected = currentLanguage == "es",
                                     onClick = { currentLanguage = "es" },
-                                    colors = androidx.compose.material3.RadioButtonDefaults.colors(
+                                    colors = RadioButtonDefaults.colors(
                                         selectedColor = Color.White,
                                         unselectedColor = Color.White
                                     )
@@ -253,7 +194,7 @@ fun ConfigScreen(
                                 RadioButton(
                                     selected = currentLanguage == "en",
                                     onClick = { currentLanguage = "en" },
-                                    colors = androidx.compose.material3.RadioButtonDefaults.colors(
+                                    colors = RadioButtonDefaults.colors(
                                         selectedColor = Color.White,
                                         unselectedColor = Color.White
                                     )
@@ -266,10 +207,8 @@ fun ConfigScreen(
                         PrimaryButton(
                             text = "Aplicar",
                             onClick = {
-                                sharedPreferences.edit().putString("language", currentLanguage)
-                                    .apply()
+                                sharedPreferences.edit().putString("language", currentLanguage).apply()
                                 setAppLocale(context, currentLanguage)
-                                showLanguageDialog = false
                                 context.restartApp()
                             }
                         )

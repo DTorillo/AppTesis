@@ -3,21 +3,10 @@ package com.example.capilux.screen
 import android.content.Context
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,16 +19,26 @@ import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.EncryptedPrefs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavHostController, useAltTheme: Boolean) {
     val context = LocalContext.current
-    val prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    val prefs = EncryptedPrefs.get(context)
+
     val storedPin = prefs.getString("pin", "") ?: ""
     val useBiometric = prefs.getBoolean("useBiometric", false)
     val pinState = remember { mutableStateOf("") }
     val error = remember { mutableStateOf<String?>(null) }
+
+    // Protección: máximo 3 intentos
+    val maxAttempts = 3
+    val cooldownTime = 30_000L // 30 segundos
+    val lastAttemptTime = prefs.getLong("last_attempt_time", 0L)
+    val failedAttempts = prefs.getInt("failed_attempts", 0)
+    val now = System.currentTimeMillis()
+    val isLocked = failedAttempts >= maxAttempts && (now - lastAttemptTime < cooldownTime)
 
     val gradient = backgroundGradient(useAltTheme)
 
@@ -50,6 +49,7 @@ fun LoginScreen(navController: NavHostController, useAltTheme: Boolean) {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     navController.navigate("main") { popUpTo("login") { inclusive = true } }
                 }
+
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     error.value = errString.toString()
                 }
@@ -75,16 +75,22 @@ fun LoginScreen(navController: NavHostController, useAltTheme: Boolean) {
                 titleContentColor = Color.White
             )
         )
+
         if (useBiometric) {
-            PrimaryButton(text = "Usar huella", onClick = {
-                val activity = context as? FragmentActivity
-                if (activity != null) {
-                    showBiometric(activity)
-                } else {
-                    error.value = "No se pudo iniciar la autenticación"
-                }
-            }, modifier = Modifier.padding(top = 32.dp))
+            PrimaryButton(
+                text = "Usar huella",
+                onClick = {
+                    val activity = context as? FragmentActivity
+                    if (activity != null) {
+                        showBiometric(activity)
+                    } else {
+                        error.value = "No se pudo iniciar la autenticación"
+                    }
+                },
+                modifier = Modifier.padding(top = 32.dp)
+            )
         }
+
         OutlinedTextField(
             value = pinState.value,
             onValueChange = { pinState.value = it.filter { ch -> ch.isDigit() }.take(4) },
@@ -103,24 +109,37 @@ fun LoginScreen(navController: NavHostController, useAltTheme: Boolean) {
             ),
             modifier = Modifier.padding(top = 24.dp)
         )
+
         PrimaryButton(
             text = "Entrar",
             onClick = {
-                if (pinState.value == storedPin && pinState.value.isNotEmpty()) {
+                if (isLocked) {
+                    error.value = "Has excedido los intentos. Espera unos segundos."
+                } else if (pinState.value == storedPin && pinState.value.isNotEmpty()) {
+                    prefs.edit().putInt("failed_attempts", 0).apply()
                     navController.navigate("main") { popUpTo("login") { inclusive = true } }
                 } else {
+                    prefs.edit()
+                        .putInt("failed_attempts", failedAttempts + 1)
+                        .putLong("last_attempt_time", now)
+                        .apply()
                     error.value = "PIN incorrecto"
                 }
             },
             enabled = pinState.value.length == 4,
             modifier = Modifier.padding(top = 24.dp)
         )
+
         error.value?.let { msg ->
             AlertDialog(
                 onDismissRequest = { error.value = null },
                 title = { Text("Error") },
                 text = { Text(msg) },
-                confirmButton = { Button(onClick = { error.value = null }) { Text("OK") } }
+                confirmButton = {
+                    Button(onClick = { error.value = null }) {
+                        Text("OK")
+                    }
+                }
             )
         }
     }

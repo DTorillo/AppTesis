@@ -66,6 +66,7 @@ import com.example.capilux.R
 import com.example.capilux.components.TermsAndConditionsDialog
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.EncryptedPrefs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,7 +82,7 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         imageUri = uri
     }
-    val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    val sharedPreferences = EncryptedPrefs.get(context)
 
     val gradient = backgroundGradient(useAltTheme)
 
