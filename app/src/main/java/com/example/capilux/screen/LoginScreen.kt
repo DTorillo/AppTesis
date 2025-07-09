@@ -1,146 +1,149 @@
 package com.example.capilux.screen
 
-import android.content.Context
+import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
+import com.example.capilux.components.showErrorDialog
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.EncryptedPrefs
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavHostController, useAltTheme: Boolean) {
     val context = LocalContext.current
-    val prefs = EncryptedPrefs.get(context)
+    val sharedPrefs = EncryptedPrefs.get(context)
+    val biometricExecutor: Executor = Executors.newSingleThreadExecutor()
 
-    val storedPin = prefs.getString("pin", "") ?: ""
-    val useBiometric = prefs.getBoolean("useBiometric", false)
-    val pinState = remember { mutableStateOf("") }
-    val error = remember { mutableStateOf<String?>(null) }
+    var pin by remember { mutableStateOf("") }
+    var showDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
 
-    // Protección: máximo 3 intentos
-    val maxAttempts = 3
-    val cooldownTime = 30_000L // 30 segundos
-    val lastAttemptTime = prefs.getLong("last_attempt_time", 0L)
-    val failedAttempts = prefs.getInt("failed_attempts", 0)
-    val now = System.currentTimeMillis()
-    val isLocked = failedAttempts >= maxAttempts && (now - lastAttemptTime < cooldownTime)
+    val savedPin = sharedPrefs.getString("pin", null)
+    val useBiometric = sharedPrefs.getBoolean("useBiometric", false)
 
-    val gradient = backgroundGradient(useAltTheme)
-
-    fun showBiometric(activity: FragmentActivity) {
-        val executor = ContextCompat.getMainExecutor(activity)
-        val prompt = BiometricPrompt(activity, executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    navController.navigate("main") { popUpTo("login") { inclusive = true } }
-                }
-
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    error.value = errString.toString()
-                }
-            })
-        val info = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Acceso biométrico")
-            .setNegativeButtonText("Cancelar")
-            .build()
-        prompt.authenticate(info)
+    val biometricAvailable = remember {
+        BiometricManager.from(context)
+            .canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) ==
+                BiometricManager.BIOMETRIC_SUCCESS
     }
 
-    Column(
+    val promptInfo by rememberUpdatedState(
+        BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Autenticación biométrica")
+            .setSubtitle("Usa tu huella digital para acceder")
+            .setNegativeButtonText("Cancelar")
+            .build()
+    )
+
+    val biometricPrompt = BiometricPrompt(
+        context as FragmentActivity,
+        ContextCompat.getMainExecutor(context), // ✅ ejecuta en UI thread
+        object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                navController.navigate("main") {
+                    popUpTo("login") { inclusive = true }
+                }
+            }
+
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                errorMessage = "Error: $errString"
+                showDialog = true
+            }
+
+            override fun onAuthenticationFailed() {
+                errorMessage = "Huella no reconocida. Inténtalo de nuevo."
+                showDialog = true
+            }
+        }
+    )
+
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(gradient)
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(backgroundGradient(useAltTheme)),
+        contentAlignment = Alignment.Center
     ) {
-        TopAppBar(
-            title = { Text("Autenticación") },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                titleContentColor = Color.White
-            )
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(24.dp)
+        ) {
+            Text("Autenticación", style = MaterialTheme.typography.titleLarge, color = Color.White)
 
-        if (useBiometric) {
+            // ✅ Solo muestra si hay PIN y biometría activa
+            if (!savedPin.isNullOrEmpty() && useBiometric && biometricAvailable) {
+                Button(onClick = {
+                    biometricPrompt.authenticate(promptInfo)
+                }) {
+                    Text("Usar huella")
+                }
+            }
+
+            OutlinedTextField(
+                value = pin,
+                onValueChange = { pin = it },
+                label = { Text("PIN", color = Color.White) },
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.White,
+                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
+                    cursorColor = Color.White
+                )
+            )
+
             PrimaryButton(
-                text = "Usar huella",
+                text = "Entrar",
                 onClick = {
-                    val activity = context as? FragmentActivity
-                    if (activity != null) {
-                        showBiometric(activity)
+                    if (pin == savedPin) {
+                        navController.navigate("main") {
+                            popUpTo("login") { inclusive = true }
+                        }
                     } else {
-                        error.value = "No se pudo iniciar la autenticación"
-                    }
-                },
-                modifier = Modifier.padding(top = 32.dp)
-            )
-        }
-
-        OutlinedTextField(
-            value = pinState.value,
-            onValueChange = { pinState.value = it.filter { ch -> ch.isDigit() }.take(4) },
-            label = { Text("PIN", color = Color.White) },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-            colors = TextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedIndicatorColor = Color.White,
-                unfocusedIndicatorColor = Color.White,
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedLabelColor = Color.White,
-                unfocusedLabelColor = Color.White
-            ),
-            modifier = Modifier.padding(top = 24.dp)
-        )
-
-        PrimaryButton(
-            text = "Entrar",
-            onClick = {
-                if (isLocked) {
-                    error.value = "Has excedido los intentos. Espera unos segundos."
-                } else if (pinState.value == storedPin && pinState.value.isNotEmpty()) {
-                    prefs.edit().putInt("failed_attempts", 0).apply()
-                    navController.navigate("main") { popUpTo("login") { inclusive = true } }
-                } else {
-                    prefs.edit()
-                        .putInt("failed_attempts", failedAttempts + 1)
-                        .putLong("last_attempt_time", now)
-                        .apply()
-                    error.value = "PIN incorrecto"
-                }
-            },
-            enabled = pinState.value.length == 4,
-            modifier = Modifier.padding(top = 24.dp)
-        )
-
-        error.value?.let { msg ->
-            AlertDialog(
-                onDismissRequest = { error.value = null },
-                title = { Text("Error") },
-                text = { Text(msg) },
-                confirmButton = {
-                    Button(onClick = { error.value = null }) {
-                        Text("OK")
+                        errorMessage = "PIN incorrecto"
+                        showDialog = true
                     }
                 }
             )
         }
+    }
+
+    if (showDialog) {
+        showErrorDialog(
+            message = errorMessage,
+            onDismiss = { showDialog = false }
+        )
     }
 }
