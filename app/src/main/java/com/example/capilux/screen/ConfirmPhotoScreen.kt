@@ -3,20 +3,10 @@ package com.example.capilux.screen
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,11 +16,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.capilux.ui.theme.backgroundGradient
+import java.io.File
 
 @Composable
 fun ConfirmPhotoScreen(imageUri: String, useAltTheme: Boolean, navController: NavHostController) {
     val gradient = backgroundGradient(useAltTheme)
     val uri = Uri.parse(imageUri)
+    val showDialog = remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -67,8 +59,13 @@ fun ConfirmPhotoScreen(imageUri: String, useAltTheme: Boolean, navController: Na
                     Text("Volver a tomar")
                 }
                 Button(onClick = {
-                    navController.navigate("processing/${Uri.encode(imageUri)}") {
-                        popUpTo("confirmPhoto/{imageUri}") { inclusive = true }
+                    val file = File(uri.path ?: "")
+                    if (!file.exists()) {
+                        showDialog.value = true
+                    } else {
+                        navController.navigate("processing/${Uri.encode(imageUri)}") {
+                            popUpTo("confirmPhoto/{imageUri}") { inclusive = true }
+                        }
                     }
                 }) {
                     Text("Siguiente")
@@ -76,5 +73,17 @@ fun ConfirmPhotoScreen(imageUri: String, useAltTheme: Boolean, navController: Na
             }
         }
     }
-}
 
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("Error") },
+            text = { Text("No se encontró la imagen, vuelve a tomarla o selecciona otra.") },
+            confirmButton = {
+                Button(onClick = { showDialog.value = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+}

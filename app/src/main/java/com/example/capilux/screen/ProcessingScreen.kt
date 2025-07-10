@@ -3,6 +3,7 @@ package com.example.capilux.screen
 import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,82 +13,113 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.draw.scale
 import androidx.navigation.NavHostController
 import com.example.capilux.R
 import com.example.capilux.network.ServerApi
 import com.example.capilux.ui.theme.backgroundGradient
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.io.File
 import java.net.URLDecoder
-import java.net.URLEncoder
 
 @Composable
 fun ProcessingScreen(imageUri: String, useAltTheme: Boolean, navController: NavHostController) {
     val context = LocalContext.current
     val processing = remember { mutableStateOf(true) }
+    val gradient = backgroundGradient(useAltTheme)
+    val coroutineScope = rememberCoroutineScope()
+
+    val infiniteTransition = rememberInfiniteTransition(label = "LogoAndHaloAnim")
+
+    // Escala del logo (pulso suave)
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 0.9f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = "LogoScale"
+    )
+
+    // Halo animado
+    val haloAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.1f,
+        targetValue = 0.3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = "HaloAlpha"
+    )
+
+    val haloScale by infiniteTransition.animateFloat(
+        initialValue = 1.0f,
+        targetValue = 1.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = "HaloScale"
+    )
 
     LaunchedEffect(imageUri) {
-        processing.value = true
         try {
+            processing.value = true
             val decodedUri = Uri.parse(URLDecoder.decode(imageUri, "UTF-8"))
             val imageFile = File(decodedUri.path ?: "")
 
-            Log.d("ProcessingScreen", "Archivo enviado: ${imageFile.path}")
+            if (!imageFile.exists()) {
+                val msg = Uri.encode("La imagen no se encontró o fue eliminada")
+                navController.navigate("errorScreen/$msg")
+                return@LaunchedEffect
+            }
 
             ServerApi.enviarImagen(
                 context = context,
                 imageUri = decodedUri,
                 onResult = { response ->
-                    try {
-                        Log.d("ProcessingScreen", "Respuesta del servidor: $response")
+                    coroutineScope.launch {
+                        try {
+                            val json = JSONObject(response)
+                            val resultado = json.optString("resultado", "")
+                            val error = json.optString("error", "")
 
-                        val json = JSONObject(response)
-                        val resultado = json.optString("resultado")
-
-                        if (resultado.contains("Forma del rostro:")) {
-                            val resultadoCodificado = Uri.encode(resultado)
-                            navController.navigate("analysisResult/$resultadoCodificado") {
-                                popUpTo("processing/{imageUri}") { inclusive = true }
+                            if (error.isNotBlank()) {
+                                val msg = Uri.encode("Error del servidor: $error")
+                                navController.navigate("errorScreen/$msg")
+                                return@launch
                             }
-                        } else {
-                            Log.e("ProcessingScreen", "La respuesta no contiene forma válida.")
-                            navController.popBackStack()
+
+                            if (resultado.isNotBlank()) {
+                                val resultadoCodificado = Uri.encode(resultado)
+                                navController.navigate("analysisResult/$resultadoCodificado") {
+                                    popUpTo("processing/{imageUri}") { inclusive = true }
+                                }
+                            } else {
+                                val msg = Uri.encode("Respuesta inválida del servidor")
+                                navController.navigate("errorScreen/$msg")
+                            }
+                        } catch (e: Exception) {
+                            val msg = Uri.encode("Error procesando JSON: ${e.message}")
+                            navController.navigate("errorScreen/$msg")
                         }
-                    } catch (e: Exception) {
-                        Log.e("ProcessingScreen", "Error al procesar JSON: ${e.message}")
-                        navController.popBackStack()
                     }
                 },
                 onError = { error ->
-                    Log.e("ProcessingScreen", "Error al enviar imagen: $error")
-                    navController.popBackStack()
+                    coroutineScope.launch {
+                        val msg = Uri.encode("No se pudo conectar al servidor: $error")
+                        navController.navigate("errorScreen/$msg")
+                    }
                 }
             )
         } catch (e: Exception) {
-            Log.e("ProcessingScreen", "Excepción general: ${e.message}")
-            navController.popBackStack()
+            val msg = Uri.encode("Error interno: ${e.message}")
+            navController.navigate("errorScreen/$msg")
         }
-        processing.value = false
     }
-
-    // Animación visual de carga
-    val gradient = backgroundGradient(useAltTheme)
-    val infiniteTransition = rememberInfiniteTransition()
-    val scale = infiniteTransition.animateFloat(
-        initialValue = 0.8f,
-        targetValue = 1.2f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 800),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
 
     Box(
         modifier = Modifier
@@ -95,31 +127,54 @@ fun ProcessingScreen(imageUri: String, useAltTheme: Boolean, navController: NavH
             .background(gradient),
         contentAlignment = Alignment.Center
     ) {
-        if (processing.value) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(contentAlignment = Alignment.Center) {
+                // Halo animado
+                Canvas(
+                    modifier = Modifier
+                        .size(160.dp)
+                        .scale(haloScale)
+                ) {
+                    drawCircle(
+                        color = Color.White.copy(alpha = haloAlpha),
+                        radius = size.minDimension / 2f
+                    )
+                }
+
+                // Logo animado
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = "Logo",
                     modifier = Modifier
-                        .size(120.dp)
-                        .scale(scale.value)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .width(160.dp)
-                        .height(4.dp),
-                    color = Color.White,
-                    trackColor = Color.White.copy(alpha = 0.3f)
+                        .size(140.dp)
+                        .scale(scale)
                 )
             }
-            Text(
-                text = "Procesando análisis facial...",
-                color = Color.White,
-                style = MaterialTheme.typography.bodyMedium,
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LinearProgressIndicator(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 32.dp)
+                    .width(180.dp)
+                    .height(5.dp),
+                color = Color.White,
+                trackColor = Color.White.copy(alpha = 0.3f)
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = "Analizando rasgos faciales...",
+                color = Color.White,
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Cada rostro es único. Calculando proporciones y armonía...",
+                color = Color.White.copy(alpha = 0.75f),
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }

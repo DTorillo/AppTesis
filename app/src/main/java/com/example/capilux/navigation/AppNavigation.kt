@@ -74,7 +74,6 @@ fun AppNavigation(
             val resultado = Uri.decode(raw)
             AnalysisResultScreen(resultado = resultado, navController = navController)
         }
-
         composable("filterPreview/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
             FilterPreviewScreen(faceShape, navController)
@@ -91,10 +90,16 @@ fun AppNavigation(
         composable("favorites") {
             FavoritesScreen()
         }
+        composable(
+            route = "errorScreen/{message}",
+            arguments = listOf(navArgument("message") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val msg = Uri.decode(backStackEntry.arguments?.getString("message") ?: "Error desconocido")
+            ErrorScreen(message = msg, useAltTheme = altThemeState.value, navController = navController)
+        }
     }
 }
 
-// ✅ Estilos recomendados para 10 tipos de rostro
 fun getRecommendedStyles(faceShape: String): List<String> {
     return when (faceShape.lowercase()) {
         "ovalado"     -> listOf("Pompadour", "Undercut", "Corte clásico")
@@ -111,7 +116,6 @@ fun getRecommendedStyles(faceShape: String): List<String> {
     }
 }
 
-// ✅ Filtros visuales recomendados (ejemplo simple)
 fun getRecommendedFilters(faceShape: String): List<androidx.compose.ui.graphics.Color> {
     return listOf(
         androidx.compose.ui.graphics.Color.Transparent,

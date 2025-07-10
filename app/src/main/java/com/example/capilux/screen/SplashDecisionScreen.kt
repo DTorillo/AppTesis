@@ -1,78 +1,89 @@
 package com.example.capilux.screen
 
-import android.content.Context
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.capilux.R
 import com.example.capilux.ui.theme.backgroundGradient
-import com.example.capilux.utils.EncryptedPrefs
+import kotlinx.coroutines.delay
 
 @Composable
 fun SplashDecisionScreen(navController: NavHostController, useAltTheme: Boolean) {
     val context = LocalContext.current
-    val sharedPrefs = EncryptedPrefs.get(context)
-
-    val username = sharedPrefs.getString("username", null)
-    var showDialog by remember { mutableStateOf(username == null) }
-
     val gradient = backgroundGradient(useAltTheme)
+    var showContent by remember { mutableStateOf(false) }
 
-    // Si ya hay usuario → login
-    LaunchedEffect(Unit) {
-        if (username != null) {
-            navController.navigate("login") {
-                popUpTo("splashDecision") { inclusive = true }
-            }
+    // Animación de logo
+    val scaleAnim = rememberInfiniteTransition(label = "LogoSplash")
+    val scale by scaleAnim.animateFloat(
+        initialValue = 0.95f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = "Scale"
+    )
+
+    LaunchedEffect(true) {
+        showContent = true
+        delay(2500)
+        navController.navigate("main") {
+            popUpTo("splash") { inclusive = true }
         }
     }
 
-    // Si no hay usuario, muestra splash con opción biométrica
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(gradient),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = "Bienvenido a Capilux",
-            style = MaterialTheme.typography.headlineSmall,
-            color = Color.White
-        )
+        AnimatedVisibility(
+            visible = showContent,
+            enter = fadeIn(animationSpec = tween(1000)) + scaleIn(initialScale = 0.8f),
+            exit = fadeOut()
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "Logo",
+                    modifier = Modifier
+                        .size(140.dp)
+                        .scale(scale)
+                )
 
-        if (showDialog) {
-            AlertDialog(
-                onDismissRequest = { /* No se puede cerrar */ },
-                title = { Text("¿Quieres usar huella digital?", color = Color.White) },
-                text = { Text("Puedes activar la huella para proteger tu app.", color = Color.White) },
-                confirmButton = {
-                    TextButton(onClick = {
-                        sharedPrefs.edit().putBoolean("useBiometric", true).apply()
-                        navController.navigate("userCreation") {
-                            popUpTo("splashDecision") { inclusive = true }
-                        }
-                    }) {
-                        Text("Sí", color = Color.White)
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        sharedPrefs.edit().putBoolean("useBiometric", false).apply()
-                        navController.navigate("userCreation") {
-                            popUpTo("splashDecision") { inclusive = true }
-                        }
-                    }) {
-                        Text("No", color = Color.White)
-                    }
-                },
-                containerColor = Color(0xFF2D0C5A)
-            )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Bienvenido a Capilux",
+                    color = Color.White,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontSize = 22.sp
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Explora el poder de tu rostro",
+                    color = Color.White.copy(alpha = 0.8f),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }

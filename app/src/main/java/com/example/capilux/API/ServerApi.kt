@@ -8,12 +8,23 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 object ServerApi {
-    private val client = OkHttpClient()
-    private const val SERVER_URL = "http://192.168.100.106:5000/analizar" // IP de tu PC
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
 
-    fun enviarImagen(context: Context, imageUri: Uri, onResult: (String) -> Unit, onError: (String) -> Unit) {
+    private const val SERVER_URL = "https://67213aded064.ngrok-free.app/analizar"
+
+    fun enviarImagen(
+        context: Context,
+        imageUri: Uri,
+        onResult: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
         try {
             val file = File(imageUri.path ?: "")
             if (!file.exists()) {
@@ -34,23 +45,32 @@ object ServerApi {
                 .post(requestBody)
                 .build()
 
+            val startTime = System.currentTimeMillis()
+
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    Log.e("ServerApi", "Error en conexión: ${e.message}")
-                    onError("No se pudo conectar con el servidor.")
+                    val endTime = System.currentTimeMillis()
+                    val duration = endTime - startTime
+                    Log.e("ServerApi", "❌ Conexión fallida en ${duration}ms: ${e.message}")
+                    onError("No se pudo conectar con el servidor. Tiempo: ${duration}ms")
                 }
 
                 override fun onResponse(call: Call, response: Response) {
+                    val endTime = System.currentTimeMillis()
+                    val duration = endTime - startTime
+                    Log.d("ServerApi", "✅ Respuesta recibida en ${duration}ms")
+
                     if (!response.isSuccessful) {
-                        onError("Respuesta inválida del servidor.")
+                        onError("Respuesta inválida del servidor. Tiempo: ${duration}ms")
                         return
                     }
 
                     val body = response.body?.string()
                     if (body != null) {
+                        Log.d("ServerApi", "Respuesta recibida: $body")
                         onResult(body)
                     } else {
-                        onError("Respuesta vacía del servidor.")
+                        onError("Respuesta vacía del servidor. Tiempo: ${duration}ms")
                     }
                 }
             })
