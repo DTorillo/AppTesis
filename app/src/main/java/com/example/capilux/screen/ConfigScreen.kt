@@ -25,6 +25,7 @@ import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.restartApp
 import com.example.capilux.utils.setAppLocale
 import com.example.capilux.utils.EncryptedPrefs
+import com.example.capilux.utils.EncryptedPrefs.getPrefs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,7 +39,7 @@ fun ConfigScreen(
     val context = LocalContext.current
 
     // 🔐 Preferencias seguras
-    val sharedPrefs = remember { EncryptedPrefs.get(context) }
+    val sharedPrefs = remember { getPrefs(context) }
 
     // 🌓 Preferencias normales (no sensibles)
     val sharedPreferences = remember { context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE) }
@@ -62,10 +63,10 @@ fun ConfigScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Configuración", color = Color.White) },
+                title = { Text("Configuraci\u00f3n", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atrás", tint = Color.White)
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atr\u00e1s", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -147,7 +148,7 @@ fun ConfigScreen(
             ) {
                 Text("Idioma", color = Color.White)
                 Text(
-                    text = if (currentLanguage == "es") "Español" else "English",
+                    text = if (currentLanguage == "es") "Espa\u00f1ol" else "English",
                     color = Color.White.copy(alpha = 0.7f)
                 )
             }
@@ -188,7 +189,7 @@ fun ConfigScreen(
                                         unselectedColor = Color.White
                                     )
                                 )
-                                Text("Español", color = Color.White)
+                                Text("Espa\u00f1ol", color = Color.White)
                             }
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 RadioButton(

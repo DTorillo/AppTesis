@@ -1,3 +1,4 @@
+
 package com.example.capilux.screen
 
 import android.os.Build
@@ -25,6 +26,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
 import com.example.capilux.R
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.EncryptedPrefs
 import java.util.concurrent.Executor
 
 @Composable
@@ -34,54 +36,53 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val gradient = backgroundGradient(useAltTheme)
     var pin by remember { mutableStateOf("") }
-    var status by remember { mutableStateOf("Verificando identidad...") }
-    val correctPin = "123456"
+    var status by remember { mutableStateOf("Verificando huella...") }
     var showPin by remember { mutableStateOf(false) }
     val executor: Executor = ContextCompat.getMainExecutor(context)
 
-    val promptInfo = remember {
-        BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Autenticación biométrica")
-            .setSubtitle("Coloca tu dedo para continuar")
-            .setNegativeButtonText("Usar PIN")
-            .build()
-    }
-
-    // Intenta usar huella automáticamente al abrir
+    // Biometría solo si está activada por el usuario
     LaunchedEffect(Unit) {
-        val biometricManager = BiometricManager.from(context)
-        if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK)
-            == BiometricManager.BIOMETRIC_SUCCESS) {
+        if (EncryptedPrefs.canUseBiometrics(context)) {
+            val manager = BiometricManager.from(context)
+            if (manager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) ==
+                BiometricManager.BIOMETRIC_SUCCESS) {
+                val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                    .setTitle("Verificación biométrica")
+                    .setSubtitle("Coloca tu dedo")
+                    .setNegativeButtonText("Usar PIN")
+                    .build()
 
-            val biometricPrompt = BiometricPrompt(
-                activity,
-                executor,
-                object : BiometricPrompt.AuthenticationCallback() {
-                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                        status = "Huella verificada"
-                        navController.navigate("main") {
-                            popUpTo("auth") { inclusive = true }
+                val biometricPrompt = BiometricPrompt(
+                    activity,
+                    executor,
+                    object : BiometricPrompt.AuthenticationCallback() {
+                        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                            navController.navigate("main") {
+                                popUpTo("auth") { inclusive = true }
+                            }
                         }
-                    }
 
-                    override fun onAuthenticationFailed() {
-                        status = "Huella no reconocida"
-                    }
+                        override fun onAuthenticationError(code: Int, msg: CharSequence) {
+                            status = "Autenticación cancelada. Usa tu PIN"
+                            showPin = true
+                        }
 
-                    override fun onAuthenticationError(code: Int, msg: CharSequence) {
-                        status = "Usa tu PIN para continuar"
-                        showPin = true
-                    }
-                })
+                        override fun onAuthenticationFailed() {
+                            status = "Huella no reconocida. Intenta otra vez"
+                        }
+                    })
 
-            biometricPrompt.authenticate(promptInfo)
+                biometricPrompt.authenticate(promptInfo)
+            } else {
+                status = "Huella no disponible. Usa tu PIN"
+                showPin = true
+            }
         } else {
-            status = "Huella no disponible. Usa tu PIN"
+            status = "Huella no configurada. Usa tu PIN"
             showPin = true
         }
     }
 
-    // UI
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -104,25 +105,20 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
                 style = MaterialTheme.typography.headlineSmall
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = status,
-                color = Color.White.copy(alpha = 0.8f),
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(text = status, color = Color.White.copy(alpha = 0.7f))
 
             if (showPin) {
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(28.dp))
 
                 OutlinedTextField(
                     value = pin,
                     onValueChange = { if (it.length <= 6) pin = it },
                     label = { Text("PIN", color = Color.White) },
-                    textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 22.sp),
+                    textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 20.sp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     modifier = Modifier
-                        .width(220.dp)
+                        .width(240.dp)
                         .padding(4.dp)
                 )
 
@@ -130,7 +126,7 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
 
                 Button(
                     onClick = {
-                        if (pin == correctPin) {
+                        if (pin == EncryptedPrefs.getPin(context)) {
                             navController.navigate("main") {
                                 popUpTo("auth") { inclusive = true }
                             }
@@ -145,8 +141,15 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
                 ) {
                     Text("Acceder", fontSize = 18.sp)
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TextButton(onClick = {
+                    navController.navigate("resetPin")
+                }) {
+                    Text("¿Olvidaste tu PIN?", color = Color.White.copy(alpha = 0.8f))
+                }
             }
         }
     }
 }
-
