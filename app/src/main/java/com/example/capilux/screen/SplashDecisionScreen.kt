@@ -42,8 +42,8 @@ fun SplashDecisionScreen(navController: NavHostController, useAltTheme: Boolean)
     LaunchedEffect(true) {
         showContent = true
         delay(2500)
-        navController.navigate("main") {
-            popUpTo("splash") { inclusive = true }
+        navController.navigate("welcome") {
+            popUpTo("splashDecision") { inclusive = true }
         }
     }
 

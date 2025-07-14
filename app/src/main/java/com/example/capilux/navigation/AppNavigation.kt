@@ -26,14 +26,14 @@ fun AppNavigation(
         composable("splashDecision") {
             SplashDecisionScreen(navController, altThemeState.value)
         }
-        composable("explanation") {
-            ExplanationScreen(navController, altThemeState.value)
+        composable("welcome") {
+            WelcomeScreen(navController, altThemeState.value)
         }
         composable("userCreation") {
             UserCreationScreen(navController, altThemeState.value, usernameState)
         }
         composable("setupSecurity") {
-            BiometricSetupScreen(navController, altThemeState.value)
+            SetupSecurityScreen(navController, altThemeState.value)
         }
         composable("login") {
             LoginScreen(navController, altThemeState.value)
