@@ -1,9 +1,6 @@
 
 package com.example.capilux.screen
 
-import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.biometric.BiometricManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
