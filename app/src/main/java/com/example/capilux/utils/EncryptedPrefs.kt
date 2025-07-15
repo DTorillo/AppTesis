@@ -13,6 +13,8 @@ object EncryptedPrefs {
     private const val KEY_SETUP_DONE = "setup_done"
     private const val KEY_SECURITY_Q = "security_question"
     private const val KEY_SECURITY_A = "security_answer"
+    private const val KEY_USERNAME = "username"
+    private const val KEY_IMAGE_URI = "imageUri"
 
     fun getPrefs(context: Context) = EncryptedSharedPreferences.create(
         PREF_NAME,
@@ -73,5 +75,21 @@ object EncryptedPrefs {
     fun isSecurityAnswerCorrect(context: Context, input: String): Boolean {
         val realAnswer = getPrefs(context).getString(KEY_SECURITY_A, "") ?: ""
         return input.lowercase().trim() == realAnswer
+    }
+
+    fun setUsername(context: Context, username: String) {
+        getPrefs(context).edit().putString(KEY_USERNAME, username).apply()
+    }
+
+    fun getUsername(context: Context): String? {
+        return getPrefs(context).getString(KEY_USERNAME, null)
+    }
+
+    fun setImageUri(context: Context, uri: String?) {
+        getPrefs(context).edit().putString(KEY_IMAGE_URI, uri).apply()
+    }
+
+    fun getImageUri(context: Context): String? {
+        return getPrefs(context).getString(KEY_IMAGE_URI, null)
     }
 }

@@ -25,7 +25,6 @@ import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.restartApp
 import com.example.capilux.utils.setAppLocale
 import com.example.capilux.utils.EncryptedPrefs
-import com.example.capilux.utils.EncryptedPrefs.getPrefs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +38,6 @@ fun ConfigScreen(
     val context = LocalContext.current
 
     // 🔐 Preferencias seguras
-    val sharedPrefs = remember { getPrefs(context) }
 
     // 🌓 Preferencias normales (no sensibles)
     val sharedPreferences = remember { context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE) }
@@ -56,7 +54,7 @@ fun ConfigScreen(
         uri?.let {
             val compressedUri = compressImage(context, it)
             currentImageUri = compressedUri
-            sharedPrefs.edit().putString("imageUri", compressedUri.toString()).apply()
+            EncryptedPrefs.setImageUri(context, compressedUri.toString())
         }
     }
 
@@ -158,10 +156,10 @@ fun ConfigScreen(
             PrimaryButton(
                 text = "Guardar cambios",
                 onClick = {
-                    sharedPrefs.edit().putString("username", editedUsername).apply()
+                    EncryptedPrefs.setUsername(context, editedUsername)
                     usernameState.value = editedUsername
                     currentImageUri?.let {
-                        sharedPrefs.edit().putString("imageUri", it.toString()).apply()
+                        EncryptedPrefs.setImageUri(context, it.toString())
                     }
                     navController.popBackStack()
                 }

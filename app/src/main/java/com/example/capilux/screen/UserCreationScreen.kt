@@ -35,7 +35,7 @@ import com.example.capilux.R
 import com.example.capilux.components.TermsAndConditionsDialog
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
-import com.example.capilux.utils.EncryptedPrefs.getPrefs
+import com.example.capilux.utils.EncryptedPrefs
 import com.example.capilux.utils.compressImage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +52,6 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         imageUri = uri
     }
-    val sharedPreferences = getPrefs(context)
 
     val gradient = backgroundGradient(useAltTheme)
 
@@ -211,10 +210,9 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
                             showDialog = true
                         }
                         else -> {
-                            val editor = sharedPreferences.edit()
-                            editor.putString("username", username)
-                            imageUri?.let { editor.putString("imageUri", it.toString()) }
-                            editor.apply()
+                            EncryptedPrefs.setUsername(context, username)
+                            val uriString = imageUri?.toString()
+                            EncryptedPrefs.setImageUri(context, uriString)
 
                             usernameState.value = username
                             navController.navigate("setupSecurity")

@@ -26,7 +26,7 @@ import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
 
 @Composable
-fun ExplanationScreen(navController: NavHostController, useAltTheme: Boolean) {
+fun WelcomeScreen(navController: NavHostController, useAltTheme: Boolean) {
     val gradient = backgroundGradient(useAltTheme)
 
     Column(

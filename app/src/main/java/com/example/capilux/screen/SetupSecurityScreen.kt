@@ -1,9 +1,6 @@
 
 package com.example.capilux.screen
 
-import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.biometric.BiometricManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -27,6 +24,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
     val gradient = backgroundGradient(useAltTheme)
 
     var pin by remember { mutableStateOf("") }
+    var confirmPin by remember { mutableStateOf("") }
     var pregunta by remember { mutableStateOf("") }
     var respuesta by remember { mutableStateOf("") }
     var activarHuella by remember { mutableStateOf(false) }
@@ -61,6 +59,24 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
             )
 
             Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = confirmPin,
+                onValueChange = { if (it.length <= 6) confirmPin = it },
+                label = { Text("Confirma tu PIN") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                modifier = Modifier.fillMaxWidth(0.8f)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (confirmPin.isNotEmpty() && confirmPin != pin) {
+                Text(
+                    text = "Los PIN no coinciden",
+                    color = Color.Red,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
 
             if (puedeUsarHuella) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -106,7 +122,8 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
                         }
                     }
                 },
-                enabled = pin.length == 6 && pregunta.isNotBlank() && respuesta.isNotBlank(),
+                enabled = pin.length == 6 && pin == confirmPin &&
+                    pregunta.isNotBlank() && respuesta.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth(0.6f)
                     .height(50.dp)

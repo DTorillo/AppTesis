@@ -25,7 +25,7 @@ class MainActivity : FragmentActivity() {
                 mutableStateOf(getInitialThemePreference(this))
             }
 
-            val username = EncryptedPrefs.getPrefs(this).getString("username", null)
+            val username = EncryptedPrefs.getUsername(this)
             val usernameState = remember { mutableStateOf(username ?: "") }
 
             if (!isCameraPermissionGranted(this)) {
