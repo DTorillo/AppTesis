@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.capilux.screen.*
+import com.example.capilux.utils.EncryptedPrefs
 
 @Composable
 fun AppNavigation(
@@ -26,21 +27,21 @@ fun AppNavigation(
         composable("splashDecision") {
             SplashDecisionScreen(navController, altThemeState.value)
         }
-        composable("explanation") {
-            ExplanationScreen(navController, altThemeState.value)
+        composable("welcome") {
+            WelcomeScreen(navController, altThemeState.value)
         }
         composable("userCreation") {
             UserCreationScreen(navController, altThemeState.value, usernameState)
         }
         composable("setupSecurity") {
-            BiometricSetupScreen(navController, altThemeState.value)
+            SetupSecurityScreen(navController, altThemeState.value)
         }
-        composable("login") {
-            LoginScreen(navController, altThemeState.value)
+        composable("auth") {
+            AuthScreen(navController, altThemeState.value)
         }
         composable("main") {
             val username = usernameState.value
-            val sharedPrefs = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
+            val sharedPrefs = remember { EncryptedPrefs.getPrefs(context) }
             val imageUriString = sharedPrefs.getString("imageUri", null)
             val imageUri = imageUriString?.let { Uri.parse(it) }
 
@@ -52,7 +53,7 @@ fun AppNavigation(
             )
         }
         composable("config") {
-            val sharedPrefs = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
+            val sharedPrefs = remember { EncryptedPrefs.getPrefs(context) }
             val savedImageUriString = sharedPrefs.getString("imageUri", null)
             val imageUri = savedImageUriString?.let { Uri.parse(it) }
 
