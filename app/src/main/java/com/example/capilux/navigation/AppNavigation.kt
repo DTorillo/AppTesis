@@ -39,6 +39,9 @@ fun AppNavigation(
         composable("auth") {
             AuthScreen(navController, altThemeState.value)
         }
+        composable("resetPin") {
+            ResetPinScreen(navController, altThemeState.value)
+        }
         composable("main") {
             val username = usernameState.value
             val sharedPrefs = remember { EncryptedPrefs.getPrefs(context) }
