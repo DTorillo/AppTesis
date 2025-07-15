@@ -1,7 +1,5 @@
-
 package com.example.capilux.screen
 
-import androidx.biometric.BiometricManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -19,12 +17,10 @@ import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.EncryptedPrefs
 
 @Composable
-fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) {
+fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
     val context = LocalContext.current
     val gradient = backgroundGradient(useAltTheme)
 
-    var pin by remember { mutableStateOf("") }
-    var confirmPin by remember { mutableStateOf("") }
     val preguntas = listOf(
         "¿Nombre de tu primera mascota?",
         "¿Ciudad donde naciste?",
@@ -35,12 +31,9 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
     var pregunta by remember { mutableStateOf(preguntas[0]) }
     var expandPreguntas by remember { mutableStateOf(false) }
     var respuesta by remember { mutableStateOf("") }
-    var activarHuella by remember { mutableStateOf(false) }
-    val puedeUsarHuella = remember {
-        BiometricManager.from(context).canAuthenticate(
-            BiometricManager.Authenticators.BIOMETRIC_WEAK
-        ) == BiometricManager.BIOMETRIC_SUCCESS
-    }
+    var nuevoPin by remember { mutableStateOf("") }
+    var confirmarPin by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -50,54 +43,13 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "Configura tu seguridad",
+                text = "Recuperar PIN",
                 color = Color.White,
                 fontSize = 22.sp,
                 style = MaterialTheme.typography.headlineSmall
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            OutlinedTextField(
-                value = pin,
-                onValueChange = { if (it.length <= 6) pin = it },
-                label = { Text("Elige un PIN de 6 dígitos") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                modifier = Modifier.fillMaxWidth(0.8f)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = confirmPin,
-                onValueChange = { if (it.length <= 6) confirmPin = it },
-                label = { Text("Confirma tu PIN") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                modifier = Modifier.fillMaxWidth(0.8f)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            if (confirmPin.isNotEmpty() && confirmPin != pin) {
-                Text(
-                    text = "Los PIN no coinciden",
-                    color = Color.Red,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-
-            if (puedeUsarHuella) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = activarHuella,
-                        onCheckedChange = { activarHuella = it },
-                        colors = CheckboxDefaults.colors(checkedColor = Color.White)
-                    )
-                    Text("Activar acceso con huella", color = Color.White)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             ExposedDropdownMenuBox(
                 expanded = expandPreguntas,
@@ -107,7 +59,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
                     value = pregunta,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Pregunta de seguridad") },
+                    label = { Text("Pregunta elegida") },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandPreguntas)
                     },
@@ -137,32 +89,57 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
             OutlinedTextField(
                 value = respuesta,
                 onValueChange = { respuesta = it },
-                label = { Text("Respuesta secreta") },
+                label = { Text("Respuesta") },
                 modifier = Modifier.fillMaxWidth(0.8f)
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = nuevoPin,
+                onValueChange = { if (it.length <= 6) nuevoPin = it },
+                label = { Text("Nuevo PIN") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                modifier = Modifier.fillMaxWidth(0.8f)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = confirmarPin,
+                onValueChange = { if (it.length <= 6) confirmarPin = it },
+                label = { Text("Confirmar PIN") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                modifier = Modifier.fillMaxWidth(0.8f)
+            )
+
+            if (error.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(error, color = Color.Red)
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = {
-                    if (pin.length == 6 && pregunta.isNotBlank() && respuesta.isNotBlank()) {
-                        EncryptedPrefs.savePin(context, pin)
-                        EncryptedPrefs.saveLastPins(context, pin)
-                        EncryptedPrefs.setUseBiometrics(context, activarHuella)
-                        EncryptedPrefs.setSecurityQuestion(context, pregunta, respuesta)
-                        EncryptedPrefs.setSetupDone(context, true)
-                        navController.navigate("main") {
-                            popUpTo("setupSecurity") { inclusive = true }
+                    if (pregunta == EncryptedPrefs.getSecurityQuestion(context) &&
+                        EncryptedPrefs.isSecurityAnswerCorrect(context, respuesta) &&
+                        nuevoPin.length == 6 && nuevoPin == confirmarPin
+                    ) {
+                        EncryptedPrefs.savePin(context, nuevoPin)
+                        EncryptedPrefs.saveLastPins(context, nuevoPin)
+                        navController.navigate("auth") {
+                            popUpTo("resetPin") { inclusive = true }
                         }
+                    } else {
+                        error = "Datos incorrectos"
                     }
                 },
-                enabled = pin.length == 6 && pin == confirmPin &&
-                    pregunta.isNotBlank() && respuesta.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth(0.6f)
                     .height(50.dp)
             ) {
-                Text("Finalizar", fontSize = 18.sp)
+                Text("Guardar", fontSize = 18.sp)
             }
         }
     }
