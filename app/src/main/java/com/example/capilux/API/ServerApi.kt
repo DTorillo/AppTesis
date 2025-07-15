@@ -17,7 +17,7 @@ object ServerApi {
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    private const val SERVER_URL = "https://67213aded064.ngrok-free.app/analizar"
+    private const val SERVER_URL = "https://975a53afccee.ngrok-free.app/analizar"
 
     fun enviarImagen(
         context: Context,
