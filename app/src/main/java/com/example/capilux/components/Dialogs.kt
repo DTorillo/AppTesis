@@ -32,6 +32,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,15 +46,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.capilux.ui.theme.PrimaryButton
+import com.example.capilux.ui.theme.backgroundGradient
 
 @Composable
-fun TermsAndConditionsDialog(onDismiss: () -> Unit) {
-    // Gradiente para el fondo principal
-    val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFF6A11CB), Color(0xFF2575FC)),
-        startY = 0f,
-        endY = 1000f
-    )
+fun TermsAndConditionsDialog(onDismiss: () -> Unit, useAltTheme: Boolean) {
+    // Gradiente para el fondo principal que respeta la configuración
+    val gradient = backgroundGradient(useAltTheme)
 
     // Estado para el scroll
     val scrollState = rememberScrollState()
@@ -186,3 +184,20 @@ fun TermsAndConditionsDialog(onDismiss: () -> Unit) {
         }
     }
 }
+@Composable
+fun showErrorDialog(
+    message: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Error", color = Color.Black) },
+        text = { Text(message, color = Color.Black) },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("OK")
+            }
+        }
+    )
+}
+

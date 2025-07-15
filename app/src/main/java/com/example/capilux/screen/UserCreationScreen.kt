@@ -1,6 +1,5 @@
 package com.example.capilux.screen
 
-import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -8,43 +7,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,10 +35,12 @@ import com.example.capilux.R
 import com.example.capilux.components.TermsAndConditionsDialog
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.EncryptedPrefs
+import com.example.capilux.utils.compressImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean) {
+fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, usernameState: MutableState<String>) {
     var username by remember { mutableStateOf("") }
     var isTermsAccepted by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
@@ -80,7 +52,6 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean) {
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         imageUri = uri
     }
-    val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
     val gradient = backgroundGradient(useAltTheme)
 
@@ -114,7 +85,6 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Encabezado
             Text(
                 text = "Personaliza tu experiencia",
                 style = MaterialTheme.typography.headlineSmall,
@@ -131,7 +101,6 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean) {
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            // Foto de perfil
             Surface(
                 modifier = Modifier
                     .size(120.dp)
@@ -176,7 +145,6 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Campo de usuario
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -199,7 +167,6 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Términos y condiciones
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -243,21 +210,18 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean) {
                             showDialog = true
                         }
                         else -> {
-                            // Guardar en SharedPreferences
-                            val editor = sharedPreferences.edit()
-                            editor.putString("username", username)
-                            imageUri?.let { editor.putString("imageUri", it.toString()) }
-                            editor.apply()
+                            EncryptedPrefs.setUsername(context, username)
+                            val uriString = imageUri?.toString()
+                            EncryptedPrefs.setImageUri(context, uriString)
 
-                            // Navegar a la pantalla principal
-                            navController.navigate("main/$username")
+                            usernameState.value = username
+                            navController.navigate("setupSecurity")
                         }
                     }
                 },
                 enabled = username.isNotBlank() && isTermsAccepted
             )
 
-            // Diálogos
             if (showDialog) {
                 AlertDialog(
                     onDismissRequest = { showDialog = false },
@@ -273,9 +237,10 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean) {
 
             if (showTermsDialog) {
                 TermsAndConditionsDialog(
-                    onDismiss = { showTermsDialog = false }
+                    onDismiss = { showTermsDialog = false },
+                    useAltTheme = useAltTheme
                 )
             }
         }
     }
-    }
+}

@@ -6,46 +6,48 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.capilux.screen.ConfigScreen
-import com.example.capilux.screen.MainScreen
-import com.example.capilux.screen.ResultsScreen
-import com.example.capilux.screen.ExplanationScreen
-import com.example.capilux.screen.FavoritesScreen
-import com.example.capilux.screen.UserCreationScreen
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Locale
+import androidx.navigation.navArgument
+import com.example.capilux.screen.*
+import com.example.capilux.utils.EncryptedPrefs
 
 @Composable
 fun AppNavigation(
     darkModeState: MutableState<Boolean>,
     altThemeState: MutableState<Boolean>,
-    startDestination: String = "explanation" // Valor por defecto
+    usernameState: MutableState<String>
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
 
-    NavHost(navController, startDestination = startDestination) {
-        composable("explanation") {
-            ExplanationScreen(navController, altThemeState.value)
+    NavHost(navController, startDestination = "splashDecision") {
+        composable("splashDecision") {
+            SplashDecisionScreen(navController, altThemeState.value)
+        }
+        composable("welcome") {
+            WelcomeScreen(navController, altThemeState.value)
         }
         composable("userCreation") {
-            UserCreationScreen(navController, altThemeState.value)
+            UserCreationScreen(navController, altThemeState.value, usernameState)
         }
-        composable("main/{username}") { backStackEntry ->
-            // 1. Obtener el nombre de usuario de los argumentos de navegación
-            val username = backStackEntry.arguments?.getString("username") ?: ""
-
-            // 2. Obtener la URI de la imagen desde SharedPreferences
-            val context = LocalContext.current
-            val sharedPrefs = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
+        composable("setupSecurity") {
+            SetupSecurityScreen(navController, altThemeState.value)
+        }
+        composable("auth") {
+            AuthScreen(navController, altThemeState.value)
+        }
+        composable("resetPin") {
+            ResetPinScreen(navController, altThemeState.value)
+        }
+        composable("main") {
+            val username = usernameState.value
+            val sharedPrefs = remember { EncryptedPrefs.getPrefs(context) }
             val imageUriString = sharedPrefs.getString("imageUri", null)
             val imageUri = imageUriString?.let { Uri.parse(it) }
 
-            // 3. Pasar ambos a MainScreen
             MainScreen(
                 navController = navController,
                 username = username,
@@ -54,52 +56,74 @@ fun AppNavigation(
             )
         }
         composable("config") {
-            val context = LocalContext.current
-            val sharedPreferences = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
-            val savedImageUriString = sharedPreferences.getString("imageUri", null)
+            val sharedPrefs = remember { EncryptedPrefs.getPrefs(context) }
+            val savedImageUriString = sharedPrefs.getString("imageUri", null)
             val imageUri = savedImageUriString?.let { Uri.parse(it) }
-            val savedUsername = sharedPreferences.getString("username", "") ?: ""
 
-            // Pasamos darkModeState y altThemeState a ConfigScreen
-            ConfigScreen(navController, savedUsername, imageUri, darkModeState, altThemeState)
+            ConfigScreen(navController, usernameState, imageUri, darkModeState, altThemeState)
+        }
+        composable("confirmPhoto/{imageUri}") { backStackEntry ->
+            val uri = backStackEntry.arguments?.getString("imageUri") ?: ""
+            ConfirmPhotoScreen(uri, altThemeState.value, navController)
+        }
+        composable("processing/{imageUri}") { backStackEntry ->
+            val uri = backStackEntry.arguments?.getString("imageUri") ?: ""
+            ProcessingScreen(uri, altThemeState.value, navController)
+        }
+        composable(
+            route = "analysisResult/{resultado}",
+            arguments = listOf(navArgument("resultado") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val raw = backStackEntry.arguments?.getString("resultado") ?: ""
+            val resultado = Uri.decode(raw)
+            AnalysisResultScreen(resultado = resultado, navController = navController)
+        }
+        composable("filterPreview/{faceShape}") { backStackEntry ->
+            val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
+            FilterPreviewScreen(faceShape, navController)
         }
         composable("results/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
             val recommendedStyles = getRecommendedStyles(faceShape)
-            val context = LocalContext.current
-            val sharedPrefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-            val imageUriString = sharedPrefs.getString("last_captured_image", null)
+            val imageUriString = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                .getString("last_captured_image", null)
             val imageUri = imageUriString?.let { Uri.parse(it) }
 
             ResultsScreen(faceShape, recommendedStyles, imageUri)
         }
         composable("favorites") {
-            // Nueva pantalla de Estilos Favoritos
             FavoritesScreen()
+        }
+        composable(
+            route = "errorScreen/{message}",
+            arguments = listOf(navArgument("message") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val msg = Uri.decode(backStackEntry.arguments?.getString("message") ?: "Error desconocido")
+            ErrorScreen(message = msg, useAltTheme = altThemeState.value, navController = navController)
         }
     }
 }
 
-// Funciones de utilidad
-private fun getOutputDirectory(context: Context): File {
-    val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
-        File(it, "Capilux").apply { mkdirs() }
-    }
-    return if (mediaDir != null && mediaDir.exists()) mediaDir else context.filesDir
-}
-
-private fun createFile(baseFolder: File, prefix: String, extension: String): File {
-    val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-        .format(System.currentTimeMillis())
-    return File(baseFolder, "${prefix}${timestamp}${extension}")
-}
-
 fun getRecommendedStyles(faceShape: String): List<String> {
     return when (faceShape.lowercase()) {
-        "ovalada" -> listOf("Corte clásico", "Peinado hacia atrás", "Corte degradado")
-        "redonda" -> listOf("Corte con volumen arriba", "Undercut", "Peinado con raya al lado")
-        "cuadrada" -> listOf("Corte buzz", "Fade", "Corte texturizado")
-        "alargada" -> listOf("Flequillo", "Corte con volumen a los lados", "Ondas naturales")
-        else -> listOf("Corte clásico", "Corte moderno", "Estilo versátil")
+        "ovalado"     -> listOf("Pompadour", "Undercut", "Corte clásico")
+        "redondo"     -> listOf("Volumen arriba", "Raya al lado", "Corte angular")
+        "cuadrado"    -> listOf("Fade", "Buzz cut", "Peinado hacia atrás")
+        "alargado"    -> listOf("Flequillo", "Laterales con volumen", "Corte balanceado")
+        "triangular"  -> listOf("Volumen superior", "Texturizado", "Peinado con caída")
+        "corazon"     -> listOf("Desconectado", "Peinado ligero", "Fade con barba")
+        "diamante"    -> listOf("Side part", "Corte alto con forma", "Textura arriba")
+        "rectangular" -> listOf("Pompadour", "Militar", "Despeinado superior")
+        "trapecio"    -> listOf("Fade alto", "Peinado balanceado", "Contornos suaves")
+        "perla"       -> listOf("Corte creativo", "Estilo personalizado", "Diseño libre")
+        else          -> listOf("Corte moderno", "Corte clásico", "Estilo versátil")
     }
+}
+
+fun getRecommendedFilters(faceShape: String): List<androidx.compose.ui.graphics.Color> {
+    return listOf(
+        androidx.compose.ui.graphics.Color.Transparent,
+        androidx.compose.ui.graphics.Color(0x882575FC),
+        androidx.compose.ui.graphics.Color(0x88FF8800)
+    )
 }
