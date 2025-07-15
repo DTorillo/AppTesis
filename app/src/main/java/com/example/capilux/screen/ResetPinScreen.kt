@@ -16,6 +16,7 @@ import androidx.navigation.NavHostController
 import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.EncryptedPrefs
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
     val context = LocalContext.current
