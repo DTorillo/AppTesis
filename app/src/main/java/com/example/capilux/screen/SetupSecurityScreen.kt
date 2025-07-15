@@ -25,7 +25,14 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
 
     var pin by remember { mutableStateOf("") }
     var confirmPin by remember { mutableStateOf("") }
-    var pregunta by remember { mutableStateOf("") }
+    val questions = listOf(
+        "¿Cuál es tu color favorito?",
+        "¿Cómo se llama tu primera mascota?",
+        "¿En qué ciudad naciste?",
+        "¿Cuál es tu comida favorita?"
+    )
+    var pregunta by remember { mutableStateOf(questions.first()) }
+    var expanded by remember { mutableStateOf(false) }
     var respuesta by remember { mutableStateOf("") }
     var activarHuella by remember { mutableStateOf(false) }
     val puedeUsarHuella = remember {
@@ -91,12 +98,35 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = pregunta,
-                onValueChange = { pregunta = it },
-                label = { Text("Pregunta de seguridad") },
-                modifier = Modifier.fillMaxWidth(0.8f)
-            )
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                OutlinedTextField(
+                    value = pregunta,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Pregunta de seguridad") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth(0.8f)
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    questions.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(option) },
+                            onClick = {
+                                pregunta = option
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
