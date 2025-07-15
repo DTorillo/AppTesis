@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.capilux.R
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.EncryptedPrefs
 import kotlinx.coroutines.delay
 
 @Composable
@@ -42,7 +43,8 @@ fun SplashDecisionScreen(navController: NavHostController, useAltTheme: Boolean)
     LaunchedEffect(true) {
         showContent = true
         delay(2500)
-        navController.navigate("main") {
+        val next = if (EncryptedPrefs.isSetupDone(context)) "auth" else "welcome"
+        navController.navigate(next) {
             popUpTo("splash") { inclusive = true }
         }
     }
