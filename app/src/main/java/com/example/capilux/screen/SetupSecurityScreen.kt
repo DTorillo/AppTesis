@@ -15,6 +15,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.EncryptedPrefs
 
@@ -61,9 +62,20 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
             OutlinedTextField(
                 value = pin,
                 onValueChange = { if (it.length <= 6) pin = it },
-                label = { Text("Elige un PIN de 6 dígitos") },
+                label = { Text("Elige un PIN de 6 dígitos", color = Color.White) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                modifier = Modifier.fillMaxWidth(0.8f)
+                modifier = Modifier.fillMaxWidth(0.8f),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+                    focusedIndicatorColor = Color.White,
+                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
+                    cursorColor = Color.White
+                )
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -71,9 +83,20 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
             OutlinedTextField(
                 value = confirmPin,
                 onValueChange = { if (it.length <= 6) confirmPin = it },
-                label = { Text("Confirma tu PIN") },
+                label = { Text("Confirma tu PIN", color = Color.White) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                modifier = Modifier.fillMaxWidth(0.8f)
+                modifier = Modifier.fillMaxWidth(0.8f),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+                    focusedIndicatorColor = Color.White,
+                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
+                    cursorColor = Color.White
+                )
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -91,7 +114,11 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
                     Checkbox(
                         checked = activarHuella,
                         onCheckedChange = { activarHuella = it },
-                        colors = CheckboxDefaults.colors(checkedColor = Color.White)
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = Color.White,
+                            uncheckedColor = Color.White,
+                            checkmarkColor = Color(0xFF6A11CB)
+                        )
                     )
                     Text("Activar acceso con huella", color = Color.White)
                 }
@@ -107,13 +134,24 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
                     value = pregunta,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Pregunta de seguridad") },
+                    label = { Text("Pregunta de seguridad", color = Color.White) },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandPreguntas)
                     },
                     modifier = Modifier
                         .menuAnchor()
-                        .fillMaxWidth(0.8f)
+                        .fillMaxWidth(0.8f),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedLabelColor = Color.White,
+                        unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+                        focusedIndicatorColor = Color.White,
+                        unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
+                        cursorColor = Color.White
+                    )
                 )
 
                 ExposedDropdownMenu(
@@ -122,7 +160,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
                 ) {
                     preguntas.forEach { option ->
                         DropdownMenuItem(
-                            text = { Text(option) },
+                            text = { Text(option, color = Color.White) },
                             onClick = {
                                 pregunta = option
                                 expandPreguntas = false
@@ -137,13 +175,25 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
             OutlinedTextField(
                 value = respuesta,
                 onValueChange = { respuesta = it },
-                label = { Text("Respuesta secreta") },
-                modifier = Modifier.fillMaxWidth(0.8f)
+                label = { Text("Respuesta secreta", color = Color.White) },
+                modifier = Modifier.fillMaxWidth(0.8f),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+                    focusedIndicatorColor = Color.White,
+                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
+                    cursorColor = Color.White
+                )
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
+            PrimaryButton(
+                text = "Finalizar",
                 onClick = {
                     if (pin.length == 6 && pregunta.isNotBlank() && respuesta.isNotBlank()) {
                         EncryptedPrefs.savePin(context, pin)
@@ -158,12 +208,8 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
                 },
                 enabled = pin.length == 6 && pin == confirmPin &&
                     pregunta.isNotBlank() && respuesta.isNotBlank(),
-                modifier = Modifier
-                    .fillMaxWidth(0.6f)
-                    .height(50.dp)
-            ) {
-                Text("Finalizar", fontSize = 18.sp)
-            }
+                modifier = Modifier.fillMaxWidth(0.6f)
+            )
         }
     }
 }
