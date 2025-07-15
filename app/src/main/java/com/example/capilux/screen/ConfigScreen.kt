@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.capilux.components.ProfileImageLarge
@@ -139,6 +140,7 @@ fun ConfigScreen(
 
             // Idioma
             var showLanguageDialog by remember { mutableStateOf(false) }
+            var showChangePinDialog by remember { mutableStateOf(false) }
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).clickable { showLanguageDialog = true },
                 verticalAlignment = Alignment.CenterVertically,
@@ -149,6 +151,14 @@ fun ConfigScreen(
                     text = if (currentLanguage == "es") "Espa\u00f1ol" else "English",
                     color = Color.White.copy(alpha = 0.7f)
                 )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).clickable { showChangePinDialog = true },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Cambiar PIN", color = Color.White)
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -209,6 +219,105 @@ fun ConfigScreen(
                                 sharedPreferences.edit().putString("language", currentLanguage).apply()
                                 setAppLocale(context, currentLanguage)
                                 context.restartApp()
+                            }
+                        )
+                    }
+                )
+            }
+
+            if (showChangePinDialog) {
+                var currentPin by remember { mutableStateOf("") }
+                var newPin by remember { mutableStateOf("") }
+                var confirmPin by remember { mutableStateOf("") }
+                var error by remember { mutableStateOf("" ) }
+
+                BaseDialog(
+                    title = "Cambiar PIN",
+                    onDismiss = { showChangePinDialog = false },
+                    content = {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            OutlinedTextField(
+                                value = currentPin,
+                                onValueChange = { if (it.length <= 6) currentPin = it },
+                                label = { Text("PIN actual", color = Color.White) },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    focusedLabelColor = Color.White,
+                                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+                                    focusedIndicatorColor = Color.White,
+                                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
+                                    cursorColor = Color.White
+                                ),
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            OutlinedTextField(
+                                value = newPin,
+                                onValueChange = { if (it.length <= 6) newPin = it },
+                                label = { Text("Nuevo PIN", color = Color.White) },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    focusedLabelColor = Color.White,
+                                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+                                    focusedIndicatorColor = Color.White,
+                                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
+                                    cursorColor = Color.White
+                                ),
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            OutlinedTextField(
+                                value = confirmPin,
+                                onValueChange = { if (it.length <= 6) confirmPin = it },
+                                label = { Text("Confirmar PIN", color = Color.White) },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    focusedLabelColor = Color.White,
+                                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+                                    focusedIndicatorColor = Color.White,
+                                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
+                                    cursorColor = Color.White
+                                ),
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            if (error.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(error, color = Color.Red)
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        PrimaryButton(
+                            text = "Guardar",
+                            onClick = {
+                                val savedPin = EncryptedPrefs.getPin(context)
+                                if (currentPin == savedPin && newPin.length == 6 && newPin == confirmPin) {
+                                    EncryptedPrefs.savePin(context, newPin)
+                                    EncryptedPrefs.saveLastPins(context, newPin)
+                                    showChangePinDialog = false
+                                } else {
+                                    error = "Datos incorrectos"
+                                }
                             }
                         )
                     }
