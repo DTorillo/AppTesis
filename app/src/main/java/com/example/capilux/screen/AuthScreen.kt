@@ -26,6 +26,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
 import com.example.capilux.R
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.utils.EncryptedPrefs
 import java.util.concurrent.Executor
 
@@ -101,12 +102,12 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
             Text(
                 text = "Bienvenido a Capilux",
                 fontSize = 22.sp,
-                color = Color.White,
+                color = Color.Black,
                 style = MaterialTheme.typography.headlineSmall
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-            Text(text = status, color = Color.White.copy(alpha = 0.7f))
+            Text(text = status, color = Color.Black.copy(alpha = 0.7f))
 
             if (showPin) {
                 Spacer(modifier = Modifier.height(28.dp))
@@ -114,17 +115,28 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
                 OutlinedTextField(
                     value = pin,
                     onValueChange = { if (it.length <= 6) pin = it },
-                    label = { Text("PIN", color = Color.White) },
-                    textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 20.sp),
+                    label = { Text("PIN", color = Color.Black) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     modifier = Modifier
                         .width(240.dp)
-                        .padding(4.dp)
+                        .padding(4.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.White.copy(alpha = 0.3f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.3f),
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        focusedLabelColor = Color.Black,
+                        unfocusedLabelColor = Color.Black.copy(alpha = 0.7f),
+                        focusedIndicatorColor = Color.Black,
+                        unfocusedIndicatorColor = Color.Black.copy(alpha = 0.5f),
+                        cursorColor = Color.Black
+                    ),
+                    textStyle = LocalTextStyle.current.copy(fontSize = 20.sp)
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Button(
+                PrimaryButton(
                     onClick = {
                         if (pin == EncryptedPrefs.getPin(context)) {
                             navController.navigate("main") {
@@ -138,16 +150,14 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
                     modifier = Modifier
                         .width(200.dp)
                         .height(48.dp)
-                ) {
-                    Text("Acceder", fontSize = 18.sp)
-                }
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 TextButton(onClick = {
                     navController.navigate("resetPin")
                 }) {
-                    Text("¿Olvidaste tu PIN?", color = Color.White.copy(alpha = 0.8f))
+                    Text("¿Olvidaste tu PIN?", color = Color.Black.copy(alpha = 0.8f))
                 }
             }
         }
