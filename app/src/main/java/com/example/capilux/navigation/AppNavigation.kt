@@ -94,6 +94,9 @@ fun AppNavigation(
         composable("favorites") {
             FavoritesScreen()
         }
+        composable("support") {
+            SupportScreen(navController, altThemeState.value)
+        }
         composable(
             route = "errorScreen/{message}",
             arguments = listOf(navArgument("message") { type = NavType.StringType })

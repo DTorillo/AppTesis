@@ -306,28 +306,11 @@ fun MainScreen(
                         )
 
                         NavigationDrawerItem(
-                            label = { Text("Editar perfil", color = Color.White) },
-                            selected = false,
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                navController.navigate("userEdit")
-                            },
-                            icon = {
-                                Icon(
-                                    Icons.Filled.Edit,
-                                    contentDescription = "Editar perfil",
-                                    tint = Color.White
-                                )
-                            },
-                            modifier = Modifier.padding(vertical = 4.dp)
-                        )
-
-                        NavigationDrawerItem(
                             label = { Text("Ayuda y soporte", color = Color.White) },
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
-                                // navController.navigate("support") - Implementar después
+                                navController.navigate("support")
                             },
                             icon = {
                                 Icon(
