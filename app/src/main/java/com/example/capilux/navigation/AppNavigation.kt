@@ -92,7 +92,13 @@ fun AppNavigation(
             ResultsScreen(faceShape, recommendedStyles, imageUri, altThemeState.value)
         }
         composable("favorites") {
-            FavoritesScreen()
+            FavoritesScreen(altThemeState.value)
+        }
+        composable("savedImages") {
+            SavedImagesScreen(navController, altThemeState.value)
+        }
+        composable("support") {
+            SupportScreen(navController, altThemeState.value)
         }
         composable(
             route = "errorScreen/{message}",

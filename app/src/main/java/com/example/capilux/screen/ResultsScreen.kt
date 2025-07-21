@@ -2,6 +2,7 @@ package com.example.capilux.screen
 
 import android.net.Uri
 import androidx.compose.foundation.Image
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -21,11 +22,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
@@ -41,6 +44,8 @@ fun ResultsScreen(
     useAltTheme: Boolean
 ) {
     val navController = rememberNavController()
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("favorites", Context.MODE_PRIVATE) }
 
     Column(
         modifier = Modifier
@@ -107,7 +112,11 @@ fun ResultsScreen(
 
         PrimaryButton(
             text = "Guardar resultados",
-            onClick = { /* Guardar resultados */ }
+            onClick = {
+                val current = prefs.getStringSet("styles", emptySet())?.toMutableSet() ?: mutableSetOf()
+                current.addAll(recommendedStyles)
+                prefs.edit().putStringSet("styles", current).apply()
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
