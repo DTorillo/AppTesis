@@ -93,6 +93,7 @@ import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.FaceFrameAnalyzer
 import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.takePhoto
+import com.example.capilux.utils.EncryptedPrefs
 import kotlinx.coroutines.launch
 import androidx.compose.material3.AlertDialog as MaterialAlertDialog
 
@@ -351,17 +352,12 @@ fun MainScreen(
                         Button(
                             onClick = {
                                 // Lógica para cerrar sesión
-                                val sharedPrefs =
-                                    context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-                                with(sharedPrefs.edit()) {
-                                    remove("username")
-                                    remove("imageUri")
-                                    apply()
-                                }
+                                EncryptedPrefs.setUsername(context, "")
+                                EncryptedPrefs.setImageUri(context, null)
 
-                                // Navegar a la pantalla de bienvenida y limpiar el backstack
-                                navController.navigate("explanation") {
-                                    popUpTo(0) // Limpiar toda la pila de navegación
+                                // Navegar al flujo inicial limpiando la pila
+                                navController.navigate("splashDecision") {
+                                    popUpTo("splashDecision") { inclusive = true }
                                 }
 
                                 // Cerrar el menú lateral

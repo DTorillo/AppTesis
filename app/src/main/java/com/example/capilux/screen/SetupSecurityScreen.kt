@@ -43,6 +43,8 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
         ) == BiometricManager.BIOMETRIC_SUCCESS
     }
 
+    val textColor = Color.Black
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -52,7 +54,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = "Configura tu seguridad",
-                color = Color.White,
+                color = textColor,
                 fontSize = 22.sp,
                 style = MaterialTheme.typography.headlineSmall
             )
@@ -62,19 +64,19 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
             OutlinedTextField(
                 value = pin,
                 onValueChange = { if (it.length <= 6) pin = it },
-                label = { Text("Elige un PIN de 6 dígitos", color = Color.White) },
+                label = { Text("Elige un PIN de 6 dígitos", color = textColor) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth(0.8f),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                    focusedIndicatorColor = Color.White,
-                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
-                    cursorColor = Color.White
+                    focusedTextColor = textColor,
+                    unfocusedTextColor = textColor,
+                    focusedLabelColor = textColor,
+                    unfocusedLabelColor = textColor.copy(alpha = 0.7f),
+                    focusedIndicatorColor = textColor,
+                    unfocusedIndicatorColor = textColor.copy(alpha = 0.5f),
+                    cursorColor = textColor
                 )
             )
 
@@ -83,19 +85,19 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
             OutlinedTextField(
                 value = confirmPin,
                 onValueChange = { if (it.length <= 6) confirmPin = it },
-                label = { Text("Confirma tu PIN", color = Color.White) },
+                label = { Text("Confirma tu PIN", color = textColor) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth(0.8f),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                    focusedIndicatorColor = Color.White,
-                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
-                    cursorColor = Color.White
+                    focusedTextColor = textColor,
+                    unfocusedTextColor = textColor,
+                    focusedLabelColor = textColor,
+                    unfocusedLabelColor = textColor.copy(alpha = 0.7f),
+                    focusedIndicatorColor = textColor,
+                    unfocusedIndicatorColor = textColor.copy(alpha = 0.5f),
+                    cursorColor = textColor
                 )
             )
 
@@ -115,12 +117,12 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
                         checked = activarHuella,
                         onCheckedChange = { activarHuella = it },
                         colors = CheckboxDefaults.colors(
-                            checkedColor = Color.White,
-                            uncheckedColor = Color.White,
+                            checkedColor = textColor,
+                            uncheckedColor = textColor,
                             checkmarkColor = Color(0xFF6A11CB)
                         )
                     )
-                    Text("Activar acceso con huella", color = Color.White)
+                    Text("Activar acceso con huella", color = textColor)
                 }
             }
 
@@ -134,7 +136,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
                     value = pregunta,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Pregunta de seguridad", color = Color.White) },
+                    label = { Text("Pregunta de seguridad", color = textColor) },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandPreguntas)
                     },
@@ -144,13 +146,13 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                        focusedIndicatorColor = Color.White,
-                        unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
-                        cursorColor = Color.White
+                        focusedTextColor = textColor,
+                        unfocusedTextColor = textColor,
+                        focusedLabelColor = textColor,
+                        unfocusedLabelColor = textColor.copy(alpha = 0.7f),
+                        focusedIndicatorColor = textColor,
+                        unfocusedIndicatorColor = textColor.copy(alpha = 0.5f),
+                        cursorColor = textColor
                     )
                 )
 
@@ -160,7 +162,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
                 ) {
                     preguntas.forEach { option ->
                         DropdownMenuItem(
-                            text = { Text(option, color = Color.White) },
+                            text = { Text(option, color = textColor) },
                             onClick = {
                                 pregunta = option
                                 expandPreguntas = false
@@ -175,18 +177,18 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
             OutlinedTextField(
                 value = respuesta,
                 onValueChange = { respuesta = it },
-                label = { Text("Respuesta secreta", color = Color.White) },
+                label = { Text("Respuesta secreta", color = textColor) },
                 modifier = Modifier.fillMaxWidth(0.8f),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                    focusedIndicatorColor = Color.White,
-                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
-                    cursorColor = Color.White
+                    focusedTextColor = textColor,
+                    unfocusedTextColor = textColor,
+                    focusedLabelColor = textColor,
+                    unfocusedLabelColor = textColor.copy(alpha = 0.7f),
+                    focusedIndicatorColor = textColor,
+                    unfocusedIndicatorColor = textColor.copy(alpha = 0.5f),
+                    cursorColor = textColor
                 )
             )
 
