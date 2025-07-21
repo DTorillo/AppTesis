@@ -32,7 +32,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Cameraswitch
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.History
@@ -306,28 +305,11 @@ fun MainScreen(
                         )
 
                         NavigationDrawerItem(
-                            label = { Text("Editar perfil", color = Color.White) },
-                            selected = false,
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                navController.navigate("userEdit")
-                            },
-                            icon = {
-                                Icon(
-                                    Icons.Filled.Edit,
-                                    contentDescription = "Editar perfil",
-                                    tint = Color.White
-                                )
-                            },
-                            modifier = Modifier.padding(vertical = 4.dp)
-                        )
-
-                        NavigationDrawerItem(
                             label = { Text("Ayuda y soporte", color = Color.White) },
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
-                                // navController.navigate("support") - Implementar después
+                                navController.navigate("support")
                             },
                             icon = {
                                 Icon(
