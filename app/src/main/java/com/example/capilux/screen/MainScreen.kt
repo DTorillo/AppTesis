@@ -358,10 +358,11 @@ fun MainScreen(
                                     remove("imageUri")
                                     apply()
                                 }
+                                EncryptedPrefs.clearSession(context)
 
-                                // Navegar a la pantalla de bienvenida y limpiar el backstack
-                                navController.navigate("explanation") {
-                                    popUpTo(0) // Limpiar toda la pila de navegación
+                                // Navegar a la pantalla de autenticación y limpiar el backstack
+                                navController.navigate("auth") {
+                                    popUpTo(0)
                                 }
 
                                 // Cerrar el menú lateral

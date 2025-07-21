@@ -50,7 +50,7 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
         ) {
             Text(
                 text = "Recuperar PIN",
-                color = Color.White,
+                color = Color.Black,
                 fontSize = 22.sp,
                 style = MaterialTheme.typography.headlineSmall
             )
@@ -65,7 +65,7 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
                     value = pregunta,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Pregunta elegida", color = Color.White) },
+                    label = { Text("Pregunta elegida", color = Color.Black) },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandPreguntas)
                     },
@@ -73,15 +73,15 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
                         .menuAnchor()
                         .fillMaxWidth(0.8f),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                        focusedIndicatorColor = Color.White,
-                        unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
-                        cursorColor = Color.White
+                        focusedContainerColor = Color.White.copy(alpha = 0.3f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.3f),
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        focusedLabelColor = Color.Black,
+                        unfocusedLabelColor = Color.Black.copy(alpha = 0.7f),
+                        focusedIndicatorColor = Color.Black,
+                        unfocusedIndicatorColor = Color.Black.copy(alpha = 0.5f),
+                        cursorColor = Color.Black
                     )
                 )
 
@@ -91,7 +91,7 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
                 ) {
                     preguntas.forEach { option ->
                         DropdownMenuItem(
-                            text = { Text(option) },
+                            text = { Text(option, color = Color.Black) },
                             onClick = {
                                 pregunta = option
                                 expandPreguntas = false
@@ -106,18 +106,18 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
             OutlinedTextField(
                 value = respuesta,
                 onValueChange = { respuesta = it },
-                label = { Text("Respuesta", color = Color.White) },
+                label = { Text("Respuesta", color = Color.Black) },
                 modifier = Modifier.fillMaxWidth(0.8f),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                    focusedIndicatorColor = Color.White,
-                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
-                    cursorColor = Color.White
+                    focusedContainerColor = Color.White.copy(alpha = 0.3f),
+                    unfocusedContainerColor = Color.White.copy(alpha = 0.3f),
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedLabelColor = Color.Black,
+                    unfocusedLabelColor = Color.Black.copy(alpha = 0.7f),
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black.copy(alpha = 0.5f),
+                    cursorColor = Color.Black
                 )
             )
 
@@ -126,19 +126,19 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
             OutlinedTextField(
                 value = nuevoPin,
                 onValueChange = { if (it.length <= 6) nuevoPin = it },
-                label = { Text("Nuevo PIN", color = Color.White) },
+                label = { Text("Nuevo PIN", color = Color.Black) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth(0.8f),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                    focusedIndicatorColor = Color.White,
-                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
-                    cursorColor = Color.White
+                    focusedContainerColor = Color.White.copy(alpha = 0.3f),
+                    unfocusedContainerColor = Color.White.copy(alpha = 0.3f),
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedLabelColor = Color.Black,
+                    unfocusedLabelColor = Color.Black.copy(alpha = 0.7f),
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black.copy(alpha = 0.5f),
+                    cursorColor = Color.Black
                 )
             )
 
@@ -147,19 +147,19 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
             OutlinedTextField(
                 value = confirmarPin,
                 onValueChange = { if (it.length <= 6) confirmarPin = it },
-                label = { Text("Confirmar PIN", color = Color.White) },
+                label = { Text("Confirmar PIN", color = Color.Black) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth(0.8f),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                    focusedIndicatorColor = Color.White,
-                    unfocusedIndicatorColor = Color.White.copy(alpha = 0.5f),
-                    cursorColor = Color.White
+                    focusedContainerColor = Color.White.copy(alpha = 0.3f),
+                    unfocusedContainerColor = Color.White.copy(alpha = 0.3f),
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedLabelColor = Color.Black,
+                    unfocusedLabelColor = Color.Black.copy(alpha = 0.7f),
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black.copy(alpha = 0.5f),
+                    cursorColor = Color.Black
                 )
             )
 
