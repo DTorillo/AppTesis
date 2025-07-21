@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.ui.theme.PrimaryButton
+import com.example.capilux.ui.theme.gradientTextFieldColors
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.capilux.utils.EncryptedPrefs
 
 @Composable
@@ -50,7 +52,7 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
         ) {
             Text(
                 text = "Recuperar PIN",
-                color = Color.Black,
+                color = Color.White,
                 fontSize = 22.sp,
                 style = MaterialTheme.typography.headlineSmall
             )
@@ -65,24 +67,15 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
                     value = pregunta,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Pregunta elegida", color = Color.Black) },
+                    label = { Text("Pregunta elegida") },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandPreguntas)
                     },
                     modifier = Modifier
                         .menuAnchor()
                         .fillMaxWidth(0.8f),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.White.copy(alpha = 0.3f),
-                        unfocusedContainerColor = Color.White.copy(alpha = 0.3f),
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        focusedLabelColor = Color.Black,
-                        unfocusedLabelColor = Color.Black.copy(alpha = 0.7f),
-                        focusedIndicatorColor = Color.Black,
-                        unfocusedIndicatorColor = Color.Black.copy(alpha = 0.5f),
-                        cursorColor = Color.Black
-                    )
+                    shape = RoundedCornerShape(16.dp),
+                    colors = gradientTextFieldColors()
                 )
 
                 ExposedDropdownMenu(
@@ -91,7 +84,7 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
                 ) {
                     preguntas.forEach { option ->
                         DropdownMenuItem(
-                            text = { Text(option, color = Color.Black) },
+                            text = { Text(option, color = Color.White) },
                             onClick = {
                                 pregunta = option
                                 expandPreguntas = false
@@ -106,19 +99,10 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
             OutlinedTextField(
                 value = respuesta,
                 onValueChange = { respuesta = it },
-                label = { Text("Respuesta", color = Color.Black) },
+                label = { Text("Respuesta") },
                 modifier = Modifier.fillMaxWidth(0.8f),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White.copy(alpha = 0.3f),
-                    unfocusedContainerColor = Color.White.copy(alpha = 0.3f),
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    focusedLabelColor = Color.Black,
-                    unfocusedLabelColor = Color.Black.copy(alpha = 0.7f),
-                    focusedIndicatorColor = Color.Black,
-                    unfocusedIndicatorColor = Color.Black.copy(alpha = 0.5f),
-                    cursorColor = Color.Black
-                )
+                shape = RoundedCornerShape(16.dp),
+                colors = gradientTextFieldColors()
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -126,20 +110,11 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
             OutlinedTextField(
                 value = nuevoPin,
                 onValueChange = { if (it.length <= 6) nuevoPin = it },
-                label = { Text("Nuevo PIN", color = Color.Black) },
+                label = { Text("Nuevo PIN") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth(0.8f),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White.copy(alpha = 0.3f),
-                    unfocusedContainerColor = Color.White.copy(alpha = 0.3f),
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    focusedLabelColor = Color.Black,
-                    unfocusedLabelColor = Color.Black.copy(alpha = 0.7f),
-                    focusedIndicatorColor = Color.Black,
-                    unfocusedIndicatorColor = Color.Black.copy(alpha = 0.5f),
-                    cursorColor = Color.Black
-                )
+                shape = RoundedCornerShape(16.dp),
+                colors = gradientTextFieldColors()
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -147,20 +122,11 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
             OutlinedTextField(
                 value = confirmarPin,
                 onValueChange = { if (it.length <= 6) confirmarPin = it },
-                label = { Text("Confirmar PIN", color = Color.Black) },
+                label = { Text("Confirmar PIN") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth(0.8f),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White.copy(alpha = 0.3f),
-                    unfocusedContainerColor = Color.White.copy(alpha = 0.3f),
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    focusedLabelColor = Color.Black,
-                    unfocusedLabelColor = Color.Black.copy(alpha = 0.7f),
-                    focusedIndicatorColor = Color.Black,
-                    unfocusedIndicatorColor = Color.Black.copy(alpha = 0.5f),
-                    cursorColor = Color.Black
-                )
+                shape = RoundedCornerShape(16.dp),
+                colors = gradientTextFieldColors()
             )
 
             if (error.isNotEmpty()) {
