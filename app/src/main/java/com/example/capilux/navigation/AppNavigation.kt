@@ -91,9 +91,6 @@ fun AppNavigation(
 
             ResultsScreen(faceShape, recommendedStyles, imageUri, altThemeState.value)
         }
-        composable("favorites") {
-            FavoritesScreen(altThemeState.value)
-        }
         composable("savedImages") {
             SavedImagesScreen(navController, altThemeState.value)
         }
