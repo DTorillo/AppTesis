@@ -116,22 +116,6 @@ fun AnalysisResultScreen(resultado: String, navController: NavHostController) {
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = { navController.navigate("filterPreview/$tipo") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-        ) {
-            Text(
-                text = "Probar filtros sugeridos",
-                color = Color(0xFF2D0C5A),
-                fontWeight = FontWeight.Bold
-            )
-        }
     }
 }
 

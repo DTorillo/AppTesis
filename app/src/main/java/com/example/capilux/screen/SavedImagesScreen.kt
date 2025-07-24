@@ -2,8 +2,10 @@ package com.example.capilux.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +15,8 @@ import androidx.compose.foundation.lazy.items
 import android.content.Context
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -20,7 +24,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,12 +37,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.saveImageToGallery
 
 @Composable
 fun SavedImagesScreen(navController: NavHostController, useAltTheme: Boolean) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("saved_images", Context.MODE_PRIVATE) }
-    val images = prefs.getStringSet("images", emptySet())!!.toList()
+    val images = remember { mutableStateListOf<String>().apply { addAll(prefs.getStringSet("images", emptySet())!!) } }
     val gradient = backgroundGradient(useAltTheme)
 
     Scaffold(
@@ -75,9 +82,34 @@ fun SavedImagesScreen(navController: NavHostController, useAltTheme: Boolean) {
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(300.dp),
+                                .height(300.dp)
+                                .border(2.dp, Color.White),
                             contentScale = ContentScale.Crop
                         )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            IconButton(onClick = {
+                                images.remove(uriString)
+                                prefs.edit().putStringSet("images", images.toSet()).apply()
+                            }) {
+                                Icon(
+                                    Icons.Filled.Delete,
+                                    contentDescription = "Eliminar",
+                                    tint = Color.White
+                                )
+                            }
+                            IconButton(onClick = {
+                                saveImageToGallery(context, Uri.parse(uriString))
+                            }) {
+                                Icon(
+                                    Icons.Filled.Download,
+                                    contentDescription = "Descargar",
+                                    tint = Color.White
+                                )
+                            }
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
