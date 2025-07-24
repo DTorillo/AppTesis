@@ -255,22 +255,6 @@ fun MainScreen(
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
 
-                        NavigationDrawerItem(
-                            label = { Text("Estilos favoritos", color = Color.White) },
-                            selected = false,
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                navController.navigate("favorites") // Navegar a la pantalla de favoritos
-                            },
-                            icon = {
-                                Icon(
-                                    Icons.Filled.Favorite,
-                                    contentDescription = "Estilos favoritos",
-                                    tint = Color.White
-                                )
-                            },
-                            modifier = Modifier.padding(vertical = 4.dp)
-                        )
 
                         NavigationDrawerItem(
                             label = { Text("Im\u00e1genes guardadas", color = Color.White) },
