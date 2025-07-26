@@ -1,8 +1,11 @@
 package com.example.capilux.screen
 
+import android.content.Context
+import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,16 +16,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import android.content.Context
-import android.net.Uri
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.window.Dialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -31,8 +36,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -47,15 +52,16 @@ fun SavedImagesScreen(navController: NavHostController, useAltTheme: Boolean) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("saved_images", Context.MODE_PRIVATE) }
     val images = remember { mutableStateListOf(*prefs.getStringSet("images", emptySet())!!.toTypedArray()) }
+    val previewImage = remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
     val gradient = backgroundGradient(useAltTheme)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Im\u00e1genes guardadas", color = Color.White) },
+                title = { Text("Imágenes guardadas", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atr\u00e1s", tint = Color.White)
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atrás", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -75,48 +81,81 @@ fun SavedImagesScreen(navController: NavHostController, useAltTheme: Boolean) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            if (images.isEmpty()) {
-                Text("No hay im\u00e1genes guardadas", color = Color.White)
-            } else {
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(images) { uriString ->
-                        Column(modifier = Modifier
+            previewImage.value?.let { uri ->
+                Dialog(onDismissRequest = { previewImage.value = null }) {
+                    Image(
+                        painter = rememberAsyncImagePainter(uri),
+                        contentDescription = null,
+                        modifier = Modifier
                             .fillMaxWidth()
-                            .border(2.dp, Color.White, RectangleShape)) {
-                            Image(
-                                painter = rememberAsyncImagePainter(uriString),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(300.dp),
-                                contentScale = ContentScale.Crop
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                IconButton(onClick = {
-                                    if (saveImageToGallery(context, Uri.parse(uriString))) {
-                                        // Image saved
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+            if (images.isEmpty()) {
+                Text(
+                    "No hay imágenes guardadas",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 32.dp)
+                )
+            } else {
+                Text(
+                    text = "Tienes ${'$'}{images.size} imágenes guardadas",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(images) { uriString ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            border = BorderStroke(1.dp, Color.White),
+                            colors = CardDefaults.cardColors(containerColor = Color(0x552D0C5A))
+                        ) {
+                            Column {
+                                Image(
+                                    painter = rememberAsyncImagePainter(uriString),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(250.dp)
+                                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                                        .clickable { previewImage.value = uriString },
+                                    contentScale = ContentScale.Crop
+                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    IconButton(onClick = {
+                                        if (saveImageToGallery(context, Uri.parse(uriString))) {
+                                            // Image saved
+                                        }
+                                    }) {
+                                        Icon(Icons.Filled.Download, contentDescription = "Descargar", tint = Color.White)
                                     }
-                                }) {
-                                    Icon(Icons.Filled.Download, contentDescription = "Descargar", tint = Color.White)
-                                }
-                                IconButton(onClick = {
-                                    deleteImageFile(context, uriString)
-                                    images.remove(uriString)
-                                    prefs.edit().putStringSet("images", images.toSet()).apply()
-                                }) {
-                                    Icon(Icons.Filled.Delete, contentDescription = "Eliminar", tint = Color.White)
+                                    IconButton(onClick = {
+                                        deleteImageFile(context, uriString)
+                                        images.remove(uriString)
+                                        prefs.edit().putStringSet("images", images.toSet()).apply()
+                                    }) {
+                                        Icon(Icons.Filled.Delete, contentDescription = "Eliminar", tint = Color.White)
+                                    }
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }
         }
     }
 }
+
