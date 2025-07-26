@@ -78,9 +78,9 @@ fun AppNavigation(
             val resultado = Uri.decode(raw)
             AnalysisResultScreen(resultado = resultado, navController = navController)
         }
-        composable("filterPreview/{faceShape}") { backStackEntry ->
+        composable("hairRecommendations/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
-            FilterPreviewScreen(faceShape, navController)
+            HairRecommendationsScreen(faceShape, navController, altThemeState.value)
         }
         composable("results/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
@@ -123,10 +123,3 @@ fun getRecommendedStyles(faceShape: String): List<String> {
     }
 }
 
-fun getRecommendedFilters(faceShape: String): List<androidx.compose.ui.graphics.Color> {
-    return listOf(
-        androidx.compose.ui.graphics.Color.Transparent,
-        androidx.compose.ui.graphics.Color(0x882575FC),
-        androidx.compose.ui.graphics.Color(0x88FF8800)
-    )
-}
