@@ -1,5 +1,7 @@
 package com.example.capilux.screen
 
+import android.content.Context
+import android.net.Uri
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,11 +16,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.capilux.ui.theme.backgroundGradient
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.rememberAsyncImagePainter
 import kotlinx.coroutines.delay
 
 @Composable
@@ -28,6 +34,11 @@ fun AnalysisResultScreen(resultado: String, navController: NavHostController) {
         ?: "desconocido"
     val tiempo = lineas.find { it.contains("segundo") || it.contains("segundos") }
     val soloMedidas = lineas.drop(1).filterNot { it.contains("segundo") }
+
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
+    val imageUriString = prefs.getString("last_captured_image", null)
+    val originalUri = imageUriString?.let { Uri.parse(it) }
 
     val gradient = backgroundGradient(useAltTheme = true)
     val cardColor = getCardColorForFaceType(tipo)
@@ -45,6 +56,20 @@ fun AnalysisResultScreen(resultado: String, navController: NavHostController) {
             style = MaterialTheme.typography.headlineSmall,
             fontSize = 22.sp
         )
+
+        originalUri?.let { uri ->
+            Spacer(modifier = Modifier.height(16.dp))
+            Image(
+                painter = rememberAsyncImagePainter(model = uri),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(3f / 4f)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -119,7 +144,11 @@ fun AnalysisResultScreen(resultado: String, navController: NavHostController) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { navController.navigate("filterPreview/$tipo") },
+            onClick = {
+                val imageParam = imageUriString ?: ""
+                val encodedUri = Uri.encode(imageParam)
+                navController.navigate("hairRecommendations/$tipo/$encodedUri")
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
@@ -127,7 +156,7 @@ fun AnalysisResultScreen(resultado: String, navController: NavHostController) {
             colors = ButtonDefaults.buttonColors(containerColor = Color.White)
         ) {
             Text(
-                text = "Probar filtros sugeridos",
+                text = "Ver recomendaciones de cabello",
                 color = Color(0xFF2D0C5A),
                 fontWeight = FontWeight.Bold
             )

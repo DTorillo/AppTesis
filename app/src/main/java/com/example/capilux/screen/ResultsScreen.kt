@@ -35,6 +35,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.SecondaryButton
 import com.example.capilux.ui.theme.backgroundGradient
+import java.io.File
 
 @Composable
 fun ResultsScreen(
@@ -46,6 +47,9 @@ fun ResultsScreen(
     val navController = rememberNavController()
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("favorites", Context.MODE_PRIVATE) }
+    val userPrefs = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
+    val generatedPath = userPrefs.getString("generated_image_path", null)
+    val generatedUri = generatedPath?.let { Uri.fromFile(File(it)) }
 
     Column(
         modifier = Modifier
@@ -67,6 +71,19 @@ fun ResultsScreen(
             Image(
                 painter = rememberAsyncImagePainter(model = uri),
                 contentDescription = "Foto analizada",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(3f / 4f)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        generatedUri?.let { uri ->
+            Spacer(modifier = Modifier.height(16.dp))
+            Image(
+                painter = rememberAsyncImagePainter(model = uri),
+                contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(3f / 4f)

@@ -22,6 +22,7 @@ object ServerApi {
     fun enviarImagen(
         context: Context,
         imageUri: Uri,
+        prompt: String? = null,
         onResult: (String) -> Unit,
         onError: (String) -> Unit
     ) {
@@ -32,13 +33,16 @@ object ServerApi {
                 return
             }
 
-            val requestBody = MultipartBody.Builder().setType(MultipartBody.FORM)
+            val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart(
                     "imagen",
                     file.name,
                     file.asRequestBody("image/jpeg".toMediaType())
                 )
-                .build()
+            if (prompt != null) {
+                builder.addFormDataPart("prompt", prompt)
+            }
+            val requestBody = builder.build()
 
             val request = Request.Builder()
                 .url(SERVER_URL)
