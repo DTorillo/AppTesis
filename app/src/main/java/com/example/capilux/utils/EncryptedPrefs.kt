@@ -92,4 +92,19 @@ object EncryptedPrefs {
     fun getImageUri(context: Context): String? {
         return getPrefs(context).getString(KEY_IMAGE_URI, null)
     }
+
+    fun clearSession(context: Context) {
+        val prefs = getPrefs(context)
+        prefs.edit().apply {
+            remove(KEY_USERNAME)
+            remove(KEY_IMAGE_URI)
+            remove(KEY_PIN)
+            remove(KEY_LAST_PINS)
+            remove(KEY_BIOMETRICS)
+            remove(KEY_SECURITY_Q)
+            remove(KEY_SECURITY_A)
+            remove(KEY_SETUP_DONE)
+            apply()
+        }
+    }
 }

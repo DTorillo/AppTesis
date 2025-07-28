@@ -32,7 +32,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Cameraswitch
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.History
@@ -90,6 +89,7 @@ import com.example.capilux.components.CameraPreview
 import com.example.capilux.components.PhotoRecommendationDialog
 import com.example.capilux.ui.theme.IconTextButton
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.EncryptedPrefs
 import com.example.capilux.utils.FaceFrameAnalyzer
 import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.takePhoto
@@ -256,17 +256,18 @@ fun MainScreen(
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
 
+
                         NavigationDrawerItem(
-                            label = { Text("Estilos favoritos", color = Color.White) },
+                            label = { Text("Im\u00e1genes guardadas", color = Color.White) },
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
-                                navController.navigate("favorites") // Navegar a la pantalla de favoritos
+                                navController.navigate("savedImages")
                             },
                             icon = {
                                 Icon(
-                                    Icons.Filled.Favorite,
-                                    contentDescription = "Estilos favoritos",
+                                    Icons.Filled.History,
+                                    contentDescription = "Im\u00e1genes guardadas",
                                     tint = Color.White
                                 )
                             },
@@ -306,28 +307,11 @@ fun MainScreen(
                         )
 
                         NavigationDrawerItem(
-                            label = { Text("Editar perfil", color = Color.White) },
-                            selected = false,
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                navController.navigate("userEdit")
-                            },
-                            icon = {
-                                Icon(
-                                    Icons.Filled.Edit,
-                                    contentDescription = "Editar perfil",
-                                    tint = Color.White
-                                )
-                            },
-                            modifier = Modifier.padding(vertical = 4.dp)
-                        )
-
-                        NavigationDrawerItem(
                             label = { Text("Ayuda y soporte", color = Color.White) },
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
-                                // navController.navigate("support") - Implementar después
+                                navController.navigate("support")
                             },
                             icon = {
                                 Icon(
@@ -358,10 +342,11 @@ fun MainScreen(
                                     remove("imageUri")
                                     apply()
                                 }
+                                EncryptedPrefs.clearSession(context)
 
-                                // Navegar a la pantalla de bienvenida y limpiar el backstack
-                                navController.navigate("explanation") {
-                                    popUpTo(0) // Limpiar toda la pila de navegación
+                                // Volver al inicio y limpiar el backstack
+                                navController.navigate("splashDecision") {
+                                    popUpTo(0)
                                 }
 
                                 // Cerrar el menú lateral

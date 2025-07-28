@@ -26,6 +26,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
 import com.example.capilux.R
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.ui.theme.PrimaryButton
+import com.example.capilux.ui.theme.gradientTextFieldColors
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.capilux.utils.EncryptedPrefs
 import java.util.concurrent.Executor
 
@@ -114,17 +117,19 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
                 OutlinedTextField(
                     value = pin,
                     onValueChange = { if (it.length <= 6) pin = it },
-                    label = { Text("PIN", color = Color.White) },
-                    textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 20.sp),
+                    label = { Text("PIN") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     modifier = Modifier
                         .width(240.dp)
-                        .padding(4.dp)
+                        .padding(4.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = gradientTextFieldColors(),
+                    textStyle = LocalTextStyle.current.copy(fontSize = 20.sp)
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Button(
+                PrimaryButton(
                     onClick = {
                         if (pin == EncryptedPrefs.getPin(context)) {
                             navController.navigate("main") {
@@ -135,12 +140,12 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
                             pin = ""
                         }
                     },
+                    text = "Ingresar",
+                    enabled = pin.length == 6,
                     modifier = Modifier
                         .width(200.dp)
                         .height(48.dp)
-                ) {
-                    Text("Acceder", fontSize = 18.sp)
-                }
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 

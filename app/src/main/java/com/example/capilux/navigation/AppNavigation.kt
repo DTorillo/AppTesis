@@ -89,10 +89,13 @@ fun AppNavigation(
                 .getString("last_captured_image", null)
             val imageUri = imageUriString?.let { Uri.parse(it) }
 
-            ResultsScreen(faceShape, recommendedStyles, imageUri)
+            ResultsScreen(faceShape, recommendedStyles, imageUri, altThemeState.value)
         }
-        composable("favorites") {
-            FavoritesScreen()
+        composable("savedImages") {
+            SavedImagesScreen(navController, altThemeState.value)
+        }
+        composable("support") {
+            SupportScreen(navController, altThemeState.value)
         }
         composable(
             route = "errorScreen/{message}",

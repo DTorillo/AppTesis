@@ -2,6 +2,8 @@ package com.example.capilux.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,6 +16,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.ui.theme.PrimaryButton
+import com.example.capilux.ui.theme.gradientTextFieldColors
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.capilux.utils.EncryptedPrefs
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,7 +47,10 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
             .background(gradient),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.verticalScroll(rememberScrollState())
+        ) {
             Text(
                 text = "Recuperar PIN",
                 color = Color.White,
@@ -66,7 +74,9 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
                     },
                     modifier = Modifier
                         .menuAnchor()
-                        .fillMaxWidth(0.8f)
+                        .fillMaxWidth(0.8f),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = gradientTextFieldColors()
                 )
 
                 ExposedDropdownMenu(
@@ -75,7 +85,7 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
                 ) {
                     preguntas.forEach { option ->
                         DropdownMenuItem(
-                            text = { Text(option) },
+                            text = { Text(option, color = Color.White) },
                             onClick = {
                                 pregunta = option
                                 expandPreguntas = false
@@ -91,7 +101,9 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
                 value = respuesta,
                 onValueChange = { respuesta = it },
                 label = { Text("Respuesta") },
-                modifier = Modifier.fillMaxWidth(0.8f)
+                modifier = Modifier.fillMaxWidth(0.8f),
+                shape = RoundedCornerShape(16.dp),
+                colors = gradientTextFieldColors()
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -101,7 +113,9 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
                 onValueChange = { if (it.length <= 6) nuevoPin = it },
                 label = { Text("Nuevo PIN") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                modifier = Modifier.fillMaxWidth(0.8f)
+                modifier = Modifier.fillMaxWidth(0.8f),
+                shape = RoundedCornerShape(16.dp),
+                colors = gradientTextFieldColors()
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -111,7 +125,9 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
                 onValueChange = { if (it.length <= 6) confirmarPin = it },
                 label = { Text("Confirmar PIN") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                modifier = Modifier.fillMaxWidth(0.8f)
+                modifier = Modifier.fillMaxWidth(0.8f),
+                shape = RoundedCornerShape(16.dp),
+                colors = gradientTextFieldColors()
             )
 
             if (error.isNotEmpty()) {
@@ -121,7 +137,8 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
+            PrimaryButton(
+                text = "Guardar",
                 onClick = {
                     if (pregunta == EncryptedPrefs.getSecurityQuestion(context) &&
                         EncryptedPrefs.isSecurityAnswerCorrect(context, respuesta) &&
@@ -136,12 +153,8 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
                         error = "Datos incorrectos"
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth(0.6f)
-                    .height(50.dp)
-            ) {
-                Text("Guardar", fontSize = 18.sp)
-            }
+                modifier = Modifier.fillMaxWidth(0.6f)
+            )
         }
     }
 }
