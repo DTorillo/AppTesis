@@ -48,7 +48,7 @@ fun FilterPreviewScreen(faceShape: String, navController: NavHostController) {
     val filters = getRecommendedFilters(faceShape)
     val selectedIndex = remember { mutableStateOf(0) }
     val capturedUri = remember { mutableStateOf<android.net.Uri?>(null) }
-    var isFrontCamera by remember { mutableStateOf(true) }
+    val isFrontCamera = remember { mutableStateOf(true) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (capturedUri.value == null) {
@@ -64,12 +64,12 @@ fun FilterPreviewScreen(faceShape: String, navController: NavHostController) {
 
             IconButton(
                 onClick = {
-                    cameraController.cameraSelector = if (isFrontCamera) {
+                    cameraController.cameraSelector = if (isFrontCamera.value) {
                         CameraSelector.DEFAULT_BACK_CAMERA
                     } else {
                         CameraSelector.DEFAULT_FRONT_CAMERA
                     }
-                    isFrontCamera = !isFrontCamera
+                    isFrontCamera.value = !isFrontCamera.value
                 },
                 modifier = Modifier
                     .align(Alignment.TopEnd)

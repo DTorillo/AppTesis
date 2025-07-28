@@ -89,6 +89,7 @@ import com.example.capilux.components.CameraPreview
 import com.example.capilux.components.PhotoRecommendationDialog
 import com.example.capilux.ui.theme.IconTextButton
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.EncryptedPrefs
 import com.example.capilux.utils.FaceFrameAnalyzer
 import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.takePhoto

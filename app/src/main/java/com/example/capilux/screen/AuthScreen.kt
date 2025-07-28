@@ -140,6 +140,8 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
                             pin = ""
                         }
                     },
+                    text = "Ingresar",
+                    enabled = pin.length == 6,
                     modifier = Modifier
                         .width(200.dp)
                         .height(48.dp)

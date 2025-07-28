@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +43,7 @@ import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.deleteImageFile
 import com.example.capilux.utils.saveImageToGallery
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SavedImagesScreen(navController: NavHostController, useAltTheme: Boolean) {
     val context = LocalContext.current

@@ -21,6 +21,7 @@ import com.example.capilux.ui.theme.gradientTextFieldColors
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.capilux.utils.EncryptedPrefs
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
     val context = LocalContext.current
