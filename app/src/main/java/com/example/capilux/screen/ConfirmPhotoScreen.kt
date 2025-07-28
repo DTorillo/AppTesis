@@ -16,12 +16,19 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.SharedViewModel
 import java.io.File
 
 @Composable
-fun ConfirmPhotoScreen(imageUri: String, useAltTheme: Boolean, navController: NavHostController) {
+fun ConfirmPhotoScreen(
+    imageUri: String,
+    useAltTheme: Boolean,
+    navController: NavHostController,
+    sharedViewModel: com.example.capilux.SharedViewModel
+) {
     val gradient = backgroundGradient(useAltTheme)
     val uri = Uri.parse(imageUri)
+    LaunchedEffect(Unit) { sharedViewModel.setImageUri(uri) }
     val showDialog = remember { mutableStateOf(false) }
 
     Box(
@@ -63,6 +70,7 @@ fun ConfirmPhotoScreen(imageUri: String, useAltTheme: Boolean, navController: Na
                     if (!file.exists()) {
                         showDialog.value = true
                     } else {
+                        sharedViewModel.setImageUri(uri)
                         navController.navigate("processing/${Uri.encode(imageUri)}") {
                             popUpTo("confirmPhoto/{imageUri}") { inclusive = true }
                         }

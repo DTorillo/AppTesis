@@ -93,6 +93,7 @@ import com.example.capilux.utils.EncryptedPrefs
 import com.example.capilux.utils.FaceFrameAnalyzer
 import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.takePhoto
+import com.example.capilux.SharedViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.material3.AlertDialog as MaterialAlertDialog
 
@@ -120,7 +121,8 @@ fun MainScreen(
     navController: NavHostController,
     username: String,
     profileImageUri: Uri?,
-    useAltTheme: Boolean
+    useAltTheme: Boolean,
+    sharedViewModel: com.example.capilux.SharedViewModel
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -148,6 +150,7 @@ fun MainScreen(
         onResult = { uri ->
             uri?.let {
                 val compressedUri = compressImage(context, it)
+                sharedViewModel.setImageUri(compressedUri)
                 val sharedPrefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
                 sharedPrefs.edit().putString("last_captured_image", compressedUri.toString())
                     .apply()
@@ -449,6 +452,7 @@ fun MainScreen(
                                     cameraController = cameraController,
                                     context = context,
                                     onSuccess = { uri ->
+                                        sharedViewModel.setImageUri(uri)
                                         navController.navigate("confirmPhoto/${Uri.encode(uri.toString())}")
                                     },
                                     onError = { error ->

@@ -13,12 +13,14 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.capilux.screen.*
 import com.example.capilux.utils.EncryptedPrefs
+import com.example.capilux.SharedViewModel
 
 @Composable
 fun AppNavigation(
     darkModeState: MutableState<Boolean>,
     altThemeState: MutableState<Boolean>,
-    usernameState: MutableState<String>
+    usernameState: MutableState<String>,
+    sharedViewModel: com.example.capilux.SharedViewModel
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
@@ -52,7 +54,8 @@ fun AppNavigation(
                 navController = navController,
                 username = username,
                 profileImageUri = imageUri,
-                useAltTheme = altThemeState.value
+                useAltTheme = altThemeState.value,
+                sharedViewModel = sharedViewModel
             )
         }
         composable("config") {
@@ -64,7 +67,7 @@ fun AppNavigation(
         }
         composable("confirmPhoto/{imageUri}") { backStackEntry ->
             val uri = backStackEntry.arguments?.getString("imageUri") ?: ""
-            ConfirmPhotoScreen(uri, altThemeState.value, navController)
+            ConfirmPhotoScreen(uri, altThemeState.value, navController, sharedViewModel)
         }
         composable("processing/{imageUri}") { backStackEntry ->
             val uri = backStackEntry.arguments?.getString("imageUri") ?: ""
@@ -78,9 +81,13 @@ fun AppNavigation(
             val resultado = Uri.decode(raw)
             AnalysisResultScreen(resultado = resultado, navController = navController)
         }
-        composable("filterPreview/{faceShape}") { backStackEntry ->
+        composable("promptSelection/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
-            FilterPreviewScreen(faceShape, navController)
+            PromptSelectionScreen(faceShape, navController, sharedViewModel)
+        }
+        composable("generatedImage/{uri}") { backStackEntry ->
+            val uri = backStackEntry.arguments?.getString("uri") ?: ""
+            GeneratedImageScreen(imageUri = uri, navController = navController, sharedViewModel = sharedViewModel)
         }
         composable("results/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
@@ -123,10 +130,3 @@ fun getRecommendedStyles(faceShape: String): List<String> {
     }
 }
 
-fun getRecommendedFilters(faceShape: String): List<androidx.compose.ui.graphics.Color> {
-    return listOf(
-        androidx.compose.ui.graphics.Color.Transparent,
-        androidx.compose.ui.graphics.Color(0x882575FC),
-        androidx.compose.ui.graphics.Color(0x88FF8800)
-    )
-}
