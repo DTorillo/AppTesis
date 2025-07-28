@@ -13,7 +13,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.capilux.screen.*
 import com.example.capilux.utils.EncryptedPrefs
-import com.example.capilux.SharedViewModel
 
 @Composable
 fun AppNavigation(

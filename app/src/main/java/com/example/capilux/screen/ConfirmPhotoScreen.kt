@@ -28,7 +28,7 @@ fun ConfirmPhotoScreen(
 ) {
     val gradient = backgroundGradient(useAltTheme)
     val uri = Uri.parse(imageUri)
-    LaunchedEffect(Unit) { sharedViewModel.setImageUri(uri) }
+    LaunchedEffect(Unit) { sharedViewModel.updateImageUri(uri) }
     val showDialog = remember { mutableStateOf(false) }
 
     Box(
@@ -70,7 +70,7 @@ fun ConfirmPhotoScreen(
                     if (!file.exists()) {
                         showDialog.value = true
                     } else {
-                        sharedViewModel.setImageUri(uri)
+                        sharedViewModel.updateImageUri(uri)
                         navController.navigate("processing/${Uri.encode(imageUri)}") {
                             popUpTo("confirmPhoto/{imageUri}") { inclusive = true }
                         }

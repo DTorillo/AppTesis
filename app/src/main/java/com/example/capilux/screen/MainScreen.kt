@@ -150,7 +150,7 @@ fun MainScreen(
         onResult = { uri ->
             uri?.let {
                 val compressedUri = compressImage(context, it)
-                sharedViewModel.setImageUri(compressedUri)
+                sharedViewModel.updateImageUri(compressedUri)
                 val sharedPrefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
                 sharedPrefs.edit().putString("last_captured_image", compressedUri.toString())
                     .apply()
@@ -452,7 +452,7 @@ fun MainScreen(
                                     cameraController = cameraController,
                                     context = context,
                                     onSuccess = { uri ->
-                                        sharedViewModel.setImageUri(uri)
+                                        sharedViewModel.updateImageUri(uri)
                                         navController.navigate("confirmPhoto/${Uri.encode(uri.toString())}")
                                     },
                                     onError = { error ->

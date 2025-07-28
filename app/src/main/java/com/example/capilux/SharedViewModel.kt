@@ -7,17 +7,18 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
 class SharedViewModel : ViewModel() {
-    var imageUri by mutableStateOf<Uri?>(null)
+
+    var imageUri: Uri? by mutableStateOf(null)
         private set
 
-    var selectedPrompt by mutableStateOf<String?>(null)
+    var selectedPrompt: String? by mutableStateOf(null)
         private set
 
-    fun setImageUri(uri: Uri?) {
+    fun updateImageUri(uri: Uri?) {
         imageUri = uri
     }
 
-    fun setSelectedPrompt(prompt: String) {
+    fun updateSelectedPrompt(prompt: String?) {
         selectedPrompt = prompt
     }
 
