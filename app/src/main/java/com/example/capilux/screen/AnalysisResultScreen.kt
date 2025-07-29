@@ -22,14 +22,18 @@ import com.example.capilux.ui.theme.backgroundGradient
 import kotlinx.coroutines.delay
 
 @Composable
-fun AnalysisResultScreen(resultado: String, navController: NavHostController) {
+fun AnalysisResultScreen(
+    resultado: String,
+    navController: NavHostController,
+    useAltTheme: Boolean
+) {
     val lineas = resultado.trim().lines().filter { it.isNotBlank() }
     val tipo = lineas.firstOrNull { it.contains("Forma del rostro:") }?.split(":")?.getOrNull(1)?.trim()?.lowercase()
         ?: "desconocido"
     val tiempo = lineas.find { it.contains("segundo") || it.contains("segundos") }
     val soloMedidas = lineas.drop(1).filterNot { it.contains("segundo") }
 
-    val gradient = backgroundGradient(useAltTheme = true)
+    val gradient = backgroundGradient(useAltTheme)
     val cardColor = getCardColorForFaceType(tipo)
 
     Column(

@@ -80,15 +80,29 @@ fun AppNavigation(
         ) { backStackEntry ->
             val raw = backStackEntry.arguments?.getString("resultado") ?: ""
             val resultado = Uri.decode(raw)
-            AnalysisResultScreen(resultado = resultado, navController = navController)
+            AnalysisResultScreen(
+                resultado = resultado,
+                navController = navController,
+                useAltTheme = altThemeState.value
+            )
         }
         composable("promptSelection/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
-            PromptSelectionScreen(faceShape, navController, sharedViewModel)
+            PromptSelectionScreen(
+                faceShape = faceShape,
+                navController = navController,
+                sharedViewModel = sharedViewModel,
+                useAltTheme = altThemeState.value
+            )
         }
         composable("generatedImage/{uri}") { backStackEntry ->
             val uri = backStackEntry.arguments?.getString("uri") ?: ""
-            GeneratedImageScreen(imageUri = uri, navController = navController, sharedViewModel = sharedViewModel)
+            GeneratedImageScreen(
+                imageUri = uri,
+                navController = navController,
+                sharedViewModel = sharedViewModel,
+                useAltTheme = altThemeState.value
+            )
         }
         composable("results/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
@@ -97,7 +111,14 @@ fun AppNavigation(
                 .getString("last_captured_image", null)
             val imageUri = imageUriString?.let { Uri.parse(it) }
 
-            ResultsScreen(faceShape, recommendedStyles, imageUri, altThemeState.value,)
+            ResultsScreen(
+                faceShape = faceShape,
+                recommendedStyles = recommendedStyles,
+                imageUri = imageUri,
+                useAltTheme = altThemeState.value,
+                navController = navController,
+                sharedViewModel = sharedViewModel
+            )
         }
         composable("savedImages") {
             SavedImagesScreen(navController, altThemeState.value)
@@ -113,7 +134,11 @@ fun AppNavigation(
             ErrorScreen(message = msg, useAltTheme = altThemeState.value, navController = navController)
         }
         composable("maskPreview") {
-            MaskPreviewScreen(navController, sharedViewModel)
+            MaskPreviewScreen(
+                navController = navController,
+                sharedViewModel = sharedViewModel,
+                useAltTheme = altThemeState.value
+            )
         }
 
     }

@@ -22,10 +22,11 @@ import java.io.File
 @Composable
 fun MaskPreviewScreen(
     navController: NavHostController,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    useAltTheme: Boolean
 ) {
     val context = LocalContext.current
-    val gradient = backgroundGradient(useAltTheme = true)
+    val gradient = backgroundGradient(useAltTheme)
     val originalFile = sharedViewModel.imageUri?.path?.let { File(it) }
     val maskFile = File(context.filesDir, "mascara.png")
 

@@ -2,8 +2,13 @@ package com.example.capilux.screen
 
 import android.content.Context
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -12,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.capilux.SharedViewModel
 import com.example.capilux.network.GenerationApi
+import com.example.capilux.ui.theme.PrimaryButton
+import com.example.capilux.ui.theme.backgroundGradient
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -25,16 +32,21 @@ data class PromptOpcion(
 fun PromptSelectionScreen(
     faceShape: String,
     navController: NavHostController,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    useAltTheme: Boolean
 ) {
     val prompts = getPrompts(faceShape)
     val loading = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    val gradient = backgroundGradient(useAltTheme)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(gradient)
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -46,7 +58,7 @@ fun PromptSelectionScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         prompts.forEach { opcion ->
-            Button(
+            PrimaryButton(
                 onClick = {
                     val uri = sharedViewModel.imageUri
                     if (uri != null) {
