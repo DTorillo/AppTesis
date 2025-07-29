@@ -119,7 +119,7 @@ fun AnalysisResultScreen(resultado: String, navController: NavHostController) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { navController.navigate("filterPreview/$tipo") },
+            onClick = { navController.navigate("promptSelection/$tipo") },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
@@ -127,7 +127,7 @@ fun AnalysisResultScreen(resultado: String, navController: NavHostController) {
             colors = ButtonDefaults.buttonColors(containerColor = Color.White)
         ) {
             Text(
-                text = "Probar filtros sugeridos",
+                text = "Elegir estilo",
                 color = Color(0xFF2D0C5A),
                 fontWeight = FontWeight.Bold
             )

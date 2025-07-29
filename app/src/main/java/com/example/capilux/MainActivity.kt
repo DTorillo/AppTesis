@@ -10,6 +10,7 @@ import com.example.capilux.navigation.AppNavigation
 import com.example.capilux.screen.resetDialogFlag
 import com.example.capilux.ui.theme.CapiluxTheme
 import com.example.capilux.utils.*
+import com.example.capilux.SharedViewModel
 
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,13 +28,14 @@ class MainActivity : FragmentActivity() {
 
             val username = EncryptedPrefs.getUsername(this)
             val usernameState = remember { mutableStateOf(username ?: "") }
+            val sharedViewModel: SharedViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
             if (!isCameraPermissionGranted(this)) {
                 requestCameraPermission(this)
             }
 
             CapiluxTheme(darkTheme = darkModeState.value) {
-                AppNavigation(darkModeState, altThemeState, usernameState)
+                AppNavigation(darkModeState, altThemeState, usernameState, sharedViewModel)
             }
         }
     }

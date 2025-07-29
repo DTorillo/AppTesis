@@ -31,27 +31,33 @@ fun compressImage(context: Context, originalUri: Uri): Uri {
     }
 }
 
-fun saveImageToGallery(context: Context, imageUri: Uri): Boolean {
+fun saveImageToGallery(context: Context, imageFile: File): Boolean {
     return try {
         val resolver = context.contentResolver
-        val inputStream = resolver.openInputStream(imageUri) ?: return false
         val fileName = "Capilux_${System.currentTimeMillis()}.jpg"
+
         val values = android.content.ContentValues().apply {
             put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, fileName)
             put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-            put(android.provider.MediaStore.Images.Media.RELATIVE_PATH, android.os.Environment.DIRECTORY_PICTURES)
+            put(android.provider.MediaStore.Images.Media.RELATIVE_PATH, android.os.Environment.DIRECTORY_PICTURES + "/Capilux")
         }
+
         val uri = resolver.insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
             ?: return false
+
         resolver.openOutputStream(uri)?.use { output ->
-            inputStream.copyTo(output)
+            imageFile.inputStream().use { input ->
+                input.copyTo(output)
+            }
         }
+
         true
     } catch (e: Exception) {
         Log.e("ImageUtils", "Error guardando imagen: ${e.message}")
         false
     }
 }
+
 
 fun deleteImageFile(context: Context, uriString: String): Boolean {
     return try {

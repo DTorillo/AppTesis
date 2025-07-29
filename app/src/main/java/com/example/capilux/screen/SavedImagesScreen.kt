@@ -1,32 +1,18 @@
 package com.example.capilux.screen
 
+import android.content.Context
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import android.content.Context
-import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -42,22 +28,27 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.deleteImageFile
 import com.example.capilux.utils.saveImageToGallery
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SavedImagesScreen(navController: NavHostController, useAltTheme: Boolean) {
     val context = LocalContext.current
-    val prefs = remember { context.getSharedPreferences("saved_images", Context.MODE_PRIVATE) }
-    val images = remember { mutableStateListOf(*prefs.getStringSet("images", emptySet())!!.toTypedArray()) }
+    val prefs = remember {
+        context.getSharedPreferences("saved_images", Context.MODE_PRIVATE)
+    }
+    val images = remember {
+        mutableStateListOf(*prefs.getStringSet("images", emptySet())?.toTypedArray() ?: emptyArray())
+    }
     val gradient = backgroundGradient(useAltTheme)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Im\u00e1genes guardadas", color = Color.White) },
+                title = { Text("Imágenes guardadas", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atr\u00e1s", tint = Color.White)
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atrás", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -78,13 +69,15 @@ fun SavedImagesScreen(navController: NavHostController, useAltTheme: Boolean) {
             verticalArrangement = Arrangement.Top
         ) {
             if (images.isEmpty()) {
-                Text("No hay im\u00e1genes guardadas", color = Color.White)
+                Text("No hay imágenes guardadas", color = Color.White)
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     items(images) { uriString ->
-                        Column(modifier = Modifier
-                            .fillMaxWidth()
-                            .border(2.dp, Color.White, RectangleShape)) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(2.dp, Color.White, RectangleShape)
+                        ) {
                             Image(
                                 painter = rememberAsyncImagePainter(uriString),
                                 contentDescription = null,
@@ -100,9 +93,8 @@ fun SavedImagesScreen(navController: NavHostController, useAltTheme: Boolean) {
                                 horizontalArrangement = Arrangement.End
                             ) {
                                 IconButton(onClick = {
-                                    if (saveImageToGallery(context, Uri.parse(uriString))) {
-                                        // Image saved
-                                    }
+                                    val file = uriToFile(context, Uri.parse(uriString))
+                                    saveImageToGallery(context, file)
                                 }) {
                                     Icon(Icons.Filled.Download, contentDescription = "Descargar", tint = Color.White)
                                 }
@@ -121,4 +113,16 @@ fun SavedImagesScreen(navController: NavHostController, useAltTheme: Boolean) {
             }
         }
     }
+}
+
+// ✅ Función para convertir Uri a File (usa almacenamiento temporal)
+fun uriToFile(context: Context, uri: Uri): File {
+    val inputStream = context.contentResolver.openInputStream(uri)
+    val tempFile = File(context.cacheDir, "temp_from_gallery.jpg")
+    inputStream?.use { input ->
+        tempFile.outputStream().use { output ->
+            input.copyTo(output)
+        }
+    }
+    return tempFile
 }
