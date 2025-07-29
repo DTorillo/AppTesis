@@ -13,6 +13,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.capilux.screen.*
 import com.example.capilux.utils.EncryptedPrefs
+import com.example.capilux.screen.MaskPreviewScreen
+
 
 @Composable
 fun AppNavigation(
@@ -95,7 +97,7 @@ fun AppNavigation(
                 .getString("last_captured_image", null)
             val imageUri = imageUriString?.let { Uri.parse(it) }
 
-            ResultsScreen(faceShape, recommendedStyles, imageUri, altThemeState.value)
+            ResultsScreen(faceShape, recommendedStyles, imageUri, altThemeState.value,)
         }
         composable("savedImages") {
             SavedImagesScreen(navController, altThemeState.value)
@@ -110,6 +112,10 @@ fun AppNavigation(
             val msg = Uri.decode(backStackEntry.arguments?.getString("message") ?: "Error desconocido")
             ErrorScreen(message = msg, useAltTheme = altThemeState.value, navController = navController)
         }
+        composable("maskPreview") {
+            MaskPreviewScreen(navController, sharedViewModel)
+        }
+
     }
 }
 

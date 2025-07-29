@@ -1,10 +1,10 @@
 package com.example.capilux.screen
 
-import android.net.Uri
-import androidx.compose.foundation.Image
 import android.content.Context
+import android.net.Uri
+import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -15,13 +15,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,22 +31,37 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.SecondaryButton
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.uriToFile
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 
 @Composable
 fun ResultsScreen(
     faceShape: String,
     recommendedStyles: List<String>,
     imageUri: Uri?,
-    useAltTheme: Boolean
+    useAltTheme: Boolean,
+    navController: Any,
+    sharedViewModel: Any
 ) {
-    val navController = rememberNavController()
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("favorites", Context.MODE_PRIVATE) }
+    val loading = remember { mutableStateOf(false) }
+
+    LaunchedEffect(faceShape) {
+        sharedViewModel.updateSelectedPrompt(faceShape)
+    }
 
     Column(
         modifier = Modifier
@@ -86,7 +102,7 @@ fun ResultsScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         LazyColumn(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f, fill = false)
         ) {
             items(recommendedStyles) { style ->
                 Text(
@@ -99,15 +115,38 @@ fun ResultsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .border(1.dp, Color.White, RoundedCornerShape(8.dp)),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
-        ) {
-            Text("Volver", color = Color.White)
+        PrimaryButton(
+            text = "Elegir estilo",
+            onClick = {
+                if (imageUri != null) {
+                    loading.value = true
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            val imageFile = uriToFile(context, imageUri)
+                            val maskBytes = enviarImagenParaMascara(imageFile)
+                            if (maskBytes != null) {
+                                val maskFile = File(context.filesDir, "mascara.png")
+                                maskFile.writeBytes(maskBytes)
+                                sharedViewModel.updateImageUri(imageUri)
+                                navController.navigate("maskPreview")
+                            } else {
+                                Log.e("MASK", "❌ Error al obtener la máscara")
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        } finally {
+                            loading.value = false
+                        }
+                    }
+                }
+            }
+        )
+
+        if (loading.value) {
+            Spacer(modifier = Modifier.height(16.dp))
+            CircularProgressIndicator()
         }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         PrimaryButton(
@@ -125,5 +164,28 @@ fun ResultsScreen(
             text = "Volver",
             onClick = { navController.popBackStack() }
         )
+    }
+}
+
+suspend fun enviarImagenParaMascara(file: File): ByteArray? {
+    return try {
+        val client = OkHttpClient()
+
+        val requestBody = MultipartBody.Builder().setType(MultipartBody.FORM)
+            .addFormDataPart("imagen", file.name, file.asRequestBody("image/jpeg".toMediaType()))
+            .build()
+
+        val request = Request.Builder()
+            .url("https://TU_NGROK/generar-mascara") // ⚠️ reemplaza con tu ngrok real
+            .post(requestBody)
+            .build()
+
+        val response = client.newCall(request).execute()
+        if (response.isSuccessful) {
+            response.body?.bytes()
+        } else null
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }

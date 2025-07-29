@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 
 class SharedViewModel : ViewModel() {
 
+    var faceShape: String by mutableStateOf("")
+        private set
     var imageUri: Uri? by mutableStateOf(null)
         private set
 
@@ -22,8 +24,13 @@ class SharedViewModel : ViewModel() {
         selectedPrompt = prompt
     }
 
+    fun updateFaceShape(shape: String) {
+        faceShape = shape
+    }
+
     fun clear() {
         imageUri = null
         selectedPrompt = null
+        faceShape = ""
     }
 }
