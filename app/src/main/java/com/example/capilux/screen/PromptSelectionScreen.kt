@@ -1,6 +1,5 @@
 package com.example.capilux.screen
 
-import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,13 +15,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.capilux.SharedViewModel
-import com.example.capilux.network.GenerationApi
+import com.example.capilux.network.CapiluxApi
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.uriToTempFile
 import kotlinx.coroutines.launch
 import java.io.File
 
-// Data class para vincular el texto visible con el prompt real
 data class PromptOpcion(
     val nombreVisible: String,
     val promptTecnico: String
@@ -67,28 +66,36 @@ fun PromptSelectionScreen(
                             try {
                                 val file = uriToTempFile(uri, context)
                                 val promptFinal = opcion.promptTecnico
-                                val resultado = GenerationApi.enviarImagenConPrompt(file, promptFinal)
 
-                                if (resultado != null) {
-                                    File(context.filesDir, "resultado_sd.png").writeBytes(resultado)
-                                    sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
-                                    navController.navigate("generated_image")
-                                }
+                                CapiluxApi.procesarImagen(
+                                    context = context,
+                                    imageUri = Uri.fromFile(file),
+                                    onSuccess = { resultado ->
+                                        val resultFile = File(context.filesDir, "resultado_sd.png")
+                                        resultFile.writeBytes(resultado)
 
+                                        sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
+                                        navController.navigate("generatedImage/${Uri.encode(resultFile.absolutePath)}")
+                                    },
+                                    onError = { mensaje ->
+                                        val encodedMsg = Uri.encode("Error: $mensaje")
+                                        navController.navigate("errorScreen/$encodedMsg")
+                                    }
+                                )
                             } catch (e: Exception) {
-                                e.printStackTrace()
+                                val error = Uri.encode("Error inesperado: ${e.message}")
+                                navController.navigate("errorScreen/$error")
                             } finally {
                                 loading.value = false
                             }
                         }
                     }
                 },
+                text = opcion.nombreVisible,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
-            ) {
-                Text(opcion.nombreVisible)
-            }
+            )
         }
 
         if (loading.value) {
@@ -96,17 +103,6 @@ fun PromptSelectionScreen(
             CircularProgressIndicator()
         }
     }
-}
-
-fun uriToTempFile(uri: Uri, context: Context): File {
-    val inputStream = context.contentResolver.openInputStream(uri)
-    val tempFile = File(context.cacheDir, "foto.jpg")
-    inputStream?.use { input ->
-        tempFile.outputStream().use { output ->
-            input.copyTo(output)
-        }
-    }
-    return tempFile
 }
 
 fun getPrompts(faceShape: String): List<PromptOpcion> {
