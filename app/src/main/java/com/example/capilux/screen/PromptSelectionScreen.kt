@@ -67,7 +67,7 @@ fun PromptSelectionScreen(
                                 val file = uriToTempFile(uri, context)
                                 val promptFinal = opcion.promptTecnico
 
-                                CapiluxApi.procesarImagen(
+                                CapiluxApi.generarEstilo(
                                     context = context,
                                     imageUri = Uri.fromFile(file),
                                     onSuccess = { resultado ->
@@ -75,13 +75,17 @@ fun PromptSelectionScreen(
                                         resultFile.writeBytes(resultado)
 
                                         sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
-                                        navController.navigate("generatedImage/${Uri.encode(resultFile.absolutePath)}")
+
+                                        // ⚠️ Usa encode para pasar el path por navigation
+                                        val encodedPath = Uri.encode(resultFile.absolutePath)
+                                        navController.navigate("generatedImage/$encodedPath")
                                     },
                                     onError = { mensaje ->
                                         val encodedMsg = Uri.encode("Error: $mensaje")
                                         navController.navigate("errorScreen/$encodedMsg")
                                     }
                                 )
+
                             } catch (e: Exception) {
                                 val error = Uri.encode("Error inesperado: ${e.message}")
                                 navController.navigate("errorScreen/$error")

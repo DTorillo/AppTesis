@@ -23,9 +23,9 @@ import java.io.File
 
 @Composable
 fun GeneratedImageScreen(
+    imageUri: String,             // <--- Debe llamarse imageUri para que no falle
     navController: NavHostController,
     sharedViewModel: SharedViewModel,
-    imageUri: String,
     useAltTheme: Boolean
 ) {
     val context = LocalContext.current

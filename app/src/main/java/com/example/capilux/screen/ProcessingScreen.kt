@@ -24,13 +24,12 @@ import androidx.navigation.NavHostController
 import com.example.capilux.R
 import com.example.capilux.network.CapiluxApi
 import com.example.capilux.ui.theme.backgroundGradient
-import java.io.File
-import java.net.URLDecoder
 
 @Composable
 fun ProcessingScreen(imageUri: String, useAltTheme: Boolean, navController: NavHostController) {
     val context = LocalContext.current
     val gradient = backgroundGradient(useAltTheme)
+    val decodedUri = Uri.parse(imageUri)
 
     val infiniteTransition = rememberInfiniteTransition(label = "LogoAndHaloAnim")
     val scale by infiniteTransition.animateFloat(
@@ -58,43 +57,31 @@ fun ProcessingScreen(imageUri: String, useAltTheme: Boolean, navController: NavH
         ), label = "HaloScale"
     )
 
-    // Aquí imageUri es el path absoluto del archivo temporal físico
+    // SOLO se llama a la IA de simetría/análisis facial:
     LaunchedEffect(imageUri) {
         try {
-            val tempFilePath = URLDecoder.decode(imageUri, "UTF-8")
-            Log.d("Capilux", "🚀 Entrando a ProcessingScreen con file: $tempFilePath")
-
-            val tempFile = File(tempFilePath)
-            if (!tempFile.exists()) {
-                val msg = "La imagen no se encontró o fue eliminada"
-                navController.navigate("errorScreen/${Uri.encode(msg)}")
-                return@LaunchedEffect
-            }
-
-            CapiluxApi.procesarImagen(
+            Log.d("Capilux", "🚀 Entrando a ProcessingScreen con URI: $imageUri")
+            CapiluxApi.analizarSimetria(
                 context = context,
-                imageUri = Uri.fromFile(tempFile), // SOLO aquí conviertes a Uri, para OkHttp
+                imageUri = decodedUri,
                 onSuccess = { resultado ->
-                    Log.d("Capilux", "🎉 Imagen procesada con éxito: ${resultado.size} bytes")
-                    val resultadoFile = File(context.filesDir, "resultado_sd.png")
-                    resultadoFile.writeBytes(resultado)
-                    navController.navigate("generatedImage/${Uri.encode(resultadoFile.absolutePath)}") {
+                    Log.d("Capilux", "🎉 Análisis facial completado, resultado recibido")
+                    navController.navigate("analysisResult/${Uri.encode(resultado)}") {
                         popUpTo("processing/{imageUri}") { inclusive = true }
                     }
                 },
                 onError = { mensaje ->
-                    Log.e("Capilux", "❌ Error en procesamiento: $mensaje")
+                    Log.e("Capilux", "❌ Error en análisis facial: $mensaje")
                     navController.navigate("errorScreen/${Uri.encode("Error: $mensaje")}")
                 }
             )
-
         } catch (e: Exception) {
             Log.e("Capilux", "❌ Error inesperado en ProcessingScreen: ${e.message}")
             navController.navigate("errorScreen/${Uri.encode("Error interno: ${e.message}")}")
         }
     }
 
-    // UI mientras se procesa...
+    // UI de carga mientras se analiza:
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -144,7 +131,7 @@ fun ProcessingScreen(imageUri: String, useAltTheme: Boolean, navController: NavH
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Detectando proporciones, generando máscara y aplicando estilo...",
+                text = "Detectando proporciones y simetría facial...",
                 color = Color.White.copy(alpha = 0.75f),
                 style = MaterialTheme.typography.bodySmall
             )

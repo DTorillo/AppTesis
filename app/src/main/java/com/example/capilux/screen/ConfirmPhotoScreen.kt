@@ -38,7 +38,7 @@ fun ConfirmPhotoScreen(
     var tempFilePath by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(imageUri) {
         try {
-            val tempFile = CapiluxApi.uriToFile(context, uri)
+            val tempFile = CapiluxApi.uriToTempFile(context, uri)
             Log.d("Capilux", "📸 Archivo temporal creado en ConfirmPhotoScreen: ${tempFile.absolutePath}")
             tempFilePath = tempFile.absolutePath
         } catch (e: Exception) {

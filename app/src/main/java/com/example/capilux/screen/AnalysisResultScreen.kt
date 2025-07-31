@@ -122,8 +122,12 @@ fun AnalysisResultScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // ---- Aquí el botón SOLO debe crear máscara, NO pasar a elegir corte todavía ----
         Button(
-            onClick = { navController.navigate("promptSelection/$tipo") },
+            onClick = {
+                // Navega a pantalla de generación de máscara
+                navController.navigate("maskProcessingScreen/$tipo")
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
@@ -131,13 +135,15 @@ fun AnalysisResultScreen(
             colors = ButtonDefaults.buttonColors(containerColor = Color.White)
         ) {
             Text(
-                text = "Elegir estilo",
+                text = "Crear máscara",
                 color = Color(0xFF2D0C5A),
                 fontWeight = FontWeight.Bold
             )
         }
     }
 }
+
+// ---- Utilities igual que antes ----
 
 private fun getCardColorForFaceType(tipo: String): Color {
     return when (tipo.lowercase()) {
