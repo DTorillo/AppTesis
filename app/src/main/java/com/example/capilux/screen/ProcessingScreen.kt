@@ -2,6 +2,7 @@ package com.example.capilux.screen
 
 import android.net.Uri
 import android.util.Log
+import java.io.File
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -29,7 +30,7 @@ import com.example.capilux.ui.theme.backgroundGradient
 fun ProcessingScreen(imageUri: String, useAltTheme: Boolean, navController: NavHostController) {
     val context = LocalContext.current
     val gradient = backgroundGradient(useAltTheme)
-    val decodedUri = Uri.parse(imageUri)
+    val decodedUri = Uri.fromFile(File(Uri.decode(imageUri)))
 
     val infiniteTransition = rememberInfiniteTransition(label = "LogoAndHaloAnim")
     val scale by infiniteTransition.animateFloat(
@@ -66,7 +67,9 @@ fun ProcessingScreen(imageUri: String, useAltTheme: Boolean, navController: NavH
                 imageUri = decodedUri,
                 onSuccess = { resultado ->
                     Log.d("Capilux", "🎉 Análisis facial completado, resultado recibido")
-                    navController.navigate("analysisResult/${Uri.encode(resultado)}") {
+                    navController.navigate(
+                        "analysisResult/${Uri.encode(resultado)}/${Uri.encode(imageUri)}"
+                    ) {
                         popUpTo("processing/{imageUri}") { inclusive = true }
                     }
                 },

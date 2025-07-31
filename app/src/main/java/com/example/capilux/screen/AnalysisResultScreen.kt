@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import android.net.Uri
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +25,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun AnalysisResultScreen(
     resultado: String,
+    imageUri: String,
     navController: NavHostController,
     useAltTheme: Boolean
 ) {
@@ -125,8 +127,8 @@ fun AnalysisResultScreen(
         // ---- Aquí el botón SOLO debe crear máscara, NO pasar a elegir corte todavía ----
         Button(
             onClick = {
-                // Navega a pantalla de generación de máscara
-                navController.navigate("maskProcessingScreen/$tipo")
+                // Navega a pantalla de generación de máscara usando la foto original
+                navController.navigate("maskProcessingScreen/${Uri.encode(imageUri)}")
             },
             modifier = Modifier
                 .fillMaxWidth()

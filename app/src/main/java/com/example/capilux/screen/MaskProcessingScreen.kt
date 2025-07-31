@@ -27,7 +27,7 @@ fun MaskProcessingScreen(
 ) {
     val context = LocalContext.current
     val gradient = backgroundGradient(useAltTheme)
-    val uri = Uri.parse(imageUri)
+    val uri = Uri.fromFile(File(Uri.decode(imageUri)))
 
     LaunchedEffect(imageUri) {
         CapiluxApi.generarMascara(
