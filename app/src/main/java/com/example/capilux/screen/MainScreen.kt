@@ -122,7 +122,7 @@ fun MainScreen(
     username: String,
     profileImageUri: Uri?,
     useAltTheme: Boolean,
-    sharedViewModel: com.example.capilux.SharedViewModel
+    sharedViewModel: SharedViewModel
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()

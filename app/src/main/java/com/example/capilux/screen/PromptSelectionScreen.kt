@@ -18,7 +18,6 @@ import com.example.capilux.SharedViewModel
 import com.example.capilux.network.CapiluxApi
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
-import com.example.capilux.utils.uriToTempFile
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -61,15 +60,15 @@ fun PromptSelectionScreen(
                 onClick = {
                     val uri = sharedViewModel.imageUri
                     if (uri != null) {
+                        val maskFile = File(context.filesDir, "mascara_tmp.png")
                         coroutineScope.launch {
                             loading.value = true
                             try {
-                                val file = uriToTempFile(uri, context)
-                                val promptFinal = opcion.promptTecnico
-
                                 CapiluxApi.generarEstilo(
                                     context = context,
-                                    imageUri = Uri.fromFile(file),
+                                    imageUri = uri,
+                                    mascaraFile = maskFile,
+                                    prompt = opcion.promptTecnico,
                                     onSuccess = { resultado ->
                                         val resultFile = File(context.filesDir, "resultado_sd.png")
                                         resultFile.writeBytes(resultado)

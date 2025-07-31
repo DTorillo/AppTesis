@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.capilux.screen.*
+import com.example.capilux.SharedViewModel
 import com.example.capilux.utils.EncryptedPrefs
 
 @Composable
@@ -19,7 +20,7 @@ fun AppNavigation(
     darkModeState: MutableState<Boolean>,
     altThemeState: MutableState<Boolean>,
     usernameState: MutableState<String>,
-    sharedViewModel: com.example.capilux.SharedViewModel
+    sharedViewModel: SharedViewModel
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
@@ -92,13 +93,19 @@ fun AppNavigation(
 
         // Resultados del análisis facial (solo muestra resultado, no llama IA)
         composable(
-            route = "analysisResult/{resultado}",
-            arguments = listOf(navArgument("resultado") { type = NavType.StringType })
+            route = "analysisResult/{resultado}/{imageUri}",
+            arguments = listOf(
+                navArgument("resultado") { type = NavType.StringType },
+                navArgument("imageUri") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
             val raw = backStackEntry.arguments?.getString("resultado") ?: ""
             val resultado = Uri.decode(raw)
+            val encodedImage = backStackEntry.arguments?.getString("imageUri") ?: ""
+            val imageUri = Uri.decode(encodedImage)
             AnalysisResultScreen(
                 resultado = resultado,
+                imageUri = imageUri,
                 navController = navController,
                 useAltTheme = altThemeState.value
             )

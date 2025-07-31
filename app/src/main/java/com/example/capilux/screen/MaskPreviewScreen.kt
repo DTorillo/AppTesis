@@ -25,7 +25,7 @@ fun MaskPreviewScreen(
 ) {
     val context = LocalContext.current
     val gradient = backgroundGradient(useAltTheme)
-    val originalFile = File(Uri.parse(imageUri).path!!)
+    val originalFile = File(Uri.decode(imageUri))
     val maskFile = File(context.filesDir, "mascara_tmp.png")
 
     Column(
