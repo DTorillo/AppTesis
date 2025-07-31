@@ -22,14 +22,18 @@ import com.example.capilux.ui.theme.backgroundGradient
 import kotlinx.coroutines.delay
 
 @Composable
-fun AnalysisResultScreen(resultado: String, navController: NavHostController) {
+fun AnalysisResultScreen(
+    resultado: String,
+    navController: NavHostController,
+    useAltTheme: Boolean
+) {
     val lineas = resultado.trim().lines().filter { it.isNotBlank() }
     val tipo = lineas.firstOrNull { it.contains("Forma del rostro:") }?.split(":")?.getOrNull(1)?.trim()?.lowercase()
         ?: "desconocido"
     val tiempo = lineas.find { it.contains("segundo") || it.contains("segundos") }
     val soloMedidas = lineas.drop(1).filterNot { it.contains("segundo") }
 
-    val gradient = backgroundGradient(useAltTheme = true)
+    val gradient = backgroundGradient(useAltTheme)
     val cardColor = getCardColorForFaceType(tipo)
 
     Column(
@@ -118,8 +122,12 @@ fun AnalysisResultScreen(resultado: String, navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // ---- Aquí el botón SOLO debe crear máscara, NO pasar a elegir corte todavía ----
         Button(
-            onClick = { navController.navigate("promptSelection/$tipo") },
+            onClick = {
+                // Navega a pantalla de generación de máscara
+                navController.navigate("maskProcessingScreen/$tipo")
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
@@ -127,13 +135,15 @@ fun AnalysisResultScreen(resultado: String, navController: NavHostController) {
             colors = ButtonDefaults.buttonColors(containerColor = Color.White)
         ) {
             Text(
-                text = "Elegir estilo",
+                text = "Crear máscara",
                 color = Color(0xFF2D0C5A),
                 fontWeight = FontWeight.Bold
             )
         }
     }
 }
+
+// ---- Utilities igual que antes ----
 
 private fun getCardColorForFaceType(tipo: String): Color {
     return when (tipo.lowercase()) {

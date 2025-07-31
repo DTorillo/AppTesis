@@ -1,9 +1,13 @@
 package com.example.capilux.screen
 
-import android.content.Context
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -11,11 +15,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.capilux.SharedViewModel
-import com.example.capilux.network.GenerationApi
+import com.example.capilux.network.CapiluxApi
+import com.example.capilux.ui.theme.PrimaryButton
+import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.uriToTempFile
 import kotlinx.coroutines.launch
 import java.io.File
 
-// Data class para vincular el texto visible con el prompt real
 data class PromptOpcion(
     val nombreVisible: String,
     val promptTecnico: String
@@ -25,16 +31,21 @@ data class PromptOpcion(
 fun PromptSelectionScreen(
     faceShape: String,
     navController: NavHostController,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    useAltTheme: Boolean
 ) {
     val prompts = getPrompts(faceShape)
     val loading = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    val gradient = backgroundGradient(useAltTheme)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(gradient)
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -46,7 +57,7 @@ fun PromptSelectionScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         prompts.forEach { opcion ->
-            Button(
+            PrimaryButton(
                 onClick = {
                     val uri = sharedViewModel.imageUri
                     if (uri != null) {
@@ -55,28 +66,40 @@ fun PromptSelectionScreen(
                             try {
                                 val file = uriToTempFile(uri, context)
                                 val promptFinal = opcion.promptTecnico
-                                val resultado = GenerationApi.enviarImagenConPrompt(file, promptFinal)
 
-                                if (resultado != null) {
-                                    File(context.filesDir, "resultado_sd.png").writeBytes(resultado)
-                                    sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
-                                    navController.navigate("generated_image")
-                                }
+                                CapiluxApi.generarEstilo(
+                                    context = context,
+                                    imageUri = Uri.fromFile(file),
+                                    onSuccess = { resultado ->
+                                        val resultFile = File(context.filesDir, "resultado_sd.png")
+                                        resultFile.writeBytes(resultado)
+
+                                        sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
+
+                                        // ⚠️ Usa encode para pasar el path por navigation
+                                        val encodedPath = Uri.encode(resultFile.absolutePath)
+                                        navController.navigate("generatedImage/$encodedPath")
+                                    },
+                                    onError = { mensaje ->
+                                        val encodedMsg = Uri.encode("Error: $mensaje")
+                                        navController.navigate("errorScreen/$encodedMsg")
+                                    }
+                                )
 
                             } catch (e: Exception) {
-                                e.printStackTrace()
+                                val error = Uri.encode("Error inesperado: ${e.message}")
+                                navController.navigate("errorScreen/$error")
                             } finally {
                                 loading.value = false
                             }
                         }
                     }
                 },
+                text = opcion.nombreVisible,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
-            ) {
-                Text(opcion.nombreVisible)
-            }
+            )
         }
 
         if (loading.value) {
@@ -84,17 +107,6 @@ fun PromptSelectionScreen(
             CircularProgressIndicator()
         }
     }
-}
-
-fun uriToTempFile(uri: Uri, context: Context): File {
-    val inputStream = context.contentResolver.openInputStream(uri)
-    val tempFile = File(context.cacheDir, "foto.jpg")
-    inputStream?.use { input ->
-        tempFile.outputStream().use { output ->
-            input.copyTo(output)
-        }
-    }
-    return tempFile
 }
 
 fun getPrompts(faceShape: String): List<PromptOpcion> {

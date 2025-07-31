@@ -13,8 +13,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.capilux.screen.*
 import com.example.capilux.utils.EncryptedPrefs
-import com.example.capilux.screen.MaskPreviewScreen
-
 
 @Composable
 fun AppNavigation(
@@ -27,6 +25,7 @@ fun AppNavigation(
     val context = LocalContext.current
 
     NavHost(navController, startDestination = "splashDecision") {
+        // ----------- FLUJO INICIAL -----------
         composable("splashDecision") {
             SplashDecisionScreen(navController, altThemeState.value)
         }
@@ -45,6 +44,8 @@ fun AppNavigation(
         composable("resetPin") {
             ResetPinScreen(navController, altThemeState.value)
         }
+
+        // ----------- MAIN Y CONFIGURACIÓN -----------
         composable("main") {
             val username = usernameState.value
             val sharedPrefs = remember { EncryptedPrefs.getPrefs(context) }
@@ -66,30 +67,101 @@ fun AppNavigation(
 
             ConfigScreen(navController, usernameState, imageUri, darkModeState, altThemeState)
         }
+
+        // ----------- FLUJO IA - PROCESO MODULAR -----------
+        // Confirmación de foto (siempre pasa path absoluto o URI válido)
         composable("confirmPhoto/{imageUri}") { backStackEntry ->
-            val uri = backStackEntry.arguments?.getString("imageUri") ?: ""
-            ConfirmPhotoScreen(uri, altThemeState.value, navController, sharedViewModel)
+            val imageUri = backStackEntry.arguments?.getString("imageUri") ?: ""
+            ConfirmPhotoScreen(
+                imageUri = imageUri,
+                useAltTheme = altThemeState.value,
+                navController = navController,
+                sharedViewModel = sharedViewModel
+            )
         }
+
+        // Procesamiento de análisis facial
         composable("processing/{imageUri}") { backStackEntry ->
-            val uri = backStackEntry.arguments?.getString("imageUri") ?: ""
-            ProcessingScreen(uri, altThemeState.value, navController)
+            val imageUri = backStackEntry.arguments?.getString("imageUri") ?: ""
+            ProcessingScreen(
+                imageUri = imageUri,
+                useAltTheme = altThemeState.value,
+                navController = navController
+            )
         }
+
+        // Resultados del análisis facial (solo muestra resultado, no llama IA)
         composable(
             route = "analysisResult/{resultado}",
             arguments = listOf(navArgument("resultado") { type = NavType.StringType })
         ) { backStackEntry ->
             val raw = backStackEntry.arguments?.getString("resultado") ?: ""
             val resultado = Uri.decode(raw)
-            AnalysisResultScreen(resultado = resultado, navController = navController)
+            AnalysisResultScreen(
+                resultado = resultado,
+                navController = navController,
+                useAltTheme = altThemeState.value
+            )
         }
-        composable("promptSelection/{faceShape}") { backStackEntry ->
-            val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
-            PromptSelectionScreen(faceShape, navController, sharedViewModel)
+
+        // Generación de máscara (solo IA de máscara, NO generativa)
+        composable("maskProcessingScreen/{imageUri}") { backStackEntry ->
+            val imageUri = backStackEntry.arguments?.getString("imageUri") ?: ""
+            MaskProcessingScreen(
+                imageUri = imageUri,
+                useAltTheme = altThemeState.value,
+                navController = navController
+            )
         }
-        composable("generatedImage/{uri}") { backStackEntry ->
-            val uri = backStackEntry.arguments?.getString("uri") ?: ""
-            GeneratedImageScreen(imageUri = uri, navController = navController, sharedViewModel = sharedViewModel)
+
+        // Previsualización de máscara (foto original y máscara lado a lado)
+        composable("maskPreviewScreen/{imageUri}") { backStackEntry ->
+            val imageUri = backStackEntry.arguments?.getString("imageUri") ?: ""
+            MaskPreviewScreen(
+                imageUri = imageUri,
+                useAltTheme = altThemeState.value,
+                navController = navController
+            )
         }
+
+        // Selección de corte/estilo (prompt). Pasa el path de la imagen original.
+        composable("promptSelectionScreen/{imageUri}") { backStackEntry ->
+            val imageUri = backStackEntry.arguments?.getString("imageUri") ?: ""
+            PromptSelectionScreen(
+                faceShape = sharedViewModel.faceShape, // O pásalo por argumento si prefieres
+                navController = navController,
+                sharedViewModel = sharedViewModel,
+                useAltTheme = altThemeState.value
+            )
+        }
+
+        // Imagen generada por la IA (resultado final)
+        composable("generatedImage/{imagePath}") { backStackEntry ->
+            val imagePath = Uri.decode(backStackEntry.arguments?.getString("imagePath") ?: "")
+            GeneratedImageScreen(
+                navController = navController,
+                imageUri = imagePath, // <--- El parámetro aquí es imageUri
+                sharedViewModel = sharedViewModel,
+                useAltTheme = altThemeState.value
+            )
+        }
+
+
+
+        // Pantalla de error
+        composable(
+            route = "errorScreen/{message}",
+            arguments = listOf(navArgument("message") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val msg = Uri.decode(backStackEntry.arguments?.getString("message") ?: "Error desconocido")
+            ErrorScreen(
+                message = msg,
+                useAltTheme = altThemeState.value,
+                navController = navController
+            )
+        }
+
+        // ----------- OTRAS PANTALLAS -----------
         composable("results/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
             val recommendedStyles = getRecommendedStyles(faceShape)
@@ -97,7 +169,14 @@ fun AppNavigation(
                 .getString("last_captured_image", null)
             val imageUri = imageUriString?.let { Uri.parse(it) }
 
-            ResultsScreen(faceShape, recommendedStyles, imageUri, altThemeState.value,)
+            ResultsScreen(
+                faceShape = faceShape,
+                recommendedStyles = recommendedStyles,
+                imageUri = imageUri,
+                useAltTheme = altThemeState.value,
+                navController = navController,
+                sharedViewModel = sharedViewModel
+            )
         }
         composable("savedImages") {
             SavedImagesScreen(navController, altThemeState.value)
@@ -105,20 +184,10 @@ fun AppNavigation(
         composable("support") {
             SupportScreen(navController, altThemeState.value)
         }
-        composable(
-            route = "errorScreen/{message}",
-            arguments = listOf(navArgument("message") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val msg = Uri.decode(backStackEntry.arguments?.getString("message") ?: "Error desconocido")
-            ErrorScreen(message = msg, useAltTheme = altThemeState.value, navController = navController)
-        }
-        composable("maskPreview") {
-            MaskPreviewScreen(navController, sharedViewModel)
-        }
-
     }
 }
 
+// ---- Utilidad para recomendaciones ----
 fun getRecommendedStyles(faceShape: String): List<String> {
     return when (faceShape.lowercase()) {
         "ovalado"     -> listOf("Pompadour", "Undercut", "Corte clásico")
@@ -134,4 +203,3 @@ fun getRecommendedStyles(faceShape: String): List<String> {
         else          -> listOf("Corte moderno", "Corte clásico", "Estilo versátil")
     }
 }
-

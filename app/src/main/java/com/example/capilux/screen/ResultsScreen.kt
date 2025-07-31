@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.navigation.NavHostController
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +37,7 @@ import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.SecondaryButton
 import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.uriToFile
+import com.example.capilux.SharedViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -52,8 +54,8 @@ fun ResultsScreen(
     recommendedStyles: List<String>,
     imageUri: Uri?,
     useAltTheme: Boolean,
-    navController: Any,
-    sharedViewModel: Any
+    navController: NavHostController,
+    sharedViewModel: SharedViewModel
 ) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("favorites", Context.MODE_PRIVATE) }
