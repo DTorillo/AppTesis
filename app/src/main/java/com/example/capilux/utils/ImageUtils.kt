@@ -86,3 +86,16 @@ fun uriToTempFile(uri: Uri, context: Context): File {
     }
     return tempFile
 }
+
+// 🔒 Guarda una imagen (Uri) en el almacenamiento privado como "original_usuario.jpg"
+fun saveImageToPrivateStorage(context: Context, sourceUri: Uri): File {
+    val inputStream = context.contentResolver.openInputStream(sourceUri)
+        ?: throw IllegalArgumentException("No se pudo abrir el URI: $sourceUri")
+    val destFile = File(context.filesDir, "original_usuario.jpg")
+    inputStream.use { input ->
+        destFile.outputStream().use { output ->
+            input.copyTo(output)
+        }
+    }
+    return destFile
+}

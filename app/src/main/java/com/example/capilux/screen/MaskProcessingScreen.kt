@@ -1,14 +1,10 @@
 package com.example.capilux.screen
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,54 +14,90 @@ import androidx.navigation.NavHostController
 import com.example.capilux.network.CapiluxApi
 import com.example.capilux.ui.theme.backgroundGradient
 import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun MaskProcessingScreen(
-    imageUri: String,        // Path o string de la foto original
+    imageUri: String, // se ignora, ¡usamos la imagen persistente!
     useAltTheme: Boolean,
     navController: NavHostController
 ) {
     val context = LocalContext.current
     val gradient = backgroundGradient(useAltTheme)
-    val uri = Uri.fromFile(File(Uri.decode(imageUri)))
+    val loading = remember { mutableStateOf(true) }
+    val error = remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(imageUri) {
+    // Siempre usa la imagen persistente
+    val originalFile = File(context.filesDir, "original_usuario.jpg")
+    val decodedUri = Uri.fromFile(originalFile)
+
+    LaunchedEffect(originalFile.absolutePath) {
+        if (!originalFile.exists() || originalFile.length() < 10_000) {
+            scope.launch(Dispatchers.Main) {
+                error.value = "La imagen original no existe o fue eliminada."
+                loading.value = false
+            }
+            return@LaunchedEffect
+        }
+
         CapiluxApi.generarMascara(
             context = context,
-            imageUri = uri,
-            onSuccess = { mascaraBytes ->
-                // Guarda la máscara como archivo temporal
-                val maskFile = File(context.filesDir, "mascara_tmp.png")
-                maskFile.writeBytes(mascaraBytes)
-                // Navega a la pantalla de comparación/previsualización de máscara
-                navController.navigate("maskPreviewScreen/$imageUri")
+            imageUri = decodedUri,
+            onSuccess = { bytes ->
+                scope.launch(Dispatchers.Main) {
+                    try {
+                        // Guarda la máscara en almacenamiento interno
+                        val file = File(context.filesDir, "mascara_tmp.png")
+                        file.writeBytes(bytes)
+                        navController.navigate("maskPreviewScreen/${Uri.encode(originalFile.absolutePath)}") {
+                            popUpTo("maskProcessingScreen/$imageUri") { inclusive = true }
+                        }
+                    } catch (e: Exception) {
+                        error.value = "No se pudo guardar la máscara: ${e.message}"
+                    }
+                    loading.value = false
+                }
             },
-            onError = { error ->
-                Log.e("Capilux", "❌ Error al generar máscara: $error")
-                navController.navigate("errorScreen/${Uri.encode(error)}")
+            onError = { mensaje ->
+                scope.launch(Dispatchers.Main) {
+                    error.value = mensaje
+                    loading.value = false
+                }
             }
         )
     }
 
-    // UI de carga mientras se genera la máscara
+    // UI feedback
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(gradient),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator(
-                color = Color.White,
-                strokeWidth = 4.dp,
-                modifier = Modifier.size(56.dp)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Generando máscara de cabello...",
-                color = Color.White,
-                style = MaterialTheme.typography.bodyLarge
-            )
+        when {
+            loading.value -> {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Generando máscara...", color = Color.White)
+                }
+            }
+            error.value != null -> {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = error.value ?: "Error desconocido",
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = { navController.popBackStack() },
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) { Text("Volver") }
+                }
+            }
         }
     }
 }

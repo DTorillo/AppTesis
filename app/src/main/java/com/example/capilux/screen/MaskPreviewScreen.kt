@@ -19,13 +19,15 @@ import java.io.File
 
 @Composable
 fun MaskPreviewScreen(
-    imageUri: String,        // El path o string de la foto original
+    imageUri: String,        // El path o string de la foto original (¡persistente!)
     useAltTheme: Boolean,
     navController: NavHostController
 ) {
     val context = LocalContext.current
     val gradient = backgroundGradient(useAltTheme)
-    val originalFile = File(Uri.decode(imageUri))
+
+    // Siempre usa el archivo persistente
+    val originalFile = File(context.filesDir, "original_usuario.jpg")
     val maskFile = File(context.filesDir, "mascara_tmp.png")
 
     Column(
@@ -43,7 +45,10 @@ fun MaskPreviewScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
             // Foto original
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("Original", color = Color.White)
@@ -52,7 +57,9 @@ fun MaskPreviewScreen(
                     Image(
                         bitmap = bitmap.asImageBitmap(),
                         contentDescription = "Imagen original",
-                        modifier = Modifier.size(160.dp).padding(8.dp)
+                        modifier = Modifier
+                            .size(160.dp)
+                            .padding(8.dp)
                     )
                 } else {
                     Text("❌ Sin imagen", color = Color.Red)
@@ -67,7 +74,9 @@ fun MaskPreviewScreen(
                     Image(
                         bitmap = bitmap.asImageBitmap(),
                         contentDescription = "Máscara",
-                        modifier = Modifier.size(160.dp).padding(8.dp)
+                        modifier = Modifier
+                            .size(160.dp)
+                            .padding(8.dp)
                     )
                 } else {
                     Text("❌ No generada", color = Color.Red)
@@ -80,7 +89,7 @@ fun MaskPreviewScreen(
         // Botón para aceptar máscara y continuar a selección de estilos/cortes
         Button(
             onClick = {
-                navController.navigate("promptSelectionScreen/$imageUri")
+                navController.navigate("promptSelectionScreen/${Uri.encode(originalFile.absolutePath)}")
             },
             modifier = Modifier.fillMaxWidth(0.8f)
         ) {
@@ -92,8 +101,7 @@ fun MaskPreviewScreen(
         // Botón para regenerar la máscara
         Button(
             onClick = {
-                // Vuelve a la pantalla de generación de máscara (esto la regenera)
-                navController.navigate("maskProcessingScreen/$imageUri")
+                navController.navigate("maskProcessingScreen/${Uri.encode(originalFile.absolutePath)}")
             },
             modifier = Modifier.fillMaxWidth(0.8f)
         ) {
