@@ -23,7 +23,7 @@ import java.io.File
 
 @Composable
 fun GeneratedImageScreen(
-    imageUri: String,             // <--- Debe llamarse imageUri para que no falle
+    imageUri: String, // No se usa porque el archivo es fijo
     navController: NavHostController,
     sharedViewModel: SharedViewModel,
     useAltTheme: Boolean
@@ -68,8 +68,13 @@ fun GeneratedImageScreen(
 
         Button(
             onClick = {
-                sharedViewModel.clear()
-                navController.navigate("camera") // cambia por tu ruta real de cámara
+                // Limpia todo el flujo para volver a empezar
+                sharedViewModel.clearAll()
+                // Opcional: borrar los archivos persistentes
+                File(context.filesDir, "original_usuario.jpg").delete()
+                File(context.filesDir, "mascara_tmp.png").delete()
+                File(context.filesDir, "resultado_sd.png").delete()
+                navController.navigate("camera") // Cambia si tu pantalla de inicio es diferente
             },
             modifier = Modifier.fillMaxWidth()
         ) {

@@ -1,40 +1,46 @@
 package com.example.capilux.screen
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.capilux.ui.theme.backgroundGradient
-import kotlinx.coroutines.delay
 
 @Composable
 fun AnalysisResultScreen(
     resultado: String,
+    imageUri: String,
     navController: NavHostController,
     useAltTheme: Boolean
 ) {
-    val lineas = resultado.trim().lines().filter { it.isNotBlank() }
-    val tipo = lineas.firstOrNull { it.contains("Forma del rostro:") }?.split(":")?.getOrNull(1)?.trim()?.lowercase()
-        ?: "desconocido"
-    val tiempo = lineas.find { it.contains("segundo") || it.contains("segundos") }
-    val soloMedidas = lineas.drop(1).filterNot { it.contains("segundo") }
-
     val gradient = backgroundGradient(useAltTheme)
-    val cardColor = getCardColorForFaceType(tipo)
+
+    // Dividir en líneas
+    val lineas = resultado.trim().lines().filter { it.isNotBlank() }
+
+    // Detectar tipo de rostro (primera línea que contenga "Forma del rostro:")
+    val tipo = lineas.firstOrNull { it.contains("Forma del rostro:", ignoreCase = true) }
+        ?.split(":")
+        ?.getOrNull(1)
+        ?.trim()
+        ?.lowercase()
+        ?: "desconocido"
+
+    // Extraer el tiempo si existe
+    val tiempo = lineas.firstOrNull { it.contains("⏱") }
+
+    // El resto son detalles, quitando tipo y tiempo
+    val detalles = lineas.filterNot {
+        it.contains("Forma del rostro:", ignoreCase = true) || it.contains("⏱")
+    }
 
     Column(
         modifier = Modifier
@@ -46,8 +52,7 @@ fun AnalysisResultScreen(
         Text(
             text = "Resultados del análisis facial",
             color = Color.White,
-            style = MaterialTheme.typography.headlineSmall,
-            fontSize = 22.sp
+            style = MaterialTheme.typography.headlineSmall
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -62,13 +67,13 @@ fun AnalysisResultScreen(
             text = tipo.replaceFirstChar { it.uppercase() },
             color = Color.White,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
         )
 
         tiempo?.let {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "⏱ Tiempo de análisis: $it",
+                text = it,
                 color = Color.White.copy(alpha = 0.8f),
                 style = MaterialTheme.typography.bodySmall
             )
@@ -80,41 +85,21 @@ fun AnalysisResultScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.weight(1f)
         ) {
-            itemsIndexed(soloMedidas) { index, medida ->
-                val (icon, iconColor) = getIconAndColor(medida)
-                var visible by remember { mutableStateOf(false) }
-
-                LaunchedEffect(index) {
-                    delay(100L * index)
-                    visible = true
-                }
-
-                AnimatedVisibility(
-                    visible = visible,
-                    enter = fadeIn() + expandVertically()
+            itemsIndexed(detalles) { _, medida ->
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.15f)),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Card(
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = cardColor.copy(alpha = 0.25f)),
-                        modifier = Modifier.fillMaxWidth()
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(16.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(16.dp)
-                        ) {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                tint = iconColor,
-                                modifier = Modifier.size(28.dp)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = medida,
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
+                        Text(
+                            text = medida,
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                 }
             }
@@ -122,11 +107,9 @@ fun AnalysisResultScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ---- Aquí el botón SOLO debe crear máscara, NO pasar a elegir corte todavía ----
         Button(
             onClick = {
-                // Navega a pantalla de generación de máscara
-                navController.navigate("maskProcessingScreen/$tipo")
+                navController.navigate("maskProcessingScreen/${android.net.Uri.encode(imageUri)}")
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -137,39 +120,8 @@ fun AnalysisResultScreen(
             Text(
                 text = "Crear máscara",
                 color = Color(0xFF2D0C5A),
-                fontWeight = FontWeight.Bold
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
             )
         }
-    }
-}
-
-// ---- Utilities igual que antes ----
-
-private fun getCardColorForFaceType(tipo: String): Color {
-    return when (tipo.lowercase()) {
-        "ovalado" -> Color(0xFF80CBC4)
-        "cuadrado" -> Color(0xFFCE93D8)
-        "alargado" -> Color(0xFFFFAB91)
-        "triangular" -> Color(0xFF90CAF9)
-        "redondo" -> Color(0xFFFFF59D)
-        "diamante" -> Color(0xFFB39DDB)
-        "corazon" -> Color(0xFFA5D6A7)
-        "rectangular" -> Color(0xFFFFCC80)
-        "trapecio" -> Color(0xFFB0BEC5)
-        else -> Color.DarkGray
-    }
-}
-
-private fun getIconAndColor(texto: String): Pair<ImageVector, Color> {
-    return when {
-        texto.contains("Ancho rostro", ignoreCase = true) -> Icons.Filled.ZoomOutMap to Color(0xFF80CBC4)
-        texto.contains("Alto rostro", ignoreCase = true) -> Icons.Filled.Straighten to Color(0xFFCE93D8)
-        texto.contains("Largo nariz", ignoreCase = true) -> Icons.Filled.Sensors to Color(0xFFA5D6A7)
-        texto.contains("Mandíbula", ignoreCase = true) -> Icons.Filled.AccountCircle to Color(0xFFFFAB91)
-        texto.contains("Frente", ignoreCase = true) && !texto.contains("↕️") -> Icons.Filled.WbSunny to Color(0xFFFFF59D)
-        texto.contains("Frente a mentón", ignoreCase = true) -> Icons.Filled.South to Color(0xFF90CAF9)
-        texto.contains("Distancia entre ojos", ignoreCase = true) -> Icons.Filled.RemoveRedEye to Color(0xFFFFCC80)
-        texto.contains("Proporción", ignoreCase = true) -> Icons.Filled.BarChart to Color(0xFFB39DDB)
-        else -> Icons.Filled.Info to Color.White
     }
 }

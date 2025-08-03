@@ -19,7 +19,7 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.capilux.SharedViewModel
 import com.example.capilux.ui.theme.backgroundGradient
-import com.example.capilux.network.CapiluxApi
+import com.example.capilux.utils.saveImageToPrivateStorage
 import java.io.File
 
 @Composable
@@ -34,16 +34,18 @@ fun ConfirmPhotoScreen(
     val uri = Uri.parse(imageUri)
     val showDialog = remember { mutableStateOf(false) }
 
-    // Convertir y guardar archivo temporal
-    var tempFilePath by remember { mutableStateOf<String?>(null) }
+    // Guardar la imagen en el almacenamiento privado y obtener el archivo
+    var privateFilePath by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(imageUri) {
         try {
-            val tempFile = CapiluxApi.uriToTempFile(context, uri)
-            Log.d("Capilux", "📸 Archivo temporal creado en ConfirmPhotoScreen: ${tempFile.absolutePath}")
-            tempFilePath = tempFile.absolutePath
+            val privateFile = saveImageToPrivateStorage(context, uri)
+            Log.d("Capilux", "🔒 Imagen guardada en privado: ${privateFile.absolutePath}")
+            privateFilePath = privateFile.absolutePath
+            // También lo puedes guardar en SharedViewModel si lo deseas:
+            sharedViewModel.updateImageUri(Uri.fromFile(privateFile))
         } catch (e: Exception) {
-            Log.e("Capilux", "❌ Error copiando imagen: ${e.message}")
-            tempFilePath = null
+            Log.e("Capilux", "❌ Error guardando imagen en privado: ${e.message}")
+            privateFilePath = null
         }
     }
 
@@ -86,12 +88,10 @@ fun ConfirmPhotoScreen(
                     Text("Volver a tomar")
                 }
                 Button(onClick = {
-                    if (tempFilePath == null || !File(tempFilePath!!).exists()) {
+                    if (privateFilePath == null || !File(privateFilePath!!).exists()) {
                         showDialog.value = true
                     } else {
-                        // Ya NO uses SharedViewModel para guardar un Uri
-                        // Navega pasando el path absoluto como String (URL encoded)
-                        navController.navigate("processing/${Uri.encode(tempFilePath!!)}") {
+                        navController.navigate("processing/${Uri.encode(privateFilePath!!)}") {
                             popUpTo("confirmPhoto/{imageUri}") { inclusive = true }
                         }
                     }

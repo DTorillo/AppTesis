@@ -19,10 +19,13 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // ✅ Opcional: solo incluir arm64-v8a si deseas reducir tamaño
+        // ✅ Incluir soporte tanto para 32 como 64 bits
         ndk {
-            abiFilters += "arm64-v8a"
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a")
         }
+
+        // Esto es útil si generas APK universal directamente desde Gradle
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -32,6 +35,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            isMinifyEnabled = false
         }
     }
 
@@ -48,9 +54,10 @@ android {
         compose = true
     }
 
-    // ✅ Compatibilidad con 16 KB sin error de compilación
+    // ✅ Empaquetado y compatibilidad
     packaging {
         jniLibs {
+            // Necesario para que funcione bien con librerías nativas en versiones recientes
             useLegacyPackaging = false
         }
         resources {
@@ -72,6 +79,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.support.annotations)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -79,11 +87,10 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
     implementation(libs.google.material)
-    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.coil.compose)
-    implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.camera.core)
@@ -100,5 +107,4 @@ dependencies {
     implementation("com.squareup.okio:okio:3.6.0")
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.11.0")
-
 }

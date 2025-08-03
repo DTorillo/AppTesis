@@ -18,7 +18,6 @@ import com.example.capilux.SharedViewModel
 import com.example.capilux.network.CapiluxApi
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
-import com.example.capilux.utils.uriToTempFile
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -38,8 +37,11 @@ fun PromptSelectionScreen(
     val loading = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-
     val gradient = backgroundGradient(useAltTheme)
+
+    // Siempre usa la imagen persistente
+    val imageFile = File(context.filesDir, "original_usuario.jpg")
+    val maskFile = File(context.filesDir, "mascara_tmp.png")
 
     Column(
         modifier = Modifier
@@ -59,39 +61,40 @@ fun PromptSelectionScreen(
         prompts.forEach { opcion ->
             PrimaryButton(
                 onClick = {
-                    val uri = sharedViewModel.imageUri
-                    if (uri != null) {
-                        coroutineScope.launch {
-                            loading.value = true
-                            try {
-                                val file = uriToTempFile(uri, context)
-                                val promptFinal = opcion.promptTecnico
+                    if (!imageFile.exists() || !maskFile.exists()) {
+                        val error = Uri.encode("No se encontró la imagen o la máscara generada.")
+                        navController.navigate("errorScreen/$error")
+                        return@PrimaryButton
+                    }
+                    coroutineScope.launch {
+                        loading.value = true
+                        try {
+                            CapiluxApi.generarEstilo(
+                                context = context,
+                                imageUri = Uri.fromFile(imageFile),
+                                mascaraFile = maskFile,
+                                prompt = opcion.promptTecnico,
+                                onSuccess = { resultado ->
+                                    val resultFile = File(context.filesDir, "resultado_sd.png")
+                                    resultFile.writeBytes(resultado)
 
-                                CapiluxApi.generarEstilo(
-                                    context = context,
-                                    imageUri = Uri.fromFile(file),
-                                    onSuccess = { resultado ->
-                                        val resultFile = File(context.filesDir, "resultado_sd.png")
-                                        resultFile.writeBytes(resultado)
+                                    sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
 
-                                        sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
+                                    // ⚠️ Usa encode para pasar el path por navigation
+                                    val encodedPath = Uri.encode(resultFile.absolutePath)
+                                    navController.navigate("generatedImage/$encodedPath")
+                                },
+                                onError = { mensaje ->
+                                    val encodedMsg = Uri.encode("Error: $mensaje")
+                                    navController.navigate("errorScreen/$encodedMsg")
+                                }
+                            )
 
-                                        // ⚠️ Usa encode para pasar el path por navigation
-                                        val encodedPath = Uri.encode(resultFile.absolutePath)
-                                        navController.navigate("generatedImage/$encodedPath")
-                                    },
-                                    onError = { mensaje ->
-                                        val encodedMsg = Uri.encode("Error: $mensaje")
-                                        navController.navigate("errorScreen/$encodedMsg")
-                                    }
-                                )
-
-                            } catch (e: Exception) {
-                                val error = Uri.encode("Error inesperado: ${e.message}")
-                                navController.navigate("errorScreen/$error")
-                            } finally {
-                                loading.value = false
-                            }
+                        } catch (e: Exception) {
+                            val error = Uri.encode("Error inesperado: ${e.message}")
+                            navController.navigate("errorScreen/$error")
+                        } finally {
+                            loading.value = false
                         }
                     }
                 },

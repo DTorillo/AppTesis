@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 
 object CapiluxApi {
 
-    private const val BASE_URL = "https://7198e702ea4a.ngrok-free.app"
+    private const val BASE_URL = "https://b23347917d25.ngrok-free.app"
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
@@ -23,42 +23,38 @@ object CapiluxApi {
         .build()
 
     // --- 1. Análisis de simetría/tipo de rostro ---
-    suspend fun analizarSimetria(
-        context: Context,
-        imageUri: Uri,
-        onSuccess: (String) -> Unit,
-        onError: (String) -> Unit
-    ) {
-        withContext(Dispatchers.IO) {
-            try {
-                val imageFile = uriToTempFile(context, imageUri)
-                if (!imageFile.exists()) {
-                    onError("Imagen no encontrada")
-                    return@withContext
+    suspend fun analizarSimetria(context: Context, imageUri: Uri): String {
+        return withContext(Dispatchers.IO) {
+            val imageFile = uriToTempFile(context, imageUri)
+            if (!imageFile.exists()) throw IOException("Imagen no encontrada")
+            val requestBody = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart(
+                    "imagen", imageFile.name,
+                    imageFile.asRequestBody("image/jpeg".toMediaType())
+                ).build()
+            val request = Request.Builder()
+                .url("$BASE_URL/rostro/analizar")
+                .post(requestBody)
+                .build()
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    throw IOException("Error de análisis facial: ${response.code}")
                 }
-                val requestBody = MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart("imagen", imageFile.name, imageFile.asRequestBody("image/jpeg".toMediaType()))
-                    .build()
-
-                val request = Request.Builder()
-                    .url("$BASE_URL/rostro/analizar")
-                    .post(requestBody)
-                    .build()
-
-                client.newCall(request).execute().use { response ->
-                    if (!response.isSuccessful) {
-                        onError("Error de análisis facial: ${response.code}")
-                        return@use
-                    }
-                    val body = response.body?.string() ?: ""
-                    onSuccess(body)
+                val bodyStr = response.body?.string().orEmpty()
+                val json = JSONObject(bodyStr)
+                val resultado = json.optString("resultado", "")
+                val duracion = json.optString("duracion", "")
+                if (resultado.isNotBlank()) {
+                    "$resultado\n⏱ Tiempo de análisis: $duracion"
+                } else {
+                    throw Exception("Respuesta inválida del servidor")
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                onError("Error en análisis facial: ${e.message}")
             }
         }
     }
+
+
 
     // --- 2. Generación de máscara (cabello) ---
     suspend fun generarMascara(
