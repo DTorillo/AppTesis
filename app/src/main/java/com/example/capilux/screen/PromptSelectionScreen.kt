@@ -80,9 +80,11 @@ fun PromptSelectionScreen(
 
                                     sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
 
-                                    // ⚠️ Usa encode para pasar el path por navigation
                                     val encodedPath = Uri.encode(resultFile.absolutePath)
-                                    navController.navigate("generatedImage/$encodedPath")
+                                    // 🔹 Navegar directamente al resultado y limpiar el backstack
+                                    navController.navigate("generatedImage/$encodedPath") {
+                                        popUpTo("main") { inclusive = false }
+                                    }
                                 },
                                 onError = { mensaje ->
                                     val encodedMsg = Uri.encode("Error: $mensaje")

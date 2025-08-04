@@ -6,11 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.capilux.screen.*
+import androidx.navigation.navArgument
 import com.example.capilux.SharedViewModel
+import com.example.capilux.screen.*
 import com.example.capilux.utils.EncryptedPrefs
 
 @Composable
@@ -42,13 +44,11 @@ fun AppNavigation(
         composable("resetPin") {
             ResetPinScreen(navController, altThemeState.value)
         }
-
         composable("main") {
             val username = usernameState.value
             val sharedPrefs = remember { EncryptedPrefs.getPrefs(context) }
             val imageUriString = sharedPrefs.getString("imageUri", null)
             val imageUri = imageUriString?.let { Uri.parse(it) }
-
             MainScreen(
                 navController = navController,
                 username = username,
@@ -61,62 +61,30 @@ fun AppNavigation(
             val sharedPrefs = remember { EncryptedPrefs.getPrefs(context) }
             val savedImageUriString = sharedPrefs.getString("imageUri", null)
             val imageUri = savedImageUriString?.let { Uri.parse(it) }
-
             ConfigScreen(navController, usernameState, imageUri, darkModeState, altThemeState)
         }
-
         composable("confirmPhoto/{imageUri}") { backStackEntry ->
             val imageUri = backStackEntry.arguments?.getString("imageUri") ?: ""
-            ConfirmPhotoScreen(
-                imageUri = imageUri,
-                useAltTheme = altThemeState.value,
-                navController = navController,
-                sharedViewModel = sharedViewModel
-            )
+            ConfirmPhotoScreen(imageUri, altThemeState.value, navController, sharedViewModel)
         }
-
         composable("processing/{imageUri}") { backStackEntry ->
             val imageUri = backStackEntry.arguments?.getString("imageUri") ?: ""
-            ProcessingScreen(
-                imageUri = imageUri,
-                useAltTheme = altThemeState.value,
-                navController = navController,
-                sharedViewModel = sharedViewModel // <-- ¡Pásalo aquí!
-            )
+            ProcessingScreen(imageUri, altThemeState.value, navController, sharedViewModel)
         }
-
-        // 🔥 RUTA ROBUSTA: solo la invocas después de guardar el resultado en el ViewModel
         composable("analysisResult") {
             val resultado = sharedViewModel.analysisResult
             val imageUri = sharedViewModel.imageUri?.toString() ?: ""
-            AnalysisResultScreen(
-                resultado = resultado,
-                imageUri = imageUri,
-                navController = navController,
-                useAltTheme = altThemeState.value
-            )
+            AnalysisResultScreen(resultado, imageUri, navController, altThemeState.value)
         }
-
         composable("maskProcessingScreen/{imageUri}") { backStackEntry ->
             val imageUri = backStackEntry.arguments?.getString("imageUri") ?: ""
-            MaskProcessingScreen(
-                imageUri = imageUri,
-                useAltTheme = altThemeState.value,
-                navController = navController
-            )
+            MaskProcessingScreen(imageUri, altThemeState.value, navController)
         }
-
         composable("maskPreviewScreen/{imageUri}") { backStackEntry ->
             val imageUri = backStackEntry.arguments?.getString("imageUri") ?: ""
-            MaskPreviewScreen(
-                imageUri = imageUri,
-                useAltTheme = altThemeState.value,
-                navController = navController
-            )
+            MaskPreviewScreen(imageUri, altThemeState.value, navController)
         }
-
         composable("promptSelectionScreen/{imageUri}") { backStackEntry ->
-            val imageUri = backStackEntry.arguments?.getString("imageUri") ?: ""
             PromptSelectionScreen(
                 faceShape = sharedViewModel.faceShape,
                 navController = navController,
@@ -125,64 +93,40 @@ fun AppNavigation(
             )
         }
 
-        composable("generatedImage/{imagePath}") { backStackEntry ->
-            val imagePath = Uri.decode(backStackEntry.arguments?.getString("imagePath") ?: "")
+        // RUTA CORREGIDA: usar siempre imageUri como parámetro
+        composable(
+            route = "generatedImage/{imageUri}",
+            arguments = listOf(navArgument("imageUri") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val imageUri = backStackEntry.arguments?.getString("imageUri") ?: ""
             GeneratedImageScreen(
                 navController = navController,
-                imageUri = imagePath,
+                imageUri = imageUri,
                 sharedViewModel = sharedViewModel,
                 useAltTheme = altThemeState.value
             )
         }
 
-        composable(
-            route = "errorScreen/{message}"
-        ) { backStackEntry ->
+        composable("errorScreen/{message}") { backStackEntry ->
             val msg = Uri.decode(backStackEntry.arguments?.getString("message") ?: "Error desconocido")
-            ErrorScreen(
-                message = msg,
-                useAltTheme = altThemeState.value,
-                navController = navController
-            )
+            ErrorScreen(msg, altThemeState.value, navController)
         }
-
         composable("results/{faceShape}") { backStackEntry ->
             val faceShape = backStackEntry.arguments?.getString("faceShape") ?: ""
-            val recommendedStyles = getRecommendedStyles(faceShape)
             val imageUriString = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
                 .getString("last_captured_image", null)
             val imageUri = imageUriString?.let { Uri.parse(it) }
-
             ResultsScreen(
                 faceShape = faceShape,
-                recommendedStyles = recommendedStyles,
+                recommendedStyles = emptyList(),
                 imageUri = imageUri,
                 useAltTheme = altThemeState.value,
                 navController = navController,
                 sharedViewModel = sharedViewModel
             )
         }
-        composable("savedImages") {
-            SavedImagesScreen(navController, altThemeState.value)
-        }
-        composable("support") {
-            SupportScreen(navController, altThemeState.value)
-        }
-    }
-}
 
-fun getRecommendedStyles(faceShape: String): List<String> {
-    return when (faceShape.lowercase()) {
-        "ovalado"     -> listOf("Pompadour", "Undercut", "Corte clásico")
-        "redondo"     -> listOf("Volumen arriba", "Raya al lado", "Corte angular")
-        "cuadrado"    -> listOf("Fade", "Buzz cut", "Peinado hacia atrás")
-        "alargado"    -> listOf("Flequillo", "Laterales con volumen", "Corte balanceado")
-        "triangular"  -> listOf("Volumen superior", "Texturizado", "Peinado con caída")
-        "corazon"     -> listOf("Desconectado", "Peinado ligero", "Fade con barba")
-        "diamante"    -> listOf("Side part", "Corte alto con forma", "Textura arriba")
-        "rectangular" -> listOf("Pompadour", "Militar", "Despeinado superior")
-        "trapecio"    -> listOf("Fade alto", "Peinado balanceado", "Contornos suaves")
-        "perla"       -> listOf("Corte creativo", "Estilo personalizado", "Diseño libre")
-        else          -> listOf("Corte moderno", "Corte clásico", "Estilo versátil")
+        composable("savedImages") { SavedImagesScreen(navController, altThemeState.value) }
+        composable("support") { SupportScreen(navController, altThemeState.value) }
     }
 }

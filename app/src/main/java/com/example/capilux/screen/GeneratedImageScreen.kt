@@ -1,6 +1,7 @@
 package com.example.capilux.screen
 
 import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -17,20 +18,29 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.capilux.SharedViewModel
-import com.example.capilux.utils.saveImageToGallery
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.saveImageToGallery
 import java.io.File
 
 @Composable
 fun GeneratedImageScreen(
-    imageUri: String, // No se usa porque el archivo es fijo
+    imageUri: String,
     navController: NavHostController,
     sharedViewModel: SharedViewModel,
     useAltTheme: Boolean
 ) {
     val context = LocalContext.current
     val gradient = backgroundGradient(useAltTheme)
-    val file = File(context.filesDir, "resultado_sd.png")
+
+    // Decodificar la ruta recibida
+    val decodedPath = Uri.decode(imageUri)
+    val file = File(decodedPath)
+
+    // Logs para depuración
+    println("🖼 Pantalla GeneratedImageScreen")
+    println("📂 Path recibido: $decodedPath")
+    println("📦 Existe archivo: ${file.exists()}, Tamaño: ${if (file.exists()) file.length() else 0} bytes")
+
     val promptVisible = sharedViewModel.selectedPrompt ?: "Estilo generado"
 
     Column(
@@ -49,17 +59,22 @@ fun GeneratedImageScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (file.exists()) {
+        if (file.exists() && file.length() > 1000) {
+            // Cargar y mostrar imagen si es válida
             val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-                    .padding(16.dp)
-            )
+            if (bitmap != null) {
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .padding(16.dp)
+                )
+            } else {
+                Text("❌ No se pudo decodificar la imagen", color = Color.Red)
+            }
         } else {
             Text("❌ No se encontró la imagen generada", color = Color.Red)
         }
@@ -68,13 +83,11 @@ fun GeneratedImageScreen(
 
         Button(
             onClick = {
-                // Limpia todo el flujo para volver a empezar
                 sharedViewModel.clearAll()
-                // Opcional: borrar los archivos persistentes
                 File(context.filesDir, "original_usuario.jpg").delete()
                 File(context.filesDir, "mascara_tmp.png").delete()
                 File(context.filesDir, "resultado_sd.png").delete()
-                navController.navigate("camera") // Cambia si tu pantalla de inicio es diferente
+                navController.navigate("camera")
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -85,7 +98,9 @@ fun GeneratedImageScreen(
 
         Button(
             onClick = {
-                saveImageToGallery(context, file)
+                if (file.exists()) {
+                    saveImageToGallery(context, file)
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
