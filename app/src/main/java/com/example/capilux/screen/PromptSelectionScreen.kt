@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -13,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import com.example.capilux.SharedViewModel
 import com.example.capilux.network.CapiluxApi
@@ -43,81 +46,106 @@ fun PromptSelectionScreen(
     val imageFile = File(context.filesDir, "original_usuario.jpg")
     val maskFile = File(context.filesDir, "mascara_tmp.png")
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(gradient)
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Estilos recomendados para rostro $faceShape",
-            style = MaterialTheme.typography.titleLarge
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Estilos recomendados para rostro $faceShape",
+                style = MaterialTheme.typography.titleLarge
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        prompts.forEach { opcion ->
-            PrimaryButton(
-                onClick = {
-                    if (!imageFile.exists() || !maskFile.exists()) {
-                        val error = Uri.encode("No se encontró la imagen o la máscara generada.")
-                        navController.navigate("errorScreen/$error")
-                        return@PrimaryButton
-                    }
-                    coroutineScope.launch {
-                        loading.value = true
-                        try {
-                            CapiluxApi.generarEstilo(
-                                context = context,
-                                imageUri = Uri.fromFile(imageFile),
-                                mascaraFile = maskFile,
-                                prompt = opcion.promptTecnico,
-                                onSuccess = { resultado ->
-                                    val resultFile = File(context.filesDir, "resultado_sd.png")
-                                    resultFile.writeBytes(resultado)
+            prompts.forEach { opcion ->
+                PrimaryButton(
+                    onClick = {
+                        if (!imageFile.exists() || !maskFile.exists()) {
+                            val error = Uri.encode("No se encontró la imagen o la máscara generada.")
+                            navController.navigate("errorScreen/$error")
+                            return@PrimaryButton
+                        }
+                        coroutineScope.launch {
+                            loading.value = true
+                            try {
+                                CapiluxApi.generarEstilo(
+                                    context = context,
+                                    imageUri = Uri.fromFile(imageFile),
+                                    mascaraFile = maskFile,
+                                    prompt = opcion.promptTecnico,
+                                    onSuccess = { resultado ->
+                                        val resultFile = File(context.filesDir, "resultado_sd.png")
+                                        resultFile.writeBytes(resultado)
 
-                                    println("📸 IA generó ${resultado.size} bytes")
-                                    println("📏 Tamaño archivo: ${resultFile.length()} bytes")
+                                        println("📸 IA generó ${resultado.size} bytes")
+                                        println("📏 Tamaño archivo: ${resultFile.length()} bytes")
 
-                                    sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
-                                    val encodedPath = Uri.encode(resultFile.absolutePath)
+                                        sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
+                                        val encodedPath = Uri.encode(resultFile.absolutePath)
 
-                                    // 👇 La navegación DEBE ir en el hilo principal
-                                    coroutineScope.launch(Dispatchers.Main) {
-                                        navController.navigate("generatedImage/$encodedPath") {
-                                            popUpTo("main") { inclusive = false }
+                                        // 👇 La navegación DEBE ir en el hilo principal
+                                        coroutineScope.launch(Dispatchers.Main) {
+                                            navController.navigate("generatedImage/$encodedPath") {
+                                                popUpTo("main") { inclusive = false }
+                                            }
+                                        }
+                                    },
+                                    onError = { mensaje ->
+                                        val encodedMsg = Uri.encode("Error: $mensaje")
+                                        coroutineScope.launch(Dispatchers.Main) {
+                                            navController.navigate("errorScreen/$encodedMsg")
                                         }
                                     }
-                                },
-                                onError = { mensaje ->
-                                    val encodedMsg = Uri.encode("Error: $mensaje")
-                                    coroutineScope.launch(Dispatchers.Main) {
-                                        navController.navigate("errorScreen/$encodedMsg")
-                                    }
+                                )
+                            } catch (e: Exception) {
+                                val error = Uri.encode("Error inesperado: ${e.message}")
+                                coroutineScope.launch(Dispatchers.Main) {
+                                    navController.navigate("errorScreen/$error")
                                 }
-                            )
-                        } catch (e: Exception) {
-                            val error = Uri.encode("Error inesperado: ${e.message}")
-                            coroutineScope.launch(Dispatchers.Main) {
-                                navController.navigate("errorScreen/$error")
+                            } finally {
+                                loading.value = false
                             }
-                        } finally {
-                            loading.value = false
                         }
-                    }
-                },
-                text = opcion.nombreVisible,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            )
+                    },
+                    text = opcion.nombreVisible,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                )
+            }
         }
 
         if (loading.value) {
-            Spacer(modifier = Modifier.height(24.dp))
-            CircularProgressIndicator()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.4f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.8f)
+                    ),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Generando estilo...", color = Color.White)
+                    }
+                }
+            }
         }
     }
 }

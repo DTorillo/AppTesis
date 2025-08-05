@@ -78,24 +78,46 @@ fun MaskProcessingScreen(
     ) {
         when {
             loading.value -> {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Generando máscara...", color = Color.White)
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Black.copy(alpha = 0.4f)
+                    ),
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Generando máscara...", color = Color.White)
+                    }
                 }
             }
             error.value != null -> {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = error.value ?: "Error desconocido",
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = { navController.popBackStack() },
-                        modifier = Modifier.padding(top = 16.dp)
-                    ) { Text("Volver") }
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Black.copy(alpha = 0.4f)
+                    ),
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = error.value ?: "Error desconocido",
+                            color = Color.Red,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = { navController.popBackStack() },
+                            modifier = Modifier.padding(top = 16.dp)
+                        ) { Text("Volver") }
+                    }
                 }
             }
         }
