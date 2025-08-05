@@ -14,13 +14,11 @@ import java.util.concurrent.TimeUnit
 
 object CapiluxApi {
 
-    private const val BASE_URL = "https://bc15f1139215.ngrok-free.app"
-
-    // Cliente OkHttp con timeouts razonables
+    private const val BASE_URL = "https://32d1c89f0bf5.ngrok-free.app"
     private val client = OkHttpClient.Builder()
-        .connectTimeout(20, TimeUnit.SECONDS)
-        .readTimeout(40, TimeUnit.SECONDS)
-        .writeTimeout(40, TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
     // --- 1. Análisis de simetría/tipo de rostro ---
@@ -55,7 +53,9 @@ object CapiluxApi {
         }
     }
 
-    // --- 2. Generación de máscara ---
+
+
+    // --- 2. Generación de máscara (cabello) ---
     suspend fun generarMascara(
         context: Context,
         imageUri: Uri,
@@ -84,7 +84,7 @@ object CapiluxApi {
                         return@use
                     }
                     val bytes = response.body?.bytes()
-                    if (bytes != null && bytes.isNotEmpty()) {
+                    if (bytes != null) {
                         onSuccess(bytes)
                     } else {
                         onError("Respuesta de máscara vacía")
@@ -97,10 +97,10 @@ object CapiluxApi {
         }
     }
 
-    // --- 3. Generación de estilo (IA generativa) ---
+    // --- 3. Generación de corte/estilo (IA generativa) ---
     suspend fun generarEstilo(
         context: Context,
-        imageUri: Uri,
+        imageUri: Uri?,
         mascaraFile: File,
         prompt: String,
         onSuccess: (ByteArray) -> Unit,
@@ -108,14 +108,23 @@ object CapiluxApi {
     ) {
         withContext(Dispatchers.IO) {
             try {
-                val imageFile = uriToTempFile(context, imageUri)
+                // ⚡ Usar directamente el archivo persistente original_usuario.jpg
+                val imageFile = File(context.filesDir, "original_usuario.jpg")
+
                 if (!imageFile.exists() || !mascaraFile.exists()) {
                     onError("Imagen o máscara no encontrada para IA generativa")
                     return@withContext
                 }
+
                 val body = MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart("imagen", imageFile.name, imageFile.asRequestBody("image/jpeg".toMediaType()))
-                    .addFormDataPart("mascara", mascaraFile.name, mascaraFile.asRequestBody("image/png".toMediaType()))
+                    .addFormDataPart(
+                        "imagen", imageFile.name,
+                        imageFile.asRequestBody("image/jpeg".toMediaType())
+                    )
+                    .addFormDataPart(
+                        "mascara", mascaraFile.name,
+                        mascaraFile.asRequestBody("image/png".toMediaType())
+                    )
                     .addFormDataPart("prompt", prompt)
                     .build()
 
@@ -125,18 +134,12 @@ object CapiluxApi {
                     .build()
 
                 client.newCall(request).execute().use { response ->
-                    // Validar que el servidor realmente devuelve una imagen
-                    val contentType = response.header("Content-Type") ?: ""
-                    if (!response.isSuccessful || !contentType.contains("image")) {
-                        val errorBody = response.body?.string()
-                        onError("El servidor no devolvió una imagen: $errorBody")
+                    if (!response.isSuccessful) {
+                        onError("Error generando estilo: ${response.code}")
                         return@use
                     }
                     val bytes = response.body?.bytes()
-                    if (bytes != null && bytes.isNotEmpty()) {
-                        val file = File(context.filesDir, "resultado_sd.png")
-                        file.writeBytes(bytes)
-                        println("✅ Imagen guardada en: ${file.absolutePath}, tamaño: ${file.length()} bytes")
+                    if (bytes != null) {
                         onSuccess(bytes)
                     } else {
                         onError("Respuesta de IA generativa vacía")
@@ -149,7 +152,8 @@ object CapiluxApi {
         }
     }
 
-    // --- Utilidad: convertir Uri a archivo temporal ---
+
+    // Utilidad: convertir Uri a archivo temporal seguro
     fun uriToTempFile(context: Context, uri: Uri): File {
         val inputStream = context.contentResolver.openInputStream(uri)
             ?: throw IllegalArgumentException("No se pudo abrir el URI: $uri")

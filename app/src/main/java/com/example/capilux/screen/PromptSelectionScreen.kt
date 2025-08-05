@@ -18,6 +18,7 @@ import com.example.capilux.SharedViewModel
 import com.example.capilux.network.CapiluxApi
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -39,7 +40,6 @@ fun PromptSelectionScreen(
     val context = LocalContext.current
     val gradient = backgroundGradient(useAltTheme)
 
-    // Siempre usa la imagen persistente
     val imageFile = File(context.filesDir, "original_usuario.jpg")
     val maskFile = File(context.filesDir, "mascara_tmp.png")
 
@@ -78,23 +78,31 @@ fun PromptSelectionScreen(
                                     val resultFile = File(context.filesDir, "resultado_sd.png")
                                     resultFile.writeBytes(resultado)
 
-                                    sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
+                                    println("📸 IA generó ${resultado.size} bytes")
+                                    println("📏 Tamaño archivo: ${resultFile.length()} bytes")
 
+                                    sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
                                     val encodedPath = Uri.encode(resultFile.absolutePath)
-                                    // 🔹 Navegar directamente al resultado y limpiar el backstack
-                                    navController.navigate("generatedImage/$encodedPath") {
-                                        popUpTo("main") { inclusive = false }
+
+                                    // 👇 La navegación DEBE ir en el hilo principal
+                                    coroutineScope.launch(Dispatchers.Main) {
+                                        navController.navigate("generatedImage/$encodedPath") {
+                                            popUpTo("main") { inclusive = false }
+                                        }
                                     }
                                 },
                                 onError = { mensaje ->
                                     val encodedMsg = Uri.encode("Error: $mensaje")
-                                    navController.navigate("errorScreen/$encodedMsg")
+                                    coroutineScope.launch(Dispatchers.Main) {
+                                        navController.navigate("errorScreen/$encodedMsg")
+                                    }
                                 }
                             )
-
                         } catch (e: Exception) {
                             val error = Uri.encode("Error inesperado: ${e.message}")
-                            navController.navigate("errorScreen/$error")
+                            coroutineScope.launch(Dispatchers.Main) {
+                                navController.navigate("errorScreen/$error")
+                            }
                         } finally {
                             loading.value = false
                         }

@@ -2,13 +2,15 @@ package com.example.capilux.screen
 
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,8 +20,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.capilux.SharedViewModel
-import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.network.CapiluxApi
 import com.example.capilux.utils.saveImageToGallery
+import com.example.capilux.ui.theme.backgroundGradient
+import kotlinx.coroutines.launch
 import java.io.File
 
 @Composable
@@ -31,17 +35,18 @@ fun GeneratedImageScreen(
 ) {
     val context = LocalContext.current
     val gradient = backgroundGradient(useAltTheme)
-
-    // Decodificar la ruta recibida
-    val decodedPath = Uri.decode(imageUri)
-    val file = File(decodedPath)
-
-    // Logs para depuración
-    println("🖼 Pantalla GeneratedImageScreen")
-    println("📂 Path recibido: $decodedPath")
-    println("📦 Existe archivo: ${file.exists()}, Tamaño: ${if (file.exists()) file.length() else 0} bytes")
-
+    val file = File(context.filesDir, "resultado_sd.png")
     val promptVisible = sharedViewModel.selectedPrompt ?: "Estilo generado"
+    var loading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+
+    // 🔹 Controlar el botón físico / gesto de retroceso
+    BackHandler {
+        navController.navigate("main") {
+            popUpTo("main") { inclusive = false }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -59,24 +64,28 @@ fun GeneratedImageScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (file.exists() && file.length() > 1000) {
-            // Cargar y mostrar imagen si es válida
+        if (loading) {
+            CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Regenerando imagen...", color = Color.White)
+        } else if (file.exists()) {
             val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-            if (bitmap != null) {
-                Image(
-                    bitmap = bitmap.asImageBitmap(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .padding(16.dp)
-                )
-            } else {
-                Text("❌ No se pudo decodificar la imagen", color = Color.Red)
-            }
+            Image(
+                bitmap = bitmap.asImageBitmap(),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .padding(16.dp)
+            )
         } else {
             Text("❌ No se encontró la imagen generada", color = Color.Red)
+        }
+
+        errorMessage?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(it, color = Color.Red)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -87,24 +96,65 @@ fun GeneratedImageScreen(
                 File(context.filesDir, "original_usuario.jpg").delete()
                 File(context.filesDir, "mascara_tmp.png").delete()
                 File(context.filesDir, "resultado_sd.png").delete()
-                navController.navigate("camera")
+                navController.navigate("main") {
+                    popUpTo("main") { inclusive = false }
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Volver a tomar otra foto")
+            Text("Volver al inicio")
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
             onClick = {
-                if (file.exists()) {
-                    saveImageToGallery(context, file)
-                }
+                saveImageToGallery(context, file)
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Guardar imagen")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = {
+                // Lógica para regenerar imagen con el mismo prompt/archivos
+                val imageFile = File(context.filesDir, "original_usuario.jpg")
+                val maskFile = File(context.filesDir, "mascara_tmp.png")
+                val prompt = promptVisible
+                if (!imageFile.exists() || !maskFile.exists()) {
+                    errorMessage = "No se encontró la imagen o la máscara original."
+                    return@Button
+                }
+                loading = true
+                errorMessage = null
+                coroutineScope.launch {
+                    try {
+                        CapiluxApi.generarEstilo(
+                            context = context,
+                            imageUri = Uri.fromFile(imageFile),
+                            mascaraFile = maskFile,
+                            prompt = prompt,
+                            onSuccess = { resultado ->
+                                file.writeBytes(resultado)
+                                errorMessage = null
+                            },
+                            onError = { mensaje ->
+                                errorMessage = "Error al regenerar: $mensaje"
+                            }
+                        )
+                    } catch (e: Exception) {
+                        errorMessage = "Error inesperado: ${e.message}"
+                    } finally {
+                        loading = false
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Regenerar resultado")
         }
     }
 }
