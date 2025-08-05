@@ -6,7 +6,9 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -21,12 +23,9 @@ import androidx.navigation.NavHostController
 import com.example.capilux.SharedViewModel
 import com.example.capilux.network.CapiluxApi
 import com.example.capilux.utils.saveImageToGallery
+import com.example.capilux.ui.theme.PrimaryButton
+import com.example.capilux.ui.theme.SecondaryButton
 import com.example.capilux.ui.theme.backgroundGradient
-import com.example.capilux.components.LoadingOverlay
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.shape.RoundedCornerShape
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -45,6 +44,7 @@ fun GeneratedImageScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
+    // 🔹 Controlar el botón físico / gesto de retroceso
     BackHandler {
         navController.navigate("main") {
             popUpTo("main") { inclusive = false }
@@ -55,13 +55,13 @@ fun GeneratedImageScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(gradient)
+            .padding(16.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Mostrar nombre del estilo
             Text(
                 text = "Estilo aplicado: $promptVisible",
                 style = MaterialTheme.typography.titleLarge,
@@ -73,9 +73,12 @@ fun GeneratedImageScreen(
             if (file.exists()) {
                 val bitmap = BitmapFactory.decodeFile(file.absolutePath)
                 Card(
-                    shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)),
-                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Black.copy(alpha = 0.3f)
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
                     Image(
                         bitmap = bitmap.asImageBitmap(),
@@ -97,7 +100,8 @@ fun GeneratedImageScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
+            SecondaryButton(
+                text = "Volver al inicio",
                 onClick = {
                     sharedViewModel.clearAll()
                     File(context.filesDir, "original_usuario.jpg").delete()
@@ -108,29 +112,27 @@ fun GeneratedImageScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Volver al inicio")
-            }
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Button(
+            PrimaryButton(
+                text = "Guardar imagen",
                 onClick = { saveImageToGallery(context, file) },
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Guardar imagen")
-            }
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Button(
+            PrimaryButton(
+                text = "Regenerar resultado",
                 onClick = {
                     val imageFile = File(context.filesDir, "original_usuario.jpg")
                     val maskFile = File(context.filesDir, "mascara_tmp.png")
                     val prompt = promptVisible
                     if (!imageFile.exists() || !maskFile.exists()) {
                         errorMessage = "No se encontró la imagen o la máscara original."
-                        return@Button
+                        return@PrimaryButton
                     }
                     loading = true
                     errorMessage = null
@@ -157,14 +159,32 @@ fun GeneratedImageScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Regenerar resultado")
-            }
+            )
         }
 
         if (loading) {
-            LoadingOverlay(message = "Regenerando imagen...", useAltTheme = useAltTheme)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.4f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.8f)
+                    ),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Regenerando imagen...", color = Color.White)
+                    }
+                }
+            }
         }
     }
 }
-
