@@ -1,6 +1,7 @@
 package com.example.capilux.screen
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,17 +13,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.example.capilux.SharedViewModel
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.utils.saveImageToPrivateStorage
 import java.io.File
 
 @Composable
-fun ConfirmPhotoScreen(imageUri: String, useAltTheme: Boolean, navController: NavHostController) {
+fun ConfirmPhotoScreen(
+    imageUri: String,
+    useAltTheme: Boolean,
+    navController: NavHostController,
+    sharedViewModel: SharedViewModel
+) {
+    val context = LocalContext.current
     val gradient = backgroundGradient(useAltTheme)
     val uri = Uri.parse(imageUri)
     val showDialog = remember { mutableStateOf(false) }
+
+    // Guardar la imagen en el almacenamiento privado y obtener el archivo
+    var privateFilePath by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(imageUri) {
+        try {
+            val privateFile = saveImageToPrivateStorage(context, uri)
+            Log.d("Capilux", "🔒 Imagen guardada en privado: ${privateFile.absolutePath}")
+            privateFilePath = privateFile.absolutePath
+            // También lo puedes guardar en SharedViewModel si lo deseas:
+            sharedViewModel.updateImageUri(Uri.fromFile(privateFile))
+        } catch (e: Exception) {
+            Log.e("Capilux", "❌ Error guardando imagen en privado: ${e.message}")
+            privateFilePath = null
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -44,13 +69,17 @@ fun ConfirmPhotoScreen(imageUri: String, useAltTheme: Boolean, navController: Na
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
+
             Spacer(modifier = Modifier.height(16.dp))
+
             Text(
                 text = "¿La foto está bien?",
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium
             )
+
             Spacer(modifier = Modifier.height(16.dp))
+
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
@@ -59,11 +88,10 @@ fun ConfirmPhotoScreen(imageUri: String, useAltTheme: Boolean, navController: Na
                     Text("Volver a tomar")
                 }
                 Button(onClick = {
-                    val file = File(uri.path ?: "")
-                    if (!file.exists()) {
+                    if (privateFilePath == null || !File(privateFilePath!!).exists()) {
                         showDialog.value = true
                     } else {
-                        navController.navigate("processing/${Uri.encode(imageUri)}") {
+                        navController.navigate("processing/${Uri.encode(privateFilePath!!)}") {
                             popUpTo("confirmPhoto/{imageUri}") { inclusive = true }
                         }
                     }
