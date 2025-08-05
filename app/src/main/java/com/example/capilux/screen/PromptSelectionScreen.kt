@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -18,6 +17,7 @@ import com.example.capilux.SharedViewModel
 import com.example.capilux.network.CapiluxApi
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.components.LoadingOverlay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -43,24 +43,28 @@ fun PromptSelectionScreen(
     val imageFile = File(context.filesDir, "original_usuario.jpg")
     val maskFile = File(context.filesDir, "mascara_tmp.png")
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(gradient)
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Estilos recomendados para rostro $faceShape",
-            style = MaterialTheme.typography.titleLarge
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Estilos recomendados para rostro $faceShape",
+                style = MaterialTheme.typography.titleLarge
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        prompts.forEach { opcion ->
-            PrimaryButton(
-                onClick = {
+            prompts.forEach { opcion ->
+                PrimaryButton(
+                    onClick = {
                     if (!imageFile.exists() || !maskFile.exists()) {
                         val error = Uri.encode("No se encontró la imagen o la máscara generada.")
                         navController.navigate("errorScreen/$error")
@@ -114,12 +118,15 @@ fun PromptSelectionScreen(
                     .padding(vertical = 8.dp)
             )
         }
-
         if (loading.value) {
-            Spacer(modifier = Modifier.height(24.dp))
-            CircularProgressIndicator()
+            // Provide spacing when overlay is not shown, though overlay will cover
+            Spacer(modifier = Modifier.height(80.dp))
         }
     }
+    if (loading.value) {
+        LoadingOverlay(message = "Generando estilo...", useAltTheme = useAltTheme)
+    }
+}
 }
 
 fun getPrompts(faceShape: String): List<PromptOpcion> {

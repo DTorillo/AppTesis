@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.capilux.network.CapiluxApi
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.components.LoadingOverlay
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -70,24 +71,19 @@ fun MaskProcessingScreen(
     }
 
     // UI feedback
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(gradient),
-        contentAlignment = Alignment.Center
-    ) {
-        when {
-            loading.value -> {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Generando máscara...", color = Color.White)
-                }
-            }
-            error.value != null -> {
+    if (loading.value) {
+        LoadingOverlay(message = "Generando máscara...", useAltTheme = useAltTheme)
+    } else {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(gradient),
+            contentAlignment = Alignment.Center
+        ) {
+            error.value?.let { mensaje ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = error.value ?: "Error desconocido",
+                        text = mensaje,
                         color = Color.Red,
                         style = MaterialTheme.typography.bodyLarge
                     )

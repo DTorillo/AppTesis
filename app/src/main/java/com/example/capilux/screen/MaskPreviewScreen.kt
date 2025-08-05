@@ -4,6 +4,7 @@ import android.net.Uri
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -14,6 +15,9 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.BorderStroke
 import com.example.capilux.ui.theme.backgroundGradient
 import java.io.File
 
@@ -54,13 +58,17 @@ fun MaskPreviewScreen(
                 Text("Original", color = Color.White)
                 if (originalFile.exists()) {
                     val bitmap = BitmapFactory.decodeFile(originalFile.absolutePath)
-                    Image(
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "Imagen original",
-                        modifier = Modifier
-                            .size(160.dp)
-                            .padding(8.dp)
-                    )
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)),
+                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
+                    ) {
+                        Image(
+                            bitmap = bitmap.asImageBitmap(),
+                            contentDescription = "Imagen original",
+                            modifier = Modifier.size(160.dp)
+                        )
+                    }
                 } else {
                     Text("❌ Sin imagen", color = Color.Red)
                 }
@@ -71,13 +79,17 @@ fun MaskPreviewScreen(
                 Text("Máscara", color = Color.White)
                 if (maskFile.exists()) {
                     val bitmap = BitmapFactory.decodeFile(maskFile.absolutePath)
-                    Image(
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "Máscara",
-                        modifier = Modifier
-                            .size(160.dp)
-                            .padding(8.dp)
-                    )
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)),
+                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
+                    ) {
+                        Image(
+                            bitmap = bitmap.asImageBitmap(),
+                            contentDescription = "Máscara",
+                            modifier = Modifier.size(160.dp)
+                        )
+                    }
                 } else {
                     Text("❌ No generada", color = Color.Red)
                 }
