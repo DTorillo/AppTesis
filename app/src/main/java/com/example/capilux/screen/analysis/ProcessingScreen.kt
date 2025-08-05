@@ -1,25 +1,14 @@
-package com.example.capilux.screen
+package com.example.capilux.screen.analysis
 
 import android.net.Uri
 import android.util.Log
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.capilux.R
 import com.example.capilux.SharedViewModel
 import com.example.capilux.network.CapiluxApi
-import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.components.LoadingOverlay
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
 import java.io.File
@@ -32,7 +21,6 @@ fun ProcessingScreen(
     sharedViewModel: SharedViewModel
 ) {
     val context = LocalContext.current
-    val gradient = backgroundGradient(useAltTheme)
 
     // ⚡️ Usa siempre la imagen persistente (almacenamiento privado)
     val originalFile = File(context.filesDir, "original_usuario.jpg")
@@ -66,32 +54,5 @@ fun ProcessingScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(gradient),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Logo",
-                modifier = Modifier.size(140.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            LinearProgressIndicator(
-                modifier = Modifier
-                    .width(180.dp)
-                    .height(5.dp),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Text(
-                text = "Procesando tu rostro...",
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
+    LoadingOverlay(message = "Analizando tu rostro...", useAltTheme = useAltTheme)
 }
