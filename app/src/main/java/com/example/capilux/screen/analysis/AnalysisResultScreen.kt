@@ -1,4 +1,4 @@
-package com.example.capilux.screen
+package com.example.capilux.screen.analysis
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

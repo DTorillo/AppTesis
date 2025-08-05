@@ -13,6 +13,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.capilux.SharedViewModel
 import com.example.capilux.screen.*
+import com.example.capilux.screen.analysis.AnalysisResultScreen
+import com.example.capilux.screen.analysis.ProcessingScreen
+import com.example.capilux.screen.mask.MaskPreviewScreen
+import com.example.capilux.screen.mask.MaskProcessingScreen
+import com.example.capilux.screen.style.GeneratedImageScreen
+import com.example.capilux.screen.style.PromptSelectionScreen
 import com.example.capilux.utils.EncryptedPrefs
 
 @Composable
