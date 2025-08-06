@@ -19,11 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.capilux.network.CapiluxApi
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.R
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -58,7 +60,7 @@ fun MaskProcessingScreen(
     LaunchedEffect(originalFile.absolutePath) {
         if (!originalFile.exists() || originalFile.length() < 10_000) {
             scope.launch(Dispatchers.Main) {
-                error.value = "La imagen original no existe o fue eliminada."
+                error.value = context.getString(R.string.mask_processing_original_missing)
                 loading.value = false
             }
             return@LaunchedEffect
@@ -76,7 +78,7 @@ fun MaskProcessingScreen(
                             popUpTo("maskProcessingScreen/$imageUri") { inclusive = true }
                         }
                     } catch (e: Exception) {
-                        error.value = "No se pudo guardar la máscara: ${e.message}"
+                        error.value = context.getString(R.string.mask_processing_save_error, e.message)
                     }
                     loading.value = false
                 }
@@ -95,7 +97,7 @@ fun MaskProcessingScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Creando tu Máscara",
+                        text = stringResource(R.string.mask_processing_title),
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         style = MaterialTheme.typography.headlineSmall
                     )
@@ -107,7 +109,7 @@ fun MaskProcessingScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver",
+                            contentDescription = stringResource(R.string.back),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
@@ -130,8 +132,8 @@ fun MaskProcessingScreen(
                 loading.value -> {
                     AppLoadingAnimation(
                         rotation = rotation,
-                        message = "Transformando tu imagen...",
-                        subMessage = "Estamos generando una máscara precisa\npara tu foto",
+                        message = stringResource(R.string.mask_processing_transforming),
+                        subMessage = stringResource(R.string.mask_processing_submessage),
                         useAltTheme = useAltTheme
                     )
                 }
@@ -155,7 +157,7 @@ fun MaskProcessingScreen(
                                                         popUpTo("maskProcessingScreen/$imageUri") { inclusive = true }
                                                     }
                                                 } catch (e: Exception) {
-                                                    error.value = "Error al guardar: ${e.message}"
+                                                    error.value = context.getString(R.string.mask_processing_save_error_generic, e.message)
                                                 }
                                                 loading.value = false
                                             }
@@ -168,7 +170,7 @@ fun MaskProcessingScreen(
                                         }
                                     )
                                 } else {
-                                    error.value = "Imagen no válida"
+                                    error.value = context.getString(R.string.mask_processing_invalid_image)
                                     loading.value = false
                                 }
                             }
@@ -290,7 +292,7 @@ private fun AppErrorMessage(
             ) {
                 Icon(
                     imageVector = Icons.Default.Error,
-                    contentDescription = "Error",
+                    contentDescription = stringResource(R.string.error),
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(40.dp)
                 )
@@ -299,7 +301,7 @@ private fun AppErrorMessage(
             Spacer(Modifier.height(24.dp))
 
             Text(
-                text = "¡Ups! Algo salió mal",
+                text = stringResource(R.string.mask_processing_error_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = onErrorContainerColor,
                 textAlign = TextAlign.Center
@@ -329,7 +331,7 @@ private fun AppErrorMessage(
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Volver")
+                    Text(stringResource(R.string.go_back))
                 }
 
                 Button(
@@ -351,7 +353,7 @@ private fun AppErrorMessage(
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Reintentar")
+                    Text(stringResource(R.string.retry))
                 }
             }
         }
