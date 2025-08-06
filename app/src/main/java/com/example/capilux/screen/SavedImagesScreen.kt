@@ -23,12 +23,14 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.deleteImageFile
 import com.example.capilux.utils.saveImageToGallery
 import java.io.File
+import com.example.capilux.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,10 +47,10 @@ fun SavedImagesScreen(navController: NavHostController, useAltTheme: Boolean) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Imágenes guardadas", color = Color.White) },
+                title = { Text(stringResource(R.string.saved_images_title), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atrás", tint = Color.White)
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -69,7 +71,7 @@ fun SavedImagesScreen(navController: NavHostController, useAltTheme: Boolean) {
             verticalArrangement = Arrangement.Top
         ) {
             if (images.isEmpty()) {
-                Text("No hay imágenes guardadas", color = Color.White)
+                Text(stringResource(R.string.no_saved_images), color = Color.White)
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     items(images) { uriString ->
@@ -96,14 +98,14 @@ fun SavedImagesScreen(navController: NavHostController, useAltTheme: Boolean) {
                                     val file = uriToFile(context, Uri.parse(uriString))
                                     saveImageToGallery(context, file)
                                 }) {
-                                    Icon(Icons.Filled.Download, contentDescription = "Descargar", tint = Color.White)
+                                    Icon(Icons.Filled.Download, contentDescription = stringResource(R.string.download), tint = Color.White)
                                 }
                                 IconButton(onClick = {
                                     deleteImageFile(context, uriString)
                                     images.remove(uriString)
                                     prefs.edit().putStringSet("images", images.toSet()).apply()
                                 }) {
-                                    Icon(Icons.Filled.Delete, contentDescription = "Eliminar", tint = Color.White)
+                                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete), tint = Color.White)
                                 }
                             }
                         }

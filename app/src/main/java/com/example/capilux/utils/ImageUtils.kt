@@ -63,6 +63,25 @@ fun saveImageToGallery(context: Context, imageFile: File): Boolean {
     }
 }
 
+// 💾 Guarda una imagen en el almacenamiento interno y la registra en la lista de guardadas
+fun saveImageToSavedImages(context: Context, imageFile: File): Boolean {
+    return try {
+        val savedDir = File(context.filesDir, "saved_images").apply { mkdirs() }
+        val savedFile = File(savedDir, "image_${System.currentTimeMillis()}.jpg")
+        imageFile.copyTo(savedFile, overwrite = true)
+
+        val prefs = context.getSharedPreferences("saved_images", Context.MODE_PRIVATE)
+        val images = prefs.getStringSet("images", mutableSetOf())?.toMutableSet() ?: mutableSetOf()
+        images.add(Uri.fromFile(savedFile).toString())
+        prefs.edit().putStringSet("images", images).apply()
+
+        true
+    } catch (e: Exception) {
+        Log.e("ImageUtils", "Error guardando imagen: ${e.message}")
+        false
+    }
+}
+
 // 🗑️ Elimina un archivo de imagen local
 fun deleteImageFile(context: Context, uriString: String): Boolean {
     return try {
