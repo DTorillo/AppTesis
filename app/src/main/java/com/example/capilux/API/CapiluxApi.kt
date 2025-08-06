@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 
 object CapiluxApi {
 
-    private const val BASE_URL = "https://be08e1c4cde0.ngrok-free.app"
+    private const val BASE_URL = "https://111a8aaa592a.ngrok-free.app"
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)

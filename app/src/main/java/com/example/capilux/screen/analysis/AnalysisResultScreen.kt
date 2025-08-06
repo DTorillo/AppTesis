@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import com.example.capilux.ui.theme.backgroundGradient
+import com.example.capilux.R
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
