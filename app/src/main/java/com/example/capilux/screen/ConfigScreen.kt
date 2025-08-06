@@ -27,6 +27,8 @@ import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.restartApp
 import com.example.capilux.utils.setAppLocale
 import com.example.capilux.utils.EncryptedPrefs
+import androidx.compose.ui.res.stringResource
+import com.example.capilux.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,10 +65,10 @@ fun ConfigScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Configuraci\u00f3n", color = Color.White) },
+                title = { Text(stringResource(R.string.config_screen_title), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atr\u00e1s", tint = Color.White)
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -95,7 +97,7 @@ fun ConfigScreen(
             OutlinedTextField(
                 value = editedUsername,
                 onValueChange = { editedUsername = it },
-                label = { Text("Nombre", color = Color.White) },
+                label = { Text(stringResource(R.string.name_label), color = Color.White) },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
@@ -112,7 +114,7 @@ fun ConfigScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Text("Configuraciones", color = Color.White, style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.settings), color = Color.White, style = MaterialTheme.typography.titleMedium)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -122,7 +124,7 @@ fun ConfigScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Degradado", color = Color.White)
+                Text(stringResource(R.string.gradient), color = Color.White)
                 Switch(
                     checked = altThemeEnabled,
                     onCheckedChange = {
@@ -147,9 +149,9 @@ fun ConfigScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Idioma", color = Color.White)
+                Text(stringResource(R.string.language), color = Color.White)
                 Text(
-                    text = if (currentLanguage == "es") "Espa\u00f1ol" else "English",
+                    text = if (currentLanguage == "es") stringResource(R.string.spanish) else stringResource(R.string.english),
                     color = Color.White.copy(alpha = 0.7f)
                 )
             }
@@ -159,13 +161,13 @@ fun ConfigScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Cambiar PIN", color = Color.White)
+                Text(stringResource(R.string.change_pin), color = Color.White)
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
             PrimaryButton(
-                text = "Guardar cambios",
+                text = stringResource(R.string.save_changes),
                 onClick = {
                     EncryptedPrefs.setUsername(context, editedUsername)
                     usernameState.value = editedUsername
@@ -179,13 +181,13 @@ fun ConfigScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             SecondaryButton(
-                text = "Volver",
+                text = stringResource(R.string.return),
                 onClick = { navController.popBackStack() }
             )
 
             if (showLanguageDialog) {
                 BaseDialog(
-                    title = "Seleccionar idioma",
+                    title = stringResource(R.string.select_language),
                     onDismiss = { showLanguageDialog = false },
                     content = {
                         Column {
@@ -198,7 +200,7 @@ fun ConfigScreen(
                                         unselectedColor = Color.White
                                     )
                                 )
-                                Text("Espa\u00f1ol", color = Color.White)
+                                Text(stringResource(R.string.spanish), color = Color.White)
                             }
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 RadioButton(
@@ -209,13 +211,13 @@ fun ConfigScreen(
                                         unselectedColor = Color.White
                                     )
                                 )
-                                Text("English", color = Color.White)
+                                Text(stringResource(R.string.english), color = Color.White)
                             }
                         }
                     },
                     confirmButton = {
                         PrimaryButton(
-                            text = "Aplicar",
+                            text = stringResource(R.string.apply),
                             onClick = {
                                 sharedPreferences.edit().putString("language", currentLanguage).apply()
                                 setAppLocale(context, currentLanguage)
@@ -233,14 +235,14 @@ fun ConfigScreen(
                 var error by remember { mutableStateOf("" ) }
 
                 BaseDialog(
-                    title = "Cambiar PIN",
+                    title = stringResource(R.string.change_pin),
                     onDismiss = { showChangePinDialog = false },
                     content = {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             OutlinedTextField(
                                 value = currentPin,
                                 onValueChange = { if (it.length <= 6) currentPin = it },
-                                label = { Text("PIN actual", color = Color.White) },
+                                label = { Text(stringResource(R.string.current_pin), color = Color.White) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                                 colors = TextFieldDefaults.colors(
                                     focusedContainerColor = Color.Transparent,
@@ -262,7 +264,7 @@ fun ConfigScreen(
                             OutlinedTextField(
                                 value = newPin,
                                 onValueChange = { if (it.length <= 6) newPin = it },
-                                label = { Text("Nuevo PIN", color = Color.White) },
+                                label = { Text(stringResource(R.string.new_pin), color = Color.White) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                                 colors = TextFieldDefaults.colors(
                                     focusedContainerColor = Color.Transparent,
@@ -284,7 +286,7 @@ fun ConfigScreen(
                             OutlinedTextField(
                                 value = confirmPin,
                                 onValueChange = { if (it.length <= 6) confirmPin = it },
-                                label = { Text("Confirmar PIN", color = Color.White) },
+                                label = { Text(stringResource(R.string.confirm_pin), color = Color.White) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                                 colors = TextFieldDefaults.colors(
                                     focusedContainerColor = Color.Transparent,
@@ -309,7 +311,7 @@ fun ConfigScreen(
                     },
                     confirmButton = {
                         PrimaryButton(
-                            text = "Guardar",
+                            text = stringResource(R.string.save),
                             onClick = {
                                 val savedPin = EncryptedPrefs.getPin(context)
                                 if (currentPin == savedPin && newPin.length == 6 && newPin == confirmPin) {
@@ -317,7 +319,7 @@ fun ConfigScreen(
                                     EncryptedPrefs.saveLastPins(context, newPin)
                                     showChangePinDialog = false
                                 } else {
-                                    error = "Datos incorrectos"
+                                    error = context.getString(R.string.error_incorrect_data)
                                 }
                             }
                         )

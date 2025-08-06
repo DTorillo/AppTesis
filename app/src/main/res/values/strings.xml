@@ -1,3 +1,41 @@
 <resources>
     <string name="app_name">Capilux</string>
+
+    <!-- Config Screen -->
+    <string name="config_screen_title">Configuración</string>
+    <string name="back">Atrás</string>
+    <string name="name_label">Nombre</string>
+    <string name="settings">Configuraciones</string>
+    <string name="gradient">Degradado</string>
+    <string name="language">Idioma</string>
+    <string name="spanish">Español</string>
+    <string name="english">English</string>
+    <string name="change_pin">Cambiar PIN</string>
+    <string name="save_changes">Guardar cambios</string>
+    <string name="return">Volver</string>
+    <string name="select_language">Seleccionar idioma</string>
+    <string name="apply">Aplicar</string>
+    <string name="current_pin">PIN actual</string>
+    <string name="new_pin">Nuevo PIN</string>
+    <string name="confirm_pin">Confirmar PIN</string>
+    <string name="error_incorrect_data">Datos incorrectos</string>
+    <string name="save">Guardar</string>
+
+    <!-- Saved Images Screen -->
+    <string name="saved_images_title">Imágenes guardadas</string>
+    <string name="no_saved_images">No hay imágenes guardadas</string>
+    <string name="download">Descargar</string>
+    <string name="delete">Eliminar</string>
+
+    <!-- Generated Image Screen -->
+    <string name="applied_style">Estilo aplicado: %1$s</string>
+    <string name="generated_style_default">Estilo generado</string>
+    <string name="image_not_found">❌ No se encontró la imagen generada</string>
+    <string name="back_to_home">Volver al inicio</string>
+    <string name="save_image">Guardar imagen</string>
+    <string name="regenerate_result">Regenerar resultado</string>
+    <string name="regenerating_image">Regenerando imagen...</string>
+    <string name="image_or_mask_not_found">No se encontró la imagen o la máscara original.</string>
+    <string name="error_regenerate">Error al regenerar: %1$s</string>
+    <string name="unexpected_error">Error inesperado: %1$s</string>
 </resources>
