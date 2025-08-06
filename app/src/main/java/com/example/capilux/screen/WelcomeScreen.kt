@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -40,7 +41,7 @@ fun WelcomeScreen(navController: NavHostController, useAltTheme: Boolean) {
         // Logo de la app
         Image(
             painter = painterResource(id = R.drawable.logo), // Crea un recurso drawable
-            contentDescription = "Logo Capilux",
+            contentDescription = stringResource(R.string.app_logo),
             modifier = Modifier.size(120.dp),
             contentScale = ContentScale.Fit
         )
@@ -61,7 +62,7 @@ fun WelcomeScreen(navController: NavHostController, useAltTheme: Boolean) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Bienvenido a Capilux",
+                    text = stringResource(R.string.welcome_to_capilux),
                     style = MaterialTheme.typography.headlineSmall,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
@@ -72,11 +73,11 @@ fun WelcomeScreen(navController: NavHostController, useAltTheme: Boolean) {
 
                 Text(
                     buildAnnotatedString {
-                        append("Descubre el ")
+                        append(stringResource(R.string.welcome_desc_prefix))
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("corte perfecto")
+                            append(stringResource(R.string.welcome_desc_highlight))
                         }
-                        append(" para tu tipo de rostro con nuestra tecnología de análisis facial")
+                        append(stringResource(R.string.welcome_desc_suffix))
                     },
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.White,
@@ -87,9 +88,9 @@ fun WelcomeScreen(navController: NavHostController, useAltTheme: Boolean) {
 
                 // Lista de beneficios
                 listOf(
-                    "Toma o sube una foto de tu rostro",
-                    "Analizamos tu estructura facial",
-                    "Recibe recomendaciones personalizadas"
+                    stringResource(R.string.welcome_step_take_photo),
+                    stringResource(R.string.welcome_step_analyze),
+                    stringResource(R.string.welcome_step_recommendations)
                 ).forEachIndexed { index, item ->
                     Row(
                         modifier = Modifier
@@ -118,14 +119,14 @@ fun WelcomeScreen(navController: NavHostController, useAltTheme: Boolean) {
 
         // Botón de inicio
         PrimaryButton(
-            text = "Comenzar ahora",
+            text = stringResource(R.string.start_now),
             onClick = { navController.navigate("userCreation") }
         )
         Spacer(modifier = Modifier.height(16.dp))
 
         // Texto adicional
         Text(
-            text = "¡Tu estilo perfecto está a solo un clic!",
+            text = stringResource(R.string.one_click_away),
             color = Color.White.copy(alpha = 0.8f),
             style = MaterialTheme.typography.bodySmall
         )

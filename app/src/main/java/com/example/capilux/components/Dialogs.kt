@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.capilux.R
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
 
@@ -83,7 +85,7 @@ fun TermsAndConditionsDialog(onDismiss: () -> Unit, useAltTheme: Boolean) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "Términos y Condiciones",
+                        stringResource(R.string.terms_title),
                         color = Color.White,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
@@ -99,7 +101,7 @@ fun TermsAndConditionsDialog(onDismiss: () -> Unit, useAltTheme: Boolean) {
                         .verticalScroll(scrollState)
                 ) {
                     Text(
-                        text = "Al utilizar Capilux, aceptas los siguientes términos:",
+                        text = stringResource(R.string.terms_intro),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
@@ -108,12 +110,12 @@ fun TermsAndConditionsDialog(onDismiss: () -> Unit, useAltTheme: Boolean) {
 
                     // Términos con iconos
                     listOf(
-                        Pair(Icons.Filled.Security, "Privacidad de datos: Tus imágenes se procesan localmente en tu dispositivo y no se comparten con servidores externos."),
-                        Pair(Icons.Filled.CloudUpload, "Propiedad intelectual: Conservas todos los derechos sobre tus fotos y los resultados del análisis."),
-                        Pair(Icons.Filled.Info, "Uso de la aplicación: Capilux es una herramienta de recomendación. Los resultados son sugerencias basadas en análisis facial."),
-                        Pair(Icons.Filled.Gavel, "Limitación de responsabilidad: No nos hacemos responsables por decisiones basadas en las recomendaciones proporcionadas."),
-                        Pair(Icons.Filled.Update, "Actualizaciones: Podemos modificar estos términos periódicamente. Las versiones actualizadas estarán disponibles en la aplicación."),
-                        Pair(Icons.Filled.Block, "Uso apropiado: Te comprometes a no utilizar la aplicación para fines ilegales o que violen derechos de terceros.")
+                        Pair(Icons.Filled.Security, stringResource(R.string.terms_privacy)),
+                        Pair(Icons.Filled.CloudUpload, stringResource(R.string.terms_ip)),
+                        Pair(Icons.Filled.Info, stringResource(R.string.terms_use_app)),
+                        Pair(Icons.Filled.Gavel, stringResource(R.string.terms_liability)),
+                        Pair(Icons.Filled.Update, stringResource(R.string.terms_updates)),
+                        Pair(Icons.Filled.Block, stringResource(R.string.terms_proper_use))
                     ).forEach { (icon, term) ->
                         Card(
                             modifier = Modifier
@@ -159,7 +161,7 @@ fun TermsAndConditionsDialog(onDismiss: () -> Unit, useAltTheme: Boolean) {
                         )
                     ) {
                         Text(
-                            text = "Al hacer clic en 'Aceptar', confirmas que has leído, comprendido y aceptado estos términos y condiciones en su totalidad.",
+                            text = stringResource(R.string.terms_acceptance_message),
                             color = Color.White,
                             fontStyle = FontStyle.Italic,
                             textAlign = TextAlign.Center,
@@ -176,7 +178,7 @@ fun TermsAndConditionsDialog(onDismiss: () -> Unit, useAltTheme: Boolean) {
                     contentAlignment = Alignment.Center
                 ) {
                     PrimaryButton(
-                        text = "Acepto los términos",
+                        text = stringResource(R.string.accept_terms_button),
                         onClick = onDismiss
                     )
                 }
@@ -191,11 +193,11 @@ fun showErrorDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Error", color = Color.Black) },
+        title = { Text(stringResource(R.string.error), color = Color.Black) },
         text = { Text(message, color = Color.Black) },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("OK")
+                Text(stringResource(R.string.ok))
             }
         }
     )

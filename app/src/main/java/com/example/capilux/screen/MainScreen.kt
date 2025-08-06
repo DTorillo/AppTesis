@@ -76,6 +76,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -94,6 +95,7 @@ import com.example.capilux.utils.FaceFrameAnalyzer
 import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.takePhoto
 import com.example.capilux.SharedViewModel
+import com.example.capilux.R
 import kotlinx.coroutines.launch
 import androidx.compose.material3.AlertDialog as MaterialAlertDialog
 
@@ -204,14 +206,14 @@ fun MainScreen(
                             if (profileUri != null) {
                                 Image(
                                     painter = rememberAsyncImagePainter(model = profileUri),
-                                    contentDescription = "Foto de perfil",
+                                    contentDescription = stringResource(R.string.profile_photo),
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize()
                                 )
                             } else {
                                 Icon(
                                     imageVector = Icons.Filled.Person,
-                                    contentDescription = "Foto de perfil",
+                                    contentDescription = stringResource(R.string.profile_photo),
                                     tint = Color.White,
                                     modifier = Modifier.size(60.dp)
                                 )
@@ -239,20 +241,20 @@ fun MainScreen(
                     ) {
                         // Navegación principal
                         Text(
-                            text = "NAVEGACIÓN",
+                            text = stringResource(R.string.drawer_section_navigation),
                             color = Color.White.copy(alpha = 0.6f),
                             fontSize = 12.sp,
                             modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
                         )
 
                         NavigationDrawerItem(
-                            label = { Text("Inicio", color = Color.White) },
+                            label = { Text(stringResource(R.string.drawer_home), color = Color.White) },
                             selected = true,
                             onClick = { scope.launch { drawerState.close() } },
                             icon = {
                                 Icon(
                                     Icons.Filled.Home,
-                                    contentDescription = "Inicio",
+                                    contentDescription = stringResource(R.string.drawer_home),
                                     tint = Color.White
                                 )
                             },
@@ -261,7 +263,7 @@ fun MainScreen(
 
 
                         NavigationDrawerItem(
-                            label = { Text("Im\u00e1genes guardadas", color = Color.White) },
+                            label = { Text(stringResource(R.string.drawer_saved_images), color = Color.White) },
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
@@ -270,7 +272,7 @@ fun MainScreen(
                             icon = {
                                 Icon(
                                     Icons.Filled.History,
-                                    contentDescription = "Im\u00e1genes guardadas",
+                                    contentDescription = stringResource(R.string.drawer_saved_images),
                                     tint = Color.White
                                 )
                             },
@@ -286,14 +288,14 @@ fun MainScreen(
 
                         // Configuración y cuenta
                         Text(
-                            text = "CONFIGURACIÓN",
+                            text = stringResource(R.string.drawer_section_settings),
                             color = Color.White.copy(alpha = 0.6f),
                             fontSize = 12.sp,
                             modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
                         )
 
                         NavigationDrawerItem(
-                            label = { Text("Configuración", color = Color.White) },
+                            label = { Text(stringResource(R.string.drawer_settings), color = Color.White) },
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
@@ -302,7 +304,7 @@ fun MainScreen(
                             icon = {
                                 Icon(
                                     Icons.Filled.Settings,
-                                    contentDescription = "Configuración",
+                                    contentDescription = stringResource(R.string.drawer_settings),
                                     tint = Color.White
                                 )
                             },
@@ -310,7 +312,7 @@ fun MainScreen(
                         )
 
                         NavigationDrawerItem(
-                            label = { Text("Ayuda y soporte", color = Color.White) },
+                            label = { Text(stringResource(R.string.drawer_help_support), color = Color.White) },
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
@@ -319,7 +321,7 @@ fun MainScreen(
                             icon = {
                                 Icon(
                                     Icons.Filled.Help,
-                                    contentDescription = "Ayuda",
+                                    contentDescription = stringResource(R.string.drawer_help_support),
                                     tint = Color.White
                                 )
                             },
@@ -366,25 +368,25 @@ fun MainScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Logout,
-                                contentDescription = "Cerrar sesión",
+                                contentDescription = stringResource(R.string.drawer_logout),
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Cerrar sesión")
+                            Text(stringResource(R.string.drawer_logout))
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         // Versión de la app
                         Text(
-                            text = "Capilux v0.27.0",
+                            text = stringResource(R.string.drawer_version),
                             color = Color.White.copy(alpha = 0.6f),
                             fontSize = 12.sp
                         )
 
                         // Información de derechos
                         Text(
-                            text = "© 2025 Capilux. Todos los derechos reservados.",
+                            text = stringResource(R.string.drawer_copyright),
                             color = Color.White.copy(alpha = 0.4f),
                             fontSize = 10.sp,
                             textAlign = TextAlign.Center
@@ -399,7 +401,7 @@ fun MainScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            "Capilux",
+                            stringResource(R.string.app_name),
                             color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
@@ -408,7 +410,7 @@ fun MainScreen(
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(
                                 imageVector = Icons.Filled.Menu,
-                                contentDescription = "Abrir menú",
+                                contentDescription = stringResource(R.string.open_menu),
                                 tint = Color.White
                             )
                         }
@@ -429,22 +431,22 @@ fun MainScreen(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         IconTextButton(
-                            text = "Galería",
+                            text = stringResource(R.string.gallery),
                             icon = {
                                 Icon(
                                     imageVector = Icons.Filled.Photo,
-                                    contentDescription = "Galería"
+                                    contentDescription = stringResource(R.string.gallery)
                                 )
                             },
                             onClick = { galleryLauncher.launch("image/*") }
                         )
 
                         IconTextButton(
-                            text = "Tomar foto",
+                            text = stringResource(R.string.take_photo),
                             icon = {
                                 Icon(
                                     imageVector = Icons.Filled.Camera,
-                                    contentDescription = "Tomar foto"
+                                    contentDescription = stringResource(R.string.take_photo)
                                 )
                             },
                             onClick = {
@@ -479,11 +481,11 @@ fun MainScreen(
                 showErrorDialog?.let { errorMessage ->
                     MaterialAlertDialog(
                         onDismissRequest = { showErrorDialog = null },
-                        title = { Text("Error") },
+                        title = { Text(stringResource(R.string.error)) },
                         text = { Text(errorMessage) },
                         confirmButton = {
                             androidx.compose.material3.Button(onClick = { showErrorDialog = null }) {
-                                Text("OK")
+                                Text(stringResource(R.string.ok))
                             }
                         }
                     )
@@ -491,7 +493,7 @@ fun MainScreen(
 
                 // Mensaje de bienvenida
                 Text(
-                    text = "Hola, $username",
+                    text = stringResource(R.string.greeting, username),
                     style = MaterialTheme.typography.titleLarge,
                     color = Color.White,
                     modifier = Modifier
@@ -502,7 +504,7 @@ fun MainScreen(
                 )
 
                 Text(
-                    text = "Captura tu rostro o selecciona una foto para analizar tu tipo de rostro",
+                    text = stringResource(R.string.main_instruction),
                     color = Color.White.copy(alpha = 0.9f),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -582,7 +584,9 @@ fun MainScreen(
                         }
 
                         Text(
-                            text = if (faceInsideFrame.value) "Puedes tomar la foto" else "Coloca tu cara en el marco",
+                            text = if (faceInsideFrame.value)
+                                stringResource(R.string.face_ready)
+                            else stringResource(R.string.face_not_ready),
                             color = Color.White,
                             modifier = Modifier
                                 .align(Alignment.TopCenter)
@@ -614,7 +618,7 @@ fun MainScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Cameraswitch,
-                                    contentDescription = "Cambiar cámara",
+                                    contentDescription = stringResource(R.string.switch_camera),
                                     tint = Color.White,
                                     modifier = Modifier.size(24.dp)
                                 )
@@ -628,7 +632,9 @@ fun MainScreen(
                                 .padding(16.dp)
                         ) {
                             Text(
-                                text = if (isFrontCamera) "Cámara frontal" else "Cámara trasera",
+                                text = if (isFrontCamera)
+                                    stringResource(R.string.front_camera)
+                                else stringResource(R.string.rear_camera),
                                 color = Color.White,
                                 modifier = Modifier
                                     .background(

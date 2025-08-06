@@ -16,15 +16,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.example.capilux.R
 import com.example.capilux.ui.theme.backgroundGradient
 
 @Composable
 fun LoadingOverlay(
     message: String,
     useAltTheme: Boolean,
-    motivational: String = "¡Tu nuevo estilo está en camino!"
+    motivational: String? = null
 ) {
     val gradient = backgroundGradient(useAltTheme)
     val transition = rememberInfiniteTransition(label = "overlay")
@@ -55,7 +57,7 @@ fun LoadingOverlay(
                 Text(text = message, color = Color.White, style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = motivational,
+                    text = motivational ?: stringResource(R.string.loading_motivational),
                     color = Color.White.copy(alpha = alpha),
                     style = MaterialTheme.typography.bodySmall
                 )
