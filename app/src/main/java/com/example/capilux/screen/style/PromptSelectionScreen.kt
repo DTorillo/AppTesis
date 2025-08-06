@@ -12,12 +12,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import com.example.capilux.SharedViewModel
 import com.example.capilux.network.CapiluxApi
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.components.LoadingOverlay
+import com.example.capilux.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -124,7 +126,7 @@ fun PromptSelectionScreen(
         }
     }
     if (loading.value) {
-        LoadingOverlay(message = "Generando estilo...", useAltTheme = useAltTheme)
+        LoadingOverlay(message = stringResource(R.string.generating_style), useAltTheme = useAltTheme)
     }
 }
 }

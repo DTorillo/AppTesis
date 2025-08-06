@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,7 +40,7 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val gradient = backgroundGradient(useAltTheme)
     var pin by remember { mutableStateOf("") }
-    var status by remember { mutableStateOf("Verificando huella...") }
+    var status by remember { mutableStateOf(context.getString(R.string.verifying_fingerprint)) }
     var showPin by remember { mutableStateOf(false) }
     val executor: Executor = ContextCompat.getMainExecutor(context)
 
@@ -50,9 +51,9 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
             if (manager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) ==
                 BiometricManager.BIOMETRIC_SUCCESS) {
                 val promptInfo = BiometricPrompt.PromptInfo.Builder()
-                    .setTitle("Verificación biométrica")
-                    .setSubtitle("Coloca tu dedo")
-                    .setNegativeButtonText("Usar PIN")
+                    .setTitle(context.getString(R.string.biometric_verification))
+                    .setSubtitle(context.getString(R.string.place_finger))
+                    .setNegativeButtonText(context.getString(R.string.use_pin))
                     .build()
 
                 val biometricPrompt = BiometricPrompt(
@@ -66,22 +67,22 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
                         }
 
                         override fun onAuthenticationError(code: Int, msg: CharSequence) {
-                            status = "Autenticación cancelada. Usa tu PIN"
+                            status = context.getString(R.string.auth_canceled_use_pin)
                             showPin = true
                         }
 
                         override fun onAuthenticationFailed() {
-                            status = "Huella no reconocida. Intenta otra vez"
+                            status = context.getString(R.string.fingerprint_not_recognized)
                         }
                     })
 
                 biometricPrompt.authenticate(promptInfo)
             } else {
-                status = "Huella no disponible. Usa tu PIN"
+                status = context.getString(R.string.fingerprint_not_available_use_pin)
                 showPin = true
             }
         } else {
-            status = "Huella no configurada. Usa tu PIN"
+            status = context.getString(R.string.fingerprint_not_configured_use_pin)
             showPin = true
         }
     }
@@ -95,14 +96,14 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Logo",
+                contentDescription = stringResource(R.string.app_logo),
                 modifier = Modifier
                     .size(120.dp)
                     .padding(bottom = 16.dp)
             )
 
             Text(
-                text = "Bienvenido a Capilux",
+                text = stringResource(R.string.welcome_to_capilux),
                 fontSize = 22.sp,
                 color = Color.White,
                 style = MaterialTheme.typography.headlineSmall
@@ -117,7 +118,7 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
                 OutlinedTextField(
                     value = pin,
                     onValueChange = { if (it.length <= 6) pin = it },
-                    label = { Text("PIN") },
+                    label = { Text(stringResource(R.string.pin)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     modifier = Modifier
                         .width(240.dp)
@@ -136,11 +137,11 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
                                 popUpTo("auth") { inclusive = true }
                             }
                         } else {
-                            status = "PIN incorrecto"
+                            status = context.getString(R.string.incorrect_pin)
                             pin = ""
                         }
                     },
-                    text = "Ingresar",
+                    text = stringResource(R.string.login),
                     enabled = pin.length == 6,
                     modifier = Modifier
                         .width(200.dp)
@@ -152,7 +153,7 @@ fun AuthScreen(navController: NavHostController, useAltTheme: Boolean) {
                 TextButton(onClick = {
                     navController.navigate("resetPin")
                 }) {
-                    Text("¿Olvidaste tu PIN?", color = Color.White.copy(alpha = 0.8f))
+                    Text(stringResource(R.string.forgot_pin), color = Color.White.copy(alpha = 0.8f))
                 }
             }
         }

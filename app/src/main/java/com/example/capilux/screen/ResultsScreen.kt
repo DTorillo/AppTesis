@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.capilux.ui.theme.PrimaryButton
@@ -74,7 +75,7 @@ fun ResultsScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Tu tipo de rostro es: $faceShape",
+            text = stringResource(R.string.face_type_result, faceShape),
             color = Color.White,
             style = MaterialTheme.typography.titleLarge
         )
@@ -84,7 +85,7 @@ fun ResultsScreen(
         imageUri?.let { uri ->
             Image(
                 painter = rememberAsyncImagePainter(model = uri),
-                contentDescription = "Foto analizada",
+                contentDescription = stringResource(R.string.analyzed_photo),
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(3f / 4f)
@@ -96,7 +97,7 @@ fun ResultsScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Estilos recomendados:",
+            text = stringResource(R.string.recommended_styles_title),
             color = Color.White,
             style = MaterialTheme.typography.titleMedium
         )
@@ -118,7 +119,7 @@ fun ResultsScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         PrimaryButton(
-            text = "Elegir estilo",
+            text = stringResource(R.string.choose_style),
             onClick = {
                 if (imageUri != null) {
                     loading.value = true
@@ -152,7 +153,7 @@ fun ResultsScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         PrimaryButton(
-            text = "Guardar resultados",
+            text = stringResource(R.string.save_results),
             onClick = {
                 val current = prefs.getStringSet("styles", emptySet())?.toMutableSet() ?: mutableSetOf()
                 current.addAll(recommendedStyles)
@@ -163,7 +164,7 @@ fun ResultsScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         SecondaryButton(
-            text = "Volver",
+            text = stringResource(R.string.go_back),
             onClick = { navController.popBackStack() }
         )
     }

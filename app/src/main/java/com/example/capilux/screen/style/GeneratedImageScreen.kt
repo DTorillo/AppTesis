@@ -17,10 +17,11 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import com.example.capilux.SharedViewModel
 import com.example.capilux.network.CapiluxApi
-import com.example.capilux.utils.saveImageToGallery
+import com.example.capilux.utils.saveImageToSavedImages
 import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.components.LoadingOverlay
 import androidx.compose.material3.Card
@@ -29,6 +30,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import kotlinx.coroutines.launch
 import java.io.File
+import com.example.capilux.R
 
 @Composable
 fun GeneratedImageScreen(
@@ -40,7 +42,8 @@ fun GeneratedImageScreen(
     val context = LocalContext.current
     val gradient = backgroundGradient(useAltTheme)
     val file = File(context.filesDir, "resultado_sd.png")
-    val promptVisible = sharedViewModel.selectedPrompt ?: "Estilo generado"
+    val promptDefault = stringResource(R.string.generated_style_default)
+    val promptVisible = sharedViewModel.selectedPrompt ?: promptDefault
     var loading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
@@ -63,7 +66,7 @@ fun GeneratedImageScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Estilo aplicado: $promptVisible",
+                text = stringResource(R.string.generated_style_applied, promptVisible),
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White
             )
@@ -87,7 +90,7 @@ fun GeneratedImageScreen(
                     )
                 }
             } else {
-                Text("❌ No se encontró la imagen generada", color = Color.Red)
+                Text(stringResource(R.string.generated_image_not_found), color = Color.Red)
             }
 
             errorMessage?.let {
@@ -109,16 +112,19 @@ fun GeneratedImageScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Volver al inicio")
+                Text(stringResource(R.string.back_to_home))
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Button(
-                onClick = { saveImageToGallery(context, file) },
+                onClick = {
+                    saveImageToSavedImages(context, file)
+                    navController.navigate("savedImages")
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Guardar imagen")
+                Text(stringResource(R.string.save_image))
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -129,7 +135,7 @@ fun GeneratedImageScreen(
                     val maskFile = File(context.filesDir, "mascara_tmp.png")
                     val prompt = promptVisible
                     if (!imageFile.exists() || !maskFile.exists()) {
-                        errorMessage = "No se encontró la imagen o la máscara original."
+                        errorMessage = context.getString(R.string.regenerate_missing_image_mask)
                         return@Button
                     }
                     loading = true
@@ -146,11 +152,11 @@ fun GeneratedImageScreen(
                                     errorMessage = null
                                 },
                                 onError = { mensaje ->
-                                    errorMessage = "Error al regenerar: $mensaje"
+                                    errorMessage = context.getString(R.string.regenerate_error, mensaje)
                                 }
                             )
                         } catch (e: Exception) {
-                            errorMessage = "Error inesperado: ${e.message}"
+                            errorMessage = context.getString(R.string.unexpected_error, e.message ?: "")
                         } finally {
                             loading = false
                         }
@@ -158,12 +164,12 @@ fun GeneratedImageScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Regenerar resultado")
+                Text(stringResource(R.string.regenerate_result))
             }
         }
 
         if (loading) {
-            LoadingOverlay(message = "Regenerando imagen...", useAltTheme = useAltTheme)
+            LoadingOverlay(message = stringResource(R.string.regenerating_image), useAltTheme = useAltTheme)
         }
     }
 }

@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,10 +29,10 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
     val gradient = backgroundGradient(useAltTheme)
 
     val preguntas = listOf(
-        "¿Nombre de tu primera mascota?",
-        "¿Ciudad donde naciste?",
-        "¿Comida favorita?",
-        "¿Nombre de tu mejor amigo(a) de la infancia?"
+        stringResource(R.string.security_question_pet),
+        stringResource(R.string.security_question_city),
+        stringResource(R.string.security_question_food),
+        stringResource(R.string.security_question_friend)
     )
 
     var pregunta by remember { mutableStateOf(preguntas[0]) }
@@ -52,7 +53,7 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
             modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
             Text(
-                text = "Recuperar PIN",
+                text = stringResource(R.string.recover_pin),
                 color = Color.White,
                 fontSize = 22.sp,
                 style = MaterialTheme.typography.headlineSmall
@@ -68,7 +69,7 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
                     value = pregunta,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Pregunta elegida") },
+                    label = { Text(stringResource(R.string.selected_question)) },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandPreguntas)
                     },
@@ -100,7 +101,7 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
             OutlinedTextField(
                 value = respuesta,
                 onValueChange = { respuesta = it },
-                label = { Text("Respuesta") },
+                label = { Text(stringResource(R.string.answer)) },
                 modifier = Modifier.fillMaxWidth(0.8f),
                 shape = RoundedCornerShape(16.dp),
                 colors = gradientTextFieldColors()
@@ -111,7 +112,7 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
             OutlinedTextField(
                 value = nuevoPin,
                 onValueChange = { if (it.length <= 6) nuevoPin = it },
-                label = { Text("Nuevo PIN") },
+                label = { Text(stringResource(R.string.new_pin)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth(0.8f),
                 shape = RoundedCornerShape(16.dp),
@@ -123,7 +124,7 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
             OutlinedTextField(
                 value = confirmarPin,
                 onValueChange = { if (it.length <= 6) confirmarPin = it },
-                label = { Text("Confirmar PIN") },
+                label = { Text(stringResource(R.string.confirm_pin)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth(0.8f),
                 shape = RoundedCornerShape(16.dp),
@@ -138,7 +139,7 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
             Spacer(modifier = Modifier.height(24.dp))
 
             PrimaryButton(
-                text = "Guardar",
+                text = stringResource(R.string.save),
                 onClick = {
                     if (pregunta == EncryptedPrefs.getSecurityQuestion(context) &&
                         EncryptedPrefs.isSecurityAnswerCorrect(context, respuesta) &&
@@ -150,7 +151,7 @@ fun ResetPinScreen(navController: NavHostController, useAltTheme: Boolean) {
                             popUpTo("resetPin") { inclusive = true }
                         }
                     } else {
-                        error = "Datos incorrectos"
+                        error = context.getString(R.string.incorrect_data)
                     }
                 },
                 modifier = Modifier.fillMaxWidth(0.6f)
