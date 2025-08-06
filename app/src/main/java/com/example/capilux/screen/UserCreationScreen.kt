@@ -21,7 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -58,12 +58,12 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Crear cuenta", color = Color.White) },
+                title = { Text(stringResource(R.string.create_account), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Regresar",
+                            contentDescription = stringResource(R.string.back),
                             tint = Color.White
                         )
                     }
@@ -86,7 +86,7 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Personaliza tu experiencia",
+                text = stringResource(R.string.personalize_experience),
                 style = MaterialTheme.typography.headlineSmall,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -95,7 +95,7 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
             )
 
             Text(
-                text = "Crea tu perfil para recomendaciones personalizadas",
+                text = stringResource(R.string.create_profile_subtitle),
                 color = Color.White.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 32.dp)
@@ -117,7 +117,7 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
                     if (imageUri != null) {
                         Image(
                             painter = rememberAsyncImagePainter(model = imageUri),
-                            contentDescription = "Imagen seleccionada",
+                            contentDescription = stringResource(R.string.selected_image),
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
@@ -128,13 +128,13 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Person,
-                                contentDescription = "Agregar foto",
+                                contentDescription = stringResource(R.string.add_photo),
                                 tint = Color.White,
                                 modifier = Modifier.size(48.dp)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Agregar foto",
+                                text = stringResource(R.string.add_photo),
                                 color = Color.White,
                                 fontSize = 14.sp
                             )
@@ -148,7 +148,7 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Nombre de usuario", color = Color.White) },
+                label = { Text(stringResource(R.string.username), color = Color.White) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = TextFieldDefaults.colors(
@@ -182,12 +182,12 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     buildAnnotatedString {
-                        append("Acepto los ")
+                        append(stringResource(R.string.accept_terms_prefix))
                         withStyle(style = SpanStyle(
                             color = Color.White,
                             fontWeight = FontWeight.Bold
                         )) {
-                            append("términos y condiciones")
+                            append(stringResource(R.string.terms_and_conditions))
                         }
                     },
                     color = Color.White,
@@ -198,15 +198,15 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
             Spacer(modifier = Modifier.height(32.dp))
 
             PrimaryButton(
-                text = "Continuar",
+                text = stringResource(R.string.continue_text),
                 onClick = {
                     when {
                         username.isBlank() -> {
-                            dialogMessage = "Por favor, introduce un nombre de usuario."
+                            dialogMessage = context.getString(R.string.enter_username)
                             showDialog = true
                         }
                         !isTermsAccepted -> {
-                            dialogMessage = "Por favor, acepta los términos y condiciones."
+                            dialogMessage = context.getString(R.string.accept_terms_prompt)
                             showDialog = true
                         }
                         else -> {
@@ -225,11 +225,11 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
             if (showDialog) {
                 AlertDialog(
                     onDismissRequest = { showDialog = false },
-                    title = { Text("Atención") },
+                    title = { Text(stringResource(R.string.attention)) },
                     text = { Text(dialogMessage) },
                     confirmButton = {
                         Button(onClick = { showDialog = false }) {
-                            Text("OK")
+                            Text(stringResource(R.string.ok))
                         }
                     }
                 )

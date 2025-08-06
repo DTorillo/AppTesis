@@ -1,6 +1,7 @@
 package com.example.capilux
 
 import android.os.Bundle
+import android.content.Context
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,6 +17,10 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val language = sharedPreferences.getString("language", "es") ?: "es"
+        setAppLocale(this, language)
 
         // Usamos FragmentActivity para mostrar Compose manualmente
         setContent {

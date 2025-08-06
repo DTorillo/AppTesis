@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import com.example.capilux.ui.theme.backgroundGradient
 
@@ -53,7 +54,7 @@ fun AnalysisResultScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Resultados del Análisis",
+                        text = stringResource(R.string.analysis_results_title),
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
@@ -62,7 +63,7 @@ fun AnalysisResultScreen(
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver",
+                            contentDescription = stringResource(R.string.go_back),
                             tint = Color.White
                         )
                     }
@@ -105,7 +106,7 @@ fun AnalysisResultScreen(
 
                 // Detalles del análisis
                 Text(
-                    text = "Detalles del análisis:",
+                    text = stringResource(R.string.analysis_details),
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
@@ -170,7 +171,7 @@ private fun FaceTypeCard(tipo: String) {
         // Texto descriptivo
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "Tipo de rostro",
+                text = stringResource(R.string.face_type_label),
                 color = Color.White.copy(alpha = 0.8f),
                 style = MaterialTheme.typography.titleSmall,
                 letterSpacing = 1.sp,
@@ -256,7 +257,7 @@ private fun CreateMaskButton(navController: NavHostController, imageUri: String)
         )
     ) {
         Text(
-            text = "Crear Máscara Personalizada",
+            text = stringResource(R.string.create_custom_mask),
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp
         )

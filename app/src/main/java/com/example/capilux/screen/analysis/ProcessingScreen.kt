@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import com.example.capilux.R
 import com.example.capilux.SharedViewModel
@@ -33,7 +34,7 @@ fun ProcessingScreen(
     LaunchedEffect(originalFile.absolutePath) {
         if (!originalFile.exists() || originalFile.length() < 10_000) {
             navController.navigate(
-                "errorScreen/${Uri.encode("No se encontró la imagen original. Por favor, vuelve a tomar o seleccionar una foto.")}"
+                "errorScreen/${Uri.encode(context.getString(R.string.processing_error_missing_image))}"
             )
             return@LaunchedEffect
         }
@@ -48,11 +49,11 @@ fun ProcessingScreen(
             }
         } catch (e: TimeoutCancellationException) {
             navController.navigate(
-                "errorScreen/${Uri.encode("El análisis tardó demasiado, inténtalo nuevamente")}"
+                "errorScreen/${Uri.encode(context.getString(R.string.processing_error_timeout))}"
             )
         } catch (e: Exception) {
             navController.navigate(
-                "errorScreen/${Uri.encode("Error: ${e.message}")}"
+                "errorScreen/${Uri.encode(context.getString(R.string.processing_error_generic, e.message))}"
             )
         }
     }
@@ -62,10 +63,10 @@ fun ProcessingScreen(
         contentAlignment = Alignment.Center
     ) {
         AdvancedLoadingOverlay(
-            message = "Analizando tu rostro...",
-            subMessage = "Estamos calculando las proporciones faciales\npara recomendarte los mejores cortes",
+            message = stringResource(R.string.processing_message),
+            subMessage = stringResource(R.string.processing_submessage),
             useAltTheme = useAltTheme,
-            logo = painterResource(id = R.drawable.logo) // Pasa el logo aquí
+            logo = painterResource(id = R.drawable.logo)
         )
     }
 }
