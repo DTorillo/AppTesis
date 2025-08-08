@@ -131,6 +131,8 @@
     <string name="terms_liability">Limitation of liability: We are not responsible for decisions based on the provided recommendations.</string>
     <string name="terms_updates">Updates: We may modify these terms periodically. Updated versions will be available in the app.</string>
     <string name="terms_proper_use">Proper use: You agree not to use the app for illegal purposes or to violate third-party rights.</string>
+    <string name="terms_acceptance_message">By clicking `Accept`, you confirm that you have read, understood, and accepted these terms and conditions in full.</string>
+    <string name="accept_terms_button">I accept the terms</string>
     <string name="terms_acceptance_message">By clicking "Accept", you confirm that you have read, understood, and accepted these terms and conditions in full.</string>
     <string name="accept_terms_button">I accept the terms</string>
     <string name="security_question_pet">What is the name of your first pet?</string>
@@ -138,6 +140,7 @@
     <string name="security_question_food">What is your favorite food?</string>
     <string name="security_question_friend">What is the name of your childhood best friend?</string>
     <string name="setup_security_title">Set up security questions</string>
+
 
 </resources>
 
