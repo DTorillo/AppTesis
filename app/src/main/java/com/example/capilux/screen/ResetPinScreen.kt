@@ -21,6 +21,7 @@ import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.gradientTextFieldColors
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.capilux.utils.EncryptedPrefs
+import com.example.capilux.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

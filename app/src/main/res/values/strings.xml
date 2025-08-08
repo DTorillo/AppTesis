@@ -133,5 +133,10 @@
     <string name="terms_proper_use">Uso apropiado: Te comprometes a no utilizar la aplicación para fines ilegales o que violen derechos de terceros.</string>
     <string name="terms_acceptance_message">Al hacer clic en 'Aceptar', confirmas que has leído, comprendido y aceptado estos términos y condiciones en su totalidad.</string>
     <string name="accept_terms_button">Acepto los términos</string>
+    <string name="security_question_pet">¿Cuál es el nombre de tu primera mascota?</string>
+    <string name="security_question_city">¿En qué ciudad naciste?</string>
+    <string name="security_question_food">¿Cuál es tu comida favorita?</string>
+    <string name="security_question_friend">¿Cuál es el nombre de tu mejor amigo de la infancia?</string>
+    <string name="setup_security_title">Configurar preguntas de seguridad</string>
 </resources>
 

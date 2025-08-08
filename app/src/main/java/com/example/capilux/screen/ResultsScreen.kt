@@ -38,6 +38,7 @@ import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.SecondaryButton
 import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.uriToFile
+import com.example.capilux.R
 import com.example.capilux.SharedViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
