@@ -11,10 +11,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.capilux.R
 import com.example.capilux.SharedViewModel
@@ -61,8 +61,8 @@ fun GeneratedImageScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-    val primaryColor = if (useAltTheme) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
-    val onPrimaryColor = if (useAltTheme) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onPrimary
+    val primaryColor =
+        if (useAltTheme) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
 
     BackHandler {
         navController.navigate("main") {
@@ -74,14 +74,20 @@ fun GeneratedImageScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
+                    // TÍTULO MEJORADO: más jerarquía y legibilidad
                     Text(
                         text = stringResource(R.string.generated_result_title),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 0.5.sp,
+                            lineHeight = 28.sp
+                        ),
+                        color = Color.White
                     )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent
+                    containerColor = Color.Transparent,
+                    titleContentColor = Color.White
                 )
             )
         },
@@ -103,14 +109,15 @@ fun GeneratedImageScreen(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Header with style name
+                // Cabecera con estilo seleccionado (glass + texto blanco)
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                        containerColor = Color.White.copy(alpha = 0.08f)
                     ),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = CardDefaults.cardElevation(4.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(6.dp),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
@@ -118,20 +125,25 @@ fun GeneratedImageScreen(
                     ) {
                         Text(
                             text = stringResource(R.string.selected_style),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = Color.White.copy(alpha = 0.85f)
                         )
                         Text(
                             text = promptVisible,
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                lineHeight = 22.sp
+                            ),
+                            color = Color.White,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 4.dp)
                         )
                     }
                 }
 
-                // Image display
+                // Imagen generada
                 if (resultFile.exists()) {
                     val bitmap = BitmapFactory.decodeFile(resultFile.absolutePath)
                     Card(
@@ -139,14 +151,14 @@ fun GeneratedImageScreen(
                             .fillMaxWidth()
                             .aspectRatio(1f)
                             .shadow(
-                                elevation = 16.dp,
-                                shape = RoundedCornerShape(16.dp),
-                                spotColor = primaryColor.copy(alpha = 0.2f)
+                                elevation = 20.dp,
+                                shape = RoundedCornerShape(20.dp),
+                                spotColor = primaryColor.copy(alpha = 0.35f)
                             ),
-                        shape = RoundedCornerShape(16.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+                        shape = RoundedCornerShape(20.dp),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f)
+                            containerColor = Color.White.copy(alpha = 0.05f)
                         )
                     ) {
                         Box(
@@ -155,7 +167,7 @@ fun GeneratedImageScreen(
                                 .background(
                                     brush = Brush.radialGradient(
                                         colors = listOf(
-                                            primaryColor.copy(alpha = 0.05f),
+                                            primaryColor.copy(alpha = 0.10f),
                                             Color.Transparent
                                         )
                                     )
@@ -174,47 +186,51 @@ fun GeneratedImageScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)),
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(Color.White.copy(alpha = 0.06f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = stringResource(R.string.generated_image_not_found),
-                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            color = Color.White,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }
 
+                // Error (si aplica)
                 errorMessage?.let {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                            containerColor = Color(0xFFFF5252).copy(alpha = 0.18f)
                         ),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(14.dp),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.18f))
                     ) {
                         Text(
                             text = it,
-                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            color = Color.White,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(16.dp)
                         )
                     }
                 }
 
-                // Action buttons
+                // BOTONES: diseño unificado, alto, redondeados, blancos y con bordes sutiles
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    // Botón principal: Regenerar
                     Button(
                         onClick = {
                             val originalFile = File(context.filesDir, "original_usuario.jpg")
                             val maskFile = File(context.filesDir, "mascara_tmp.png")
 
                             if (!originalFile.exists() || !maskFile.exists()) {
-                                errorMessage = context.getString(R.string.regenerate_missing_image_mask)
+                                errorMessage =
+                                    context.getString(R.string.regenerate_missing_image_mask)
                                 return@Button
                             }
                             loading = true
@@ -232,67 +248,77 @@ fun GeneratedImageScreen(
                                             errorMessage = null
                                         },
                                         onError = { mensaje ->
-                                            errorMessage = context.getString(R.string.regenerate_error, mensaje)
+                                            errorMessage =
+                                                context.getString(R.string.regenerate_error, mensaje)
                                         }
                                     )
                                 } catch (e: Exception) {
-                                    errorMessage = context.getString(R.string.unexpected_error, e.message ?: "")
+                                    errorMessage = context.getString(
+                                        R.string.unexpected_error,
+                                        e.message ?: ""
+                                    )
                                 } finally {
                                     loading = false
                                 }
                             }
                         },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = primaryColor,
-                            contentColor = onPrimaryColor
+                            containerColor = primaryColor.copy(alpha = 0.95f),
+                            contentColor = Color.White
                         ),
                         elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = 4.dp,
-                            pressedElevation = 2.dp
+                            defaultElevation = 8.dp,
+                            pressedElevation = 4.dp
                         ),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
+                            contentDescription = null
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = stringResource(R.string.regenerate_result),
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold)
                         )
                     }
 
+                    // Botón secundario: Guardar
                     Button(
                         onClick = {
                             saveImageToSavedImages(context, resultFile)
                             navController.navigate("savedImages")
                         },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                            containerColor = primaryColor.copy(alpha = 0.75f),
+                            contentColor = Color.White
                         ),
                         elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = 4.dp,
-                            pressedElevation = 2.dp
+                            defaultElevation = 6.dp,
+                            pressedElevation = 3.dp
                         ),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
                     ) {
                         Icon(
                             imageVector = Icons.Default.Save,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
+                            contentDescription = null
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = stringResource(R.string.save_image),
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold)
                         )
                     }
 
+                    // Botón texto/contorno: Volver al inicio
                     OutlinedButton(
                         onClick = {
                             sharedViewModel.clearAll()
@@ -303,22 +329,25 @@ fun GeneratedImageScreen(
                                 popUpTo("main") { inclusive = false }
                             }
                         },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            contentColor = Color.White
                         ),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                        shape = RoundedCornerShape(12.dp)
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.55f)),
+                        shape = RoundedCornerShape(14.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Home,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
+                            contentDescription = null
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = stringResource(R.string.back_to_home),
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Medium
+                            )
                         )
                     }
                 }

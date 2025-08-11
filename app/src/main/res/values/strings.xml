@@ -39,7 +39,7 @@
     <string name="drawer_settings">Configuración</string>
     <string name="drawer_help_support">Ayuda y soporte</string>
     <string name="drawer_logout">Cerrar sesión</string>
-    <string name="drawer_version">Capilux v0.27.0</string>
+    <string name="drawer_version">Capilux v1.0.0</string>
     <string name="drawer_copyright">© 2025 Capilux. Todos los derechos reservados.</string>
     <string name="open_menu">Abrir menú</string>
     <string name="gallery">Galería</string>
@@ -113,7 +113,7 @@
     <string name="secret_answer">Respuesta secreta</string>
     <string name="finish">Finalizar</string>
     <string name="welcome_desc_prefix">Descubre el </string>
-    <string name="welcome_desc_highlight">corte perfecto</string>
+    <string name="welcome_desc_highlight"> corte perfecto </string>
     <string name="welcome_desc_suffix"> para tu tipo de rostro con nuestra tecnología de análisis facial</string>
     <string name="welcome_step_take_photo">Toma o sube una foto de tu rostro</string>
     <string name="welcome_step_analyze">Analizamos tu estructura facial</string>
@@ -167,5 +167,7 @@
     <string name="recommended_styles">Estilos recomendados</string>
     <string name="recommended_styles_for">Estilos recomendados para %1$s</string>
     <string name="missing_image_mask">No se encontró la imagen o la máscara.</string>
+    <string name="tap_to_preview">Toca para ver la vista previa</string>
+    <string name="select_style_prompt" translatable="false">Selecciona un estilo para personalizar tu foto</string>
 </resources>
 

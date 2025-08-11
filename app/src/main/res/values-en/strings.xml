@@ -169,4 +169,7 @@
     <string name="recommended_styles">Recommended styles</string>
     <string name="recommended_styles_for">Recommended styles for %1$s</string>
     <string name="missing_image_mask">Image or mask not found.</string>
+    <string name="tap_to_preview">Tap to see preview</string>
+    <string name="select_style_prompt">Select a style to personalize your photo</string>
+
 </resources>
