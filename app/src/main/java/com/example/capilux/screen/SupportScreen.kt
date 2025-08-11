@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -55,10 +56,10 @@ fun SupportScreen(navController: NavHostController, useAltTheme: Boolean) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ayuda y soporte", color = Color.White) },
+                title = { Text(stringResource(R.string.drawer_help_support), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atrás", tint = Color.White)
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -80,28 +81,28 @@ fun SupportScreen(navController: NavHostController, useAltTheme: Boolean) {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Logo Capilux",
+                contentDescription = stringResource(R.string.support_logo_description),
                 modifier = Modifier
                     .size(140.dp)
                     .offset(y = offsetY.dp)
             )
             Spacer(modifier = Modifier.size(24.dp))
             Text(
-                text = "¿Necesitas ayuda? Contáctanos en:",
+                text = stringResource(R.string.support_contact_prompt),
                 color = Color.White,
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.size(12.dp))
             Text(
-                text = "soporte@capilux.com",
+                text = stringResource(R.string.support_email),
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp
             )
             Spacer(modifier = Modifier.size(4.dp))
             Text(
-                text = "Teléfono: +1 234 567 890",
+                text = stringResource(R.string.support_phone),
                 color = Color.White,
                 style = MaterialTheme.typography.bodyLarge
             )

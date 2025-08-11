@@ -26,6 +26,8 @@ import androidx.navigation.NavHostController
 import androidx.compose.foundation.BorderStroke
 import com.example.capilux.ui.theme.backgroundGradient
 import java.io.File
+import androidx.compose.ui.res.stringResource
+import com.example.capilux.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +47,7 @@ fun MaskPreviewScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Previsualización",
+                        text = stringResource(R.string.mask_preview_title),
                         color = Color.White,
                         style = MaterialTheme.typography.titleLarge
                     )
@@ -54,7 +56,7 @@ fun MaskPreviewScreen(
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver",
+                            contentDescription = stringResource(R.string.back),
                             tint = Color.White
                         )
                     }
@@ -83,7 +85,7 @@ fun MaskPreviewScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Imagen Original",
+                    text = stringResource(R.string.original_image),
                     color = Color.White.copy(alpha = 0.9f),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -91,7 +93,7 @@ fun MaskPreviewScreen(
 
                 ImageWithScroll(
                     file = originalFile,
-                    errorText = "Sin imagen original"
+                    errorText = stringResource(R.string.no_original_image)
                 )
             }
 
@@ -110,7 +112,7 @@ fun MaskPreviewScreen(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "Transformación aplicada",
+                    text = stringResource(R.string.transformation_applied),
                     color = Color.White.copy(alpha = 0.7f),
                     style = MaterialTheme.typography.labelMedium
                 )
@@ -133,7 +135,7 @@ fun MaskPreviewScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Máscara Generada",
+                    text = stringResource(R.string.generated_mask),
                     color = Color.White.copy(alpha = 0.9f),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -141,7 +143,7 @@ fun MaskPreviewScreen(
 
                 ImageWithScroll(
                     file = maskFile,
-                    errorText = "Máscara no disponible"
+                    errorText = stringResource(R.string.mask_not_available)
                 )
             }
 
@@ -168,7 +170,7 @@ fun MaskPreviewScreen(
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Confirmar y Continuar", style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.confirm_and_continue), style = MaterialTheme.typography.labelLarge)
                 }
 
                 // Special design for generate new mask button
@@ -190,7 +192,7 @@ fun MaskPreviewScreen(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text("Generar Nueva Máscara", style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.generate_new_mask), style = MaterialTheme.typography.labelLarge)
                 }
             }
 
@@ -225,7 +227,7 @@ private fun ImageWithScroll(
             ) {
                 Image(
                     bitmap = bitmap.asImageBitmap(),
-                    contentDescription = "Preview",
+                    contentDescription = stringResource(R.string.mask_preview_title),
                     modifier = Modifier.fillMaxWidth(),
                     contentScale = ContentScale.Fit
                 )
