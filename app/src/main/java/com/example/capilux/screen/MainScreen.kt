@@ -1,13 +1,20 @@
+// MainScreen.kt  (frontal por defecto + máxima calidad)
 package com.example.capilux.screen
 
 import android.content.Context
 import android.net.Uri
+import android.util.Size
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageCapture
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,7 +31,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,7 +38,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Cameraswitch
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
@@ -60,6 +65,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,22 +75,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.foundation.Canvas
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.example.capilux.R
+import com.example.capilux.SharedViewModel
 import com.example.capilux.components.CameraPreview
 import com.example.capilux.components.PhotoRecommendationDialog
 import com.example.capilux.ui.theme.IconTextButton
@@ -93,23 +97,18 @@ import com.example.capilux.utils.EncryptedPrefs
 import com.example.capilux.utils.FaceFrameAnalyzer
 import com.example.capilux.utils.compressImage
 import com.example.capilux.utils.takePhoto
-import com.example.capilux.SharedViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.material3.AlertDialog as MaterialAlertDialog
 
-// Guarda si el diálogo ya fue mostrado
+// ===== Preferencias simples para recordar si ya mostramos el diálogo =====
 fun setDialogShown(context: Context, shown: Boolean) {
     val sharedPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     sharedPrefs.edit().putBoolean("dialog_shown", shown).apply()
 }
-
-// Verifica si el diálogo ya fue mostrado
 fun isDialogShown(context: Context): Boolean {
     val sharedPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     return sharedPrefs.getBoolean("dialog_shown", false)
 }
-
-// Restablecer la bandera al cerrar la app
 fun resetDialogFlag(context: Context) {
     val sharedPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     sharedPrefs.edit().putBoolean("dialog_shown", false).apply()
@@ -131,12 +130,36 @@ fun MainScreen(
 
     val gradient = backgroundGradient(useAltTheme)
 
+    // ====== Calidad máxima en captura + análisis liviano ======
+    // Preferir la resolución más alta disponible para CAPTURA.
+    val captureResSelector = remember {
+        ResolutionSelector.Builder()
+            .setResolutionStrategy(ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY)
+            .build()
+    }
+    // Mantener análisis en 640x480 aprox. para no restringir la captura.
+    val analysisResSelector = remember {
+        ResolutionSelector.Builder()
+            .setResolutionStrategy(
+                ResolutionStrategy(
+                    Size(640, 480),
+                    ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER
+                )
+            ).build()
+    }
+
+    // 📷 Controller: IMAGE_CAPTURE + IMAGE_ANALYSIS (ya lo usabas):contentReference[oaicite:3]{index=3}
     val cameraController = remember {
         LifecycleCameraController(context).apply {
-            // Configurar casos de uso para captura y análisis en tiempo real
             setEnabledUseCases(CameraController.IMAGE_CAPTURE or CameraController.IMAGE_ANALYSIS)
+            setImageCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+            setImageAnalysisBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            // Frontal por defecto
+            cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
         }
     }
+
+    // ✅ Estado: rostro dentro del marco
     val faceInsideFrame = remember { mutableStateOf(false) }
     val analysisExecutor = remember { java.util.concurrent.Executors.newSingleThreadExecutor() }
     LaunchedEffect(Unit) {
@@ -144,7 +167,11 @@ fun MainScreen(
             faceInsideFrame.value = it
         })
     }
-    var isFrontCamera by remember { mutableStateOf(false) }
+
+    // Frontal por defecto en UI
+    var isFrontCamera by remember { mutableStateOf(true) } // antes false:contentReference[oaicite:4]{index=4}
+
+    // 📁 Selector de galería
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
@@ -152,20 +179,22 @@ fun MainScreen(
                 val compressedUri = compressImage(context, it)
                 sharedViewModel.updateImageUri(compressedUri)
                 val sharedPrefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-                sharedPrefs.edit().putString("last_captured_image", compressedUri.toString())
-                    .apply()
+                sharedPrefs.edit().putString("last_captured_image", compressedUri.toString()).apply()
                 navController.navigate("confirmPhoto/${Uri.encode(compressedUri.toString())}")
             }
         }
     )
+
     val sharedPrefs = remember { context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE) }
     val savedImageUri = remember { sharedPrefs.getString("imageUri", null) }
     val profileUri = savedImageUri?.let { Uri.parse(it) } ?: profileImageUri
+
+    // 💡 Diálogo de recomendaciones inicial
     val showRecommendationsDialog = remember { mutableStateOf(!isDialogShown(context)) }
     if (showRecommendationsDialog.value) {
         PhotoRecommendationDialog(onDismiss = {
             showRecommendationsDialog.value = false
-            setDialogShown(context, true) // Marca que el diálogo ha sido mostrado
+            setDialogShown(context, true)
         })
     }
 
@@ -181,10 +210,10 @@ fun MainScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .verticalScroll(rememberScrollState()) // Esto agrega scroll
+                        .verticalScroll(rememberScrollState())
                         .padding(16.dp)
                 ) {
-                    // Encabezado con foto de perfil
+                    // ===== Header con foto y nombre =====
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -192,7 +221,6 @@ fun MainScreen(
                             .padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Foto de perfil
                         Box(
                             modifier = Modifier
                                 .size(120.dp)
@@ -204,23 +232,20 @@ fun MainScreen(
                             if (profileUri != null) {
                                 Image(
                                     painter = rememberAsyncImagePainter(model = profileUri),
-                                    contentDescription = "Foto de perfil",
+                                    contentDescription = stringResource(R.string.profile_photo),
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize()
                                 )
                             } else {
                                 Icon(
                                     imageVector = Icons.Filled.Person,
-                                    contentDescription = "Foto de perfil",
+                                    contentDescription = stringResource(R.string.profile_photo),
                                     tint = Color.White,
                                     modifier = Modifier.size(60.dp)
                                 )
                             }
                         }
-
                         Spacer(modifier = Modifier.height(16.dp))
-
-                        // Nombre de usuario
                         Text(
                             text = username,
                             color = Color.White,
@@ -231,128 +256,87 @@ fun MainScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Sección principal
+                    // ===== Navegación =====
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                     ) {
-                        // Navegación principal
                         Text(
-                            text = "NAVEGACIÓN",
+                            text = stringResource(R.string.drawer_section_navigation),
                             color = Color.White.copy(alpha = 0.6f),
                             fontSize = 12.sp,
                             modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
                         )
 
                         NavigationDrawerItem(
-                            label = { Text("Inicio", color = Color.White) },
+                            label = { Text(stringResource(R.string.drawer_home), color = Color.White) },
                             selected = true,
                             onClick = { scope.launch { drawerState.close() } },
-                            icon = {
-                                Icon(
-                                    Icons.Filled.Home,
-                                    contentDescription = "Inicio",
-                                    tint = Color.White
-                                )
-                            },
+                            icon = { Icon(Icons.Filled.Home, contentDescription = null, tint = Color.White) },
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
 
-
                         NavigationDrawerItem(
-                            label = { Text("Im\u00e1genes guardadas", color = Color.White) },
+                            label = { Text(stringResource(R.string.drawer_saved_images), color = Color.White) },
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
                                 navController.navigate("savedImages")
                             },
-                            icon = {
-                                Icon(
-                                    Icons.Filled.History,
-                                    contentDescription = "Im\u00e1genes guardadas",
-                                    tint = Color.White
-                                )
-                            },
+                            icon = { Icon(Icons.Filled.History, contentDescription = null, tint = Color.White) },
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
 
-                        // Divider
                         Divider(
                             color = Color.White.copy(alpha = 0.2f),
                             thickness = 1.dp,
                             modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp)
                         )
 
-                        // Configuración y cuenta
                         Text(
-                            text = "CONFIGURACIÓN",
+                            text = stringResource(R.string.drawer_section_settings),
                             color = Color.White.copy(alpha = 0.6f),
                             fontSize = 12.sp,
                             modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
                         )
 
                         NavigationDrawerItem(
-                            label = { Text("Configuración", color = Color.White) },
+                            label = { Text(stringResource(R.string.drawer_settings), color = Color.White) },
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
                                 navController.navigate("config")
                             },
-                            icon = {
-                                Icon(
-                                    Icons.Filled.Settings,
-                                    contentDescription = "Configuración",
-                                    tint = Color.White
-                                )
-                            },
+                            icon = { Icon(Icons.Filled.Settings, contentDescription = null, tint = Color.White) },
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
 
                         NavigationDrawerItem(
-                            label = { Text("Ayuda y soporte", color = Color.White) },
+                            label = { Text(stringResource(R.string.drawer_help_support), color = Color.White) },
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
                                 navController.navigate("support")
                             },
-                            icon = {
-                                Icon(
-                                    Icons.Filled.Help,
-                                    contentDescription = "Ayuda",
-                                    tint = Color.White
-                                )
-                            },
+                            icon = { Icon(Icons.Filled.Help, contentDescription = null, tint = Color.White) },
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
 
-                    // Pie de página
+                    // ===== Footer =====
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Botón de cerrar sesión
                         Button(
                             onClick = {
-                                // Lógica para cerrar sesión
-                                val sharedPrefs =
-                                    context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-                                with(sharedPrefs.edit()) {
-                                    remove("username")
-                                    remove("imageUri")
-                                    apply()
-                                }
+                                val sp = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                                with(sp.edit()) { remove("username"); remove("imageUri"); apply() }
                                 EncryptedPrefs.clearSession(context)
-
-                                // Volver al inicio y limpiar el backstack
-                                navController.navigate("splashDecision") {
-                                    popUpTo(0)
-                                }
-
-                                // Cerrar el menú lateral
+                                navController.navigate("splashDecision") { popUpTo(0) }
                                 scope.launch { drawerState.close() }
                             },
                             modifier = Modifier
@@ -364,27 +348,19 @@ fun MainScreen(
                                 contentColor = Color.White
                             )
                         ) {
-                            Icon(
-                                imageVector = Icons.Filled.Logout,
-                                contentDescription = "Cerrar sesión",
-                                modifier = Modifier.size(20.dp)
-                            )
+                            Icon(imageVector = Icons.Filled.Logout, contentDescription = null, modifier = Modifier.size(20.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Cerrar sesión")
+                            Text(stringResource(R.string.drawer_logout))
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
-
-                        // Versión de la app
                         Text(
-                            text = "Capilux v0.27.0",
+                            text = stringResource(R.string.drawer_version),
                             color = Color.White.copy(alpha = 0.6f),
                             fontSize = 12.sp
                         )
-
-                        // Información de derechos
                         Text(
-                            text = "© 2025 Capilux. Todos los derechos reservados.",
+                            text = stringResource(R.string.drawer_copyright),
                             color = Color.White.copy(alpha = 0.4f),
                             fontSize = 10.sp,
                             textAlign = TextAlign.Center
@@ -399,18 +375,14 @@ fun MainScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            "Capilux",
+                            stringResource(R.string.app_name),
                             color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(
-                                imageVector = Icons.Filled.Menu,
-                                contentDescription = "Abrir menú",
-                                tint = Color.White
-                            )
+                            Icon(imageVector = Icons.Filled.Menu, contentDescription = stringResource(R.string.open_menu), tint = Color.White)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -429,24 +401,13 @@ fun MainScreen(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         IconTextButton(
-                            text = "Galería",
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.Filled.Photo,
-                                    contentDescription = "Galería"
-                                )
-                            },
+                            text = stringResource(R.string.gallery),
+                            icon = { Icon(imageVector = Icons.Filled.Photo, contentDescription = stringResource(R.string.gallery)) },
                             onClick = { galleryLauncher.launch("image/*") }
                         )
-
                         IconTextButton(
-                            text = "Tomar foto",
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.Filled.Camera,
-                                    contentDescription = "Tomar foto"
-                                )
-                            },
+                            text = stringResource(R.string.take_photo),
+                            icon = { Icon(imageVector = Icons.Filled.Camera, contentDescription = stringResource(R.string.take_photo)) },
                             onClick = {
                                 takePhoto(
                                     cameraController = cameraController,
@@ -479,19 +440,19 @@ fun MainScreen(
                 showErrorDialog?.let { errorMessage ->
                     MaterialAlertDialog(
                         onDismissRequest = { showErrorDialog = null },
-                        title = { Text("Error") },
+                        title = { Text(stringResource(R.string.error)) },
                         text = { Text(errorMessage) },
                         confirmButton = {
                             androidx.compose.material3.Button(onClick = { showErrorDialog = null }) {
-                                Text("OK")
+                                Text(stringResource(R.string.ok))
                             }
                         }
                     )
                 }
 
-                // Mensaje de bienvenida
+                // Saludo
                 Text(
-                    text = "Hola, $username",
+                    text = stringResource(R.string.greeting, username),
                     style = MaterialTheme.typography.titleLarge,
                     color = Color.White,
                     modifier = Modifier
@@ -502,7 +463,7 @@ fun MainScreen(
                 )
 
                 Text(
-                    text = "Captura tu rostro o selecciona una foto para analizar tu tipo de rostro",
+                    text = stringResource(R.string.main_instruction),
                     color = Color.White.copy(alpha = 0.9f),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -510,7 +471,7 @@ fun MainScreen(
                     textAlign = TextAlign.Center
                 )
 
-                // Contenedor de la cámara
+                // ===== Vista de cámara =====
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -530,7 +491,7 @@ fun MainScreen(
                             cameraController = cameraController
                         )
 
-                        // Marco guía con forma de rostro
+                        // Óvalo guía simple
                         Canvas(
                             modifier = Modifier
                                 .align(Alignment.Center)
@@ -541,36 +502,24 @@ fun MainScreen(
                             val path = Path().apply {
                                 moveTo(size.width / 2f, strokeWidth / 2)
                                 cubicTo(
-                                    size.width * 0.75f,
-                                    strokeWidth / 2,
-                                    size.width * 0.95f,
-                                    size.height * 0.25f,
-                                    size.width * 0.95f,
-                                    size.height * 0.55f
+                                    size.width * 0.75f, strokeWidth / 2,
+                                    size.width * 0.95f, size.height * 0.25f,
+                                    size.width * 0.95f, size.height * 0.55f
                                 )
                                 cubicTo(
-                                    size.width * 0.95f,
-                                    size.height * 0.85f,
-                                    size.width * 0.75f,
-                                    size.height - strokeWidth / 2,
-                                    size.width / 2f,
-                                    size.height - strokeWidth / 2
+                                    size.width * 0.95f, size.height * 0.85f,
+                                    size.width * 0.75f, size.height - strokeWidth / 2,
+                                    size.width / 2f, size.height - strokeWidth / 2
                                 )
                                 cubicTo(
-                                    size.width * 0.25f,
-                                    size.height - strokeWidth / 2,
-                                    size.width * 0.05f,
-                                    size.height * 0.85f,
-                                    size.width * 0.05f,
-                                    size.height * 0.55f
+                                    size.width * 0.25f, size.height - strokeWidth / 2,
+                                    size.width * 0.05f, size.height * 0.85f,
+                                    size.width * 0.05f, size.height * 0.55f
                                 )
                                 cubicTo(
-                                    size.width * 0.05f,
-                                    size.height * 0.25f,
-                                    size.width * 0.25f,
-                                    strokeWidth / 2,
-                                    size.width / 2f,
-                                    strokeWidth / 2
+                                    size.width * 0.05f, size.height * 0.25f,
+                                    size.width * 0.25f, strokeWidth / 2,
+                                    size.width / 2f, strokeWidth / 2
                                 )
                                 close()
                             }
@@ -581,15 +530,18 @@ fun MainScreen(
                             )
                         }
 
+                        // Mensaje superior
                         Text(
-                            text = if (faceInsideFrame.value) "Puedes tomar la foto" else "Coloca tu cara en el marco",
+                            text = if (faceInsideFrame.value)
+                                stringResource(R.string.face_ready)
+                            else stringResource(R.string.face_not_ready),
                             color = Color.White,
                             modifier = Modifier
                                 .align(Alignment.TopCenter)
                                 .padding(top = 16.dp)
                         )
 
-                        // Botón para cambiar cámara
+                        // Cambiar cámara
                         Box(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
@@ -606,41 +558,38 @@ fun MainScreen(
                                 },
                                 modifier = Modifier
                                     .size(48.dp)
-                                    .background(
-                                        Color(0xAA2D0C5A),
-                                        CircleShape
-                                    )
+                                    .background(Color(0xAA2D0C5A), CircleShape)
                                     .border(1.dp, Color.White.copy(alpha = 0.5f), CircleShape)
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Cameraswitch,
-                                    contentDescription = "Cambiar cámara",
+                                    contentDescription = stringResource(R.string.switch_camera),
                                     tint = Color.White,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
                         }
 
-                        // Indicador de modo cámara
+                        // Indicador modo cámara (opcional)
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .padding(16.dp)
                         ) {
                             Text(
-                                text = if (isFrontCamera) "Cámara frontal" else "Cámara trasera",
+                                text = if (isFrontCamera)
+                                    stringResource(R.string.front_camera)
+                                else
+                                    stringResource(R.string.rear_camera),
                                 color = Color.White,
                                 modifier = Modifier
-                                    .background(
-                                        Color(0xAA2D0C5A),
-                                        RoundedCornerShape(16.dp)
-                                    )
+                                    .background(Color(0xAA2D0C5A), RoundedCornerShape(16.dp))
                                     .padding(horizontal = 16.dp, vertical = 8.dp)
                             )
                         }
                     }
                 }
-                        }
-                    }
-                }
             }
+        }
+    }
+}

@@ -1,14 +1,20 @@
 package com.example.capilux.screen.analysis
 
 import android.net.Uri
-import android.util.Log
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
+import com.example.capilux.R
 import com.example.capilux.SharedViewModel
+import com.example.capilux.components.AdvancedLoadingOverlay
 import com.example.capilux.network.CapiluxApi
-import com.example.capilux.components.LoadingOverlay
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
 import java.io.File
@@ -21,15 +27,13 @@ fun ProcessingScreen(
     sharedViewModel: SharedViewModel
 ) {
     val context = LocalContext.current
-
-    // ⚡️ Usa siempre la imagen persistente (almacenamiento privado)
     val originalFile = File(context.filesDir, "original_usuario.jpg")
     val decodedUri = Uri.fromFile(originalFile)
 
     LaunchedEffect(originalFile.absolutePath) {
         if (!originalFile.exists() || originalFile.length() < 10_000) {
             navController.navigate(
-                "errorScreen/${Uri.encode("No se encontró la imagen original. Por favor, vuelve a tomar o seleccionar una foto.")}"
+                "errorScreen/${Uri.encode(context.getString(R.string.processing_error_missing_image))}"
             )
             return@LaunchedEffect
         }
@@ -37,22 +41,43 @@ fun ProcessingScreen(
             val resultado = withTimeout(20_000) {
                 CapiluxApi.analizarSimetria(context, decodedUri)
             }
-            Log.d("Capilux", "🚀 Análisis completado.")
+            // ✅ Guardar imagen y resultado
             sharedViewModel.updateImageUri(decodedUri)
             sharedViewModel.updateAnalysisResult(resultado)
+
+            // ✅ EXTRA: parsear y guardar la forma en el ViewModel (para usarla en PromptSelection)
+            val lineas = resultado.trim().lines().filter { it.isNotBlank() }
+            val tipo = lineas.firstOrNull { it.contains("Forma del rostro:", ignoreCase = true) }
+                ?.split(":")
+                ?.getOrNull(1)
+                ?.trim()
+                ?.lowercase()
+                ?: "desconocido"
+            sharedViewModel.updateFaceShape(tipo)
+
             navController.navigate("analysisResult") {
                 popUpTo("processing/$imageUri") { inclusive = true }
             }
         } catch (e: TimeoutCancellationException) {
             navController.navigate(
-                "errorScreen/${Uri.encode("El análisis tardó demasiado, inténtalo nuevamente")}"
+                "errorScreen/${Uri.encode(context.getString(R.string.processing_error_timeout))}"
             )
         } catch (e: Exception) {
             navController.navigate(
-                "errorScreen/${Uri.encode("Error: ${e.message}")}"
+                "errorScreen/${Uri.encode(context.getString(R.string.processing_error_generic, e.message))}"
             )
         }
     }
 
-    LoadingOverlay(message = "Analizando tu rostro...", useAltTheme = useAltTheme)
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        AdvancedLoadingOverlay(
+            message = stringResource(R.string.processing_message),
+            subMessage = stringResource(R.string.processing_submessage),
+            useAltTheme = useAltTheme,
+            logo = painterResource(id = R.drawable.logo)
+        )
+    }
 }

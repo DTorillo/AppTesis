@@ -14,12 +14,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.ui.theme.gradientTextFieldColors
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.capilux.utils.EncryptedPrefs
+import com.example.capilux.R
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,10 +33,10 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
     var pin by remember { mutableStateOf("") }
     var confirmPin by remember { mutableStateOf("") }
     val preguntas = listOf(
-        "¿Nombre de tu primera mascota?",
-        "¿Ciudad donde naciste?",
-        "¿Comida favorita?",
-        "¿Nombre de tu mejor amigo(a) de la infancia?"
+        stringResource(R.string.security_question_pet),
+        stringResource(R.string.security_question_city),
+        stringResource(R.string.security_question_food),
+        stringResource(R.string.security_question_friend)
     )
 
     var pregunta by remember { mutableStateOf(preguntas[0]) }
@@ -54,7 +57,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "Configura tu seguridad",
+                text = stringResource(R.string.setup_security_title),
                 color = Color.White,
                 fontSize = 22.sp,
                 style = MaterialTheme.typography.headlineSmall
@@ -65,7 +68,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
             OutlinedTextField(
                 value = pin,
                 onValueChange = { if (it.length <= 6) pin = it },
-                label = { Text("Elige un PIN de 6 dígitos") },
+                label = { Text(stringResource(R.string.choose_pin_6_digits)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth(0.8f),
                 shape = RoundedCornerShape(16.dp),
@@ -77,7 +80,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
             OutlinedTextField(
                 value = confirmPin,
                 onValueChange = { if (it.length <= 6) confirmPin = it },
-                label = { Text("Confirma tu PIN") },
+                label = { Text(stringResource(R.string.confirm_pin)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth(0.8f),
                 shape = RoundedCornerShape(16.dp),
@@ -88,7 +91,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
 
             if (confirmPin.isNotEmpty() && confirmPin != pin) {
                 Text(
-                    text = "Los PIN no coinciden",
+                    text = stringResource(R.string.pin_mismatch),
                     color = Color.Red,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -105,7 +108,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
                             checkmarkColor = Color(0xFF6A11CB)
                         )
                     )
-                    Text("Activar acceso con huella", color = Color.White)
+                    Text(stringResource(R.string.enable_fingerprint_access), color = Color.White)
                 }
             }
 
@@ -119,7 +122,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
                     value = pregunta,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Pregunta de seguridad") },
+                    label = { Text(stringResource(R.string.security_question_label)) },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandPreguntas)
                     },
@@ -151,7 +154,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
             OutlinedTextField(
                 value = respuesta,
                 onValueChange = { respuesta = it },
-                label = { Text("Respuesta secreta") },
+                label = { Text(stringResource(R.string.secret_answer)) },
                 modifier = Modifier.fillMaxWidth(0.8f),
                 shape = RoundedCornerShape(16.dp),
                 colors = gradientTextFieldColors()
@@ -160,7 +163,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
             Spacer(modifier = Modifier.height(24.dp))
 
             PrimaryButton(
-                text = "Finalizar",
+                text = stringResource(R.string.finish),
                 onClick = {
                     if (pin.length == 6 && pregunta.isNotBlank() && respuesta.isNotBlank()) {
                         EncryptedPrefs.savePin(context, pin)

@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -63,7 +64,7 @@ fun SplashDecisionScreen(navController: NavHostController, useAltTheme: Boolean)
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
                     painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Logo",
+                    contentDescription = stringResource(R.string.app_logo),
                     modifier = Modifier
                         .size(140.dp)
                         .scale(scale)
@@ -72,7 +73,7 @@ fun SplashDecisionScreen(navController: NavHostController, useAltTheme: Boolean)
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = "Bienvenido a Capilux",
+                    text = stringResource(R.string.welcome_to_capilux),
                     color = Color.White,
                     style = MaterialTheme.typography.headlineSmall,
                     fontSize = 22.sp
@@ -81,7 +82,7 @@ fun SplashDecisionScreen(navController: NavHostController, useAltTheme: Boolean)
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Explora el poder de tu rostro",
+                    text = stringResource(R.string.explore_face_power),
                     color = Color.White.copy(alpha = 0.8f),
                     style = MaterialTheme.typography.bodyMedium
                 )
