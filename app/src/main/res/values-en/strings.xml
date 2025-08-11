@@ -19,6 +19,7 @@
     <string name="incorrect_data">Incorrect data</string>
     <string name="generated_style_default">Generated style</string>
     <string name="generated_style_applied">Applied style: %1$s</string>
+    <string name="generated_result_title">Generated result</string>
     <string name="generated_image_not_found">❌ Generated image not found</string>
     <string name="back_to_home">Back to home</string>
     <string name="save_image">Save image</string>
