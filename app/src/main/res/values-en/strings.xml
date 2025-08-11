@@ -19,6 +19,7 @@
     <string name="incorrect_data">Incorrect data</string>
     <string name="generated_style_default">Generated style</string>
     <string name="generated_style_applied">Applied style: %1$s</string>
+    <string name="generated_result_title">Generated result</string>
     <string name="generated_image_not_found">❌ Generated image not found</string>
     <string name="back_to_home">Back to home</string>
     <string name="save_image">Save image</string>
@@ -140,5 +141,35 @@
     <string name="setup_security_title">Set up security questions</string>
 
 
-</resources>
+    <string name="photo_recommendation_title">Tips for taking your photo</string>
+    <string name="photo_recommendation_1">1. Center your face in the frame.</string>
+    <string name="photo_recommendation_2">2. Ensure your face is well lit.</string>
+    <string name="photo_recommendation_3">3. Look forward and keep your head still.</string>
+    <string name="photo_recommendation_4">4. Make sure your hair is loose.</string>
+    <string name="close">Close</string>
+    <string name="support_contact_prompt">Need help? Contact us at:</string>
+    <string name="support_email">support@capilux.com</string>
+    <string name="support_phone">Phone: +1 234 567 890</string>
+    <string name="support_logo_description">Capilux logo</string>
+    <string name="support_terms_link">View terms and conditions</string>
+    <string name="photo_ok_question">Is the photo okay?</string>
+    <string name="retake_photo">Retake</string>
+    <string name="next">Next</string>
+    <string name="image_not_found_message">Image not found, please retake or choose another.</string>
+    <string name="mask_preview_title">Preview</string>
+    <string name="original_image">Original Image</string>
+    <string name="no_original_image">No original image</string>
+    <string name="transformation_applied">Transformation applied</string>
+    <string name="generated_mask">Generated Mask</string>
+    <string name="mask_not_available">Mask not available</string>
+    <string name="confirm_and_continue">Confirm and Continue</string>
+    <string name="generate_new_mask">Generate New Mask</string>
+    <string name="selected_style">Selected style</string>
+    <string name="style_selection_title">Select a style</string>
+    <string name="recommended_styles">Recommended styles</string>
+    <string name="recommended_styles_for">Recommended styles for %1$s</string>
+    <string name="missing_image_mask">Image or mask not found.</string>
+    <string name="tap_to_preview">Tap to see preview</string>
+    <string name="select_style_prompt">Select a style to personalize your photo</string>
 
+</resources>

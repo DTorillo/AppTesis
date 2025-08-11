@@ -139,7 +139,7 @@ fun SetupSecurityScreen(navController: NavHostController, useAltTheme: Boolean) 
                 ) {
                     preguntas.forEach { option ->
                         DropdownMenuItem(
-                            text = { Text(option, color = Color.White) },
+                            text = { Text(option, color = Color.Black) },
                             onClick = {
                                 pregunta = option
                                 expandPreguntas = false

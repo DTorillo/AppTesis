@@ -21,6 +21,8 @@ import com.example.capilux.SharedViewModel
 import com.example.capilux.ui.theme.backgroundGradient
 import com.example.capilux.utils.saveImageToPrivateStorage
 import java.io.File
+import androidx.compose.ui.res.stringResource
+import com.example.capilux.R
 
 @Composable
 fun ConfirmPhotoScreen(
@@ -73,7 +75,7 @@ fun ConfirmPhotoScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "¿La foto está bien?",
+                text = stringResource(R.string.photo_ok_question),
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium
             )
@@ -85,7 +87,7 @@ fun ConfirmPhotoScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(onClick = { navController.popBackStack() }) {
-                    Text("Volver a tomar")
+                    Text(stringResource(R.string.retake_photo))
                 }
                 Button(onClick = {
                     if (privateFilePath == null || !File(privateFilePath!!).exists()) {
@@ -96,7 +98,7 @@ fun ConfirmPhotoScreen(
                         }
                     }
                 }) {
-                    Text("Siguiente")
+                    Text(stringResource(R.string.next))
                 }
             }
         }
@@ -105,11 +107,11 @@ fun ConfirmPhotoScreen(
     if (showDialog.value) {
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
-            title = { Text("Error") },
-            text = { Text("No se encontró la imagen, vuelve a tomarla o selecciona otra.") },
+            title = { Text(stringResource(R.string.error)) },
+            text = { Text(stringResource(R.string.image_not_found_message)) },
             confirmButton = {
                 Button(onClick = { showDialog.value = false }) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok))
                 }
             }
         )
