@@ -19,7 +19,6 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
 import java.io.File
 
-
 @Composable
 fun ProcessingScreen(
     imageUri: String,
@@ -42,8 +41,20 @@ fun ProcessingScreen(
             val resultado = withTimeout(20_000) {
                 CapiluxApi.analizarSimetria(context, decodedUri)
             }
+            // ✅ Guardar imagen y resultado
             sharedViewModel.updateImageUri(decodedUri)
             sharedViewModel.updateAnalysisResult(resultado)
+
+            // ✅ EXTRA: parsear y guardar la forma en el ViewModel (para usarla en PromptSelection)
+            val lineas = resultado.trim().lines().filter { it.isNotBlank() }
+            val tipo = lineas.firstOrNull { it.contains("Forma del rostro:", ignoreCase = true) }
+                ?.split(":")
+                ?.getOrNull(1)
+                ?.trim()
+                ?.lowercase()
+                ?: "desconocido"
+            sharedViewModel.updateFaceShape(tipo)
+
             navController.navigate("analysisResult") {
                 popUpTo("processing/$imageUri") { inclusive = true }
             }

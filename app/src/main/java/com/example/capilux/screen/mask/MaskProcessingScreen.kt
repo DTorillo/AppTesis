@@ -16,10 +16,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -46,14 +50,23 @@ fun MaskProcessingScreen(
     val originalFile = File(context.filesDir, "original_usuario.jpg")
     val decodedUri = Uri.fromFile(originalFile)
 
-    // Animación de carga
+    // Animación de carga mejorada
     val infiniteTransition = rememberInfiniteTransition()
     val rotation by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = LinearEasing),
+            animation = tween(1200, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
+        )
+    )
+
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.6f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
         )
     )
 
@@ -99,7 +112,7 @@ fun MaskProcessingScreen(
                     Text(
                         text = stringResource(R.string.mask_processing_title),
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        style = MaterialTheme.typography.headlineSmall
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold)
                     )
                 },
                 navigationIcon = {
@@ -132,6 +145,7 @@ fun MaskProcessingScreen(
                 loading.value -> {
                     AppLoadingAnimation(
                         rotation = rotation,
+                        pulseAlpha = pulseAlpha,
                         message = stringResource(R.string.mask_processing_transforming),
                         subMessage = stringResource(R.string.mask_processing_submessage),
                         useAltTheme = useAltTheme
@@ -187,6 +201,7 @@ fun MaskProcessingScreen(
 @Composable
 private fun AppLoadingAnimation(
     rotation: Float,
+    pulseAlpha: Float,
     message: String,
     subMessage: String,
     useAltTheme: Boolean,
@@ -194,58 +209,130 @@ private fun AppLoadingAnimation(
 ) {
     val primaryColor = if (useAltTheme) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
     val onPrimaryColor = if (useAltTheme) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onPrimary
+    val secondaryColor = if (useAltTheme) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary
 
     Column(
         modifier = modifier.padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        // Círculo de carga con estilo de la app
+        // Círculo de carga mejorado con gradiente y efecto de pulso
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(120.dp)
+                .size(150.dp)
+                .shadow(
+                    elevation = 16.dp,
+                    shape = CircleShape,
+                    spotColor = primaryColor.copy(alpha = 0.3f)
+                )
                 .background(
-                    color = primaryColor.copy(alpha = 0.1f),
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            primaryColor.copy(alpha = 0.2f),
+                            Color.Transparent
+                        )
+                    ),
                     shape = CircleShape
                 )
         ) {
+            // Anillo exterior animado
             CircularProgressIndicator(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(140.dp)
                     .rotate(rotation),
-                strokeWidth = 4.dp,
-                color = primaryColor,
+                strokeWidth = 8.dp,
+                color = secondaryColor.copy(alpha = pulseAlpha),
                 trackColor = Color.Transparent
             )
 
-            Icon(
-                imageVector = Icons.Default.Refresh,
-                contentDescription = null,
-                tint = onPrimaryColor,
+            // Círculo central con icono
+            Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .rotate(rotation * 0.5f)
-            )
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .background(primaryColor.copy(alpha = pulseAlpha * 0.8f))
+                    .padding(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = null,
+                    tint = onPrimaryColor,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .rotate(rotation * 0.75f)
+                )
+            }
         }
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        // Contenido textual mejorado
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Text(
                 text = message,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Medium
+                ),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = pulseAlpha),
                 textAlign = TextAlign.Center
             )
-
-            Spacer(Modifier.height(8.dp))
 
             Text(
                 text = subMessage,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
+
+        // Puntos de carga animados
+        LoadingDots(useAltTheme = useAltTheme)
+    }
+}
+
+@Composable
+private fun LoadingDots(useAltTheme: Boolean) {
+    val dotColor = if (useAltTheme)
+        MaterialTheme.colorScheme.secondary
+    else
+        MaterialTheme.colorScheme.primary
+
+    val infiniteTransition = rememberInfiniteTransition()
+
+    @Composable
+    fun AnimatedDot(delay: Int) {
+        val alpha by infiniteTransition.animateFloat(
+            initialValue = 0.3f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = keyframes {
+                    durationMillis = 1200
+                    0.3f at delay
+                    1f at delay + 300
+                    0.3f at delay + 600
+                },
+                repeatMode = RepeatMode.Restart
+            )
+        )
+
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .clip(CircleShape)
+                .background(dotColor.copy(alpha = alpha))
+        )
+    }
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AnimatedDot(0)
+        AnimatedDot(150)
+        AnimatedDot(300)
     }
 }
 
@@ -302,7 +389,9 @@ private fun AppErrorMessage(
 
             Text(
                 text = stringResource(R.string.mask_processing_error_title),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
                 color = onErrorContainerColor,
                 textAlign = TextAlign.Center
             )

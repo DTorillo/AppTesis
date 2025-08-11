@@ -11,26 +11,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Typography
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.example.capilux.ui.theme.Pink40
-import com.example.capilux.ui.theme.Pink80
-import com.example.capilux.ui.theme.Purple40
-import com.example.capilux.ui.theme.Purple80
-import com.example.capilux.ui.theme.PurpleGrey40
-import com.example.capilux.ui.theme.PurpleGrey80
 
 @Composable
 fun ProfileImageLarge(imageUri: Uri?) {
