@@ -16,20 +16,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -49,16 +53,23 @@ fun SupportScreen(navController: NavHostController, useAltTheme: Boolean) {
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 2000),
             repeatMode = RepeatMode.Reverse
-        ), label = "offsetY"
+        ),
+        label = "offsetY"
     )
+
+    val uriHandler = LocalUriHandler.current
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ayuda y soporte", color = Color.White) },
+                title = { Text(stringResource(R.string.drawer_help_support), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atrás", tint = Color.White)
+                        Icon(
+                            Icons.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = Color.White
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -80,31 +91,43 @@ fun SupportScreen(navController: NavHostController, useAltTheme: Boolean) {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Logo Capilux",
+                contentDescription = stringResource(R.string.support_logo_description),
                 modifier = Modifier
                     .size(140.dp)
                     .offset(y = offsetY.dp)
             )
             Spacer(modifier = Modifier.size(24.dp))
             Text(
-                text = "¿Necesitas ayuda? Contáctanos en:",
+                text = stringResource(R.string.support_contact_prompt),
                 color = Color.White,
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.size(12.dp))
             Text(
-                text = "soporte@capilux.com",
+                text = stringResource(R.string.support_email),
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp
             )
             Spacer(modifier = Modifier.size(4.dp))
             Text(
-                text = "Teléfono: +1 234 567 890",
+                text = stringResource(R.string.support_phone),
                 color = Color.White,
                 style = MaterialTheme.typography.bodyLarge
             )
+            Spacer(modifier = Modifier.size(16.dp))
+
+            // Botón morado que abre el link externo
+            Button(
+                onClick = { uriHandler.openUri("https://capilux-ai.netlify.app/") },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF6A1B9A), // morado
+                    contentColor = Color.White          // texto blanco
+                )
+            ) {
+                Text(text = "Términos y Condiciones de Uso")
+            }
         }
     }
 }

@@ -3,6 +3,8 @@ package com.example.capilux.screen.style
 import androidx.compose.foundation.BorderStroke
 import android.net.Uri as AndroidUri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.capilux.R
 import com.example.capilux.SharedViewModel
@@ -102,6 +105,8 @@ fun PromptSelectionScreen(
 
     val primaryColor = if (useAltTheme) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
     val onPrimaryColor = if (useAltTheme) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onPrimary
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
     Scaffold(
         topBar = {
@@ -109,8 +114,10 @@ fun PromptSelectionScreen(
                 title = {
                     Text(
                         text = stringResource(R.string.style_selection_title),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = Color.White // <- letras blancas
                     )
                 },
                 navigationIcon = {
@@ -144,117 +151,143 @@ fun PromptSelectionScreen(
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Header with face shape information
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = CardDefaults.cardElevation(4.dp)
+                // Header
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(surfaceColor.copy(alpha = 0.3f))
+                        .border(
+                            width = 1.dp,
+                            color = primaryColor.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = if (key == "DESCONOCIDO") {
                                 stringResource(R.string.recommended_styles)
                             } else {
                                 stringResource(R.string.recommended_styles_for, titleLabel.lowercase())
                             },
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Medium,
+                                color = Color.White // <- letras blancas
+                            ),
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = stringResource(R.string.select_style_prompt),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = Color.White // <- letras blancas
+                            ),
                             textAlign = TextAlign.Center
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Style options
+                // Style Options
                 prompts.forEach { opcion ->
-                    Card(
-                        onClick = {
-                            if (!imageFile.exists() || !maskFile.exists()) {
-                                val error = AndroidUri.encode(context.getString(R.string.missing_image_mask))
-                                navController.navigate("errorScreen/$error")
-                                return@Card
-                            }
-                            coroutineScope.launch {
-                                loading.value = true
-                                try {
-                                    CapiluxApi.generarEstilo(
-                                        context = context,
-                                        imageUri = AndroidUri.fromFile(imageFile),
-                                        mascaraFile = maskFile,
-                                        prompt = opcion.promptTecnico,
-                                        onSuccess = { resultado ->
-                                            val resultFile = File(context.filesDir, "resultado_sd.png")
-                                            resultFile.writeBytes(resultado)
-
-                                            sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
-                                            sharedViewModel.updateSelectedPromptText(opcion.promptTecnico)
-
-                                            val encodedPath = AndroidUri.encode(resultFile.absolutePath)
-                                            coroutineScope.launch(Dispatchers.Main) {
-                                                navController.navigate("generatedImage/$encodedPath") {
-                                                    popUpTo("main") { inclusive = false }
-                                                }
-                                            }
-                                        },
-                                        onError = { mensaje ->
-                                            val encodedMsg = AndroidUri.encode("${context.getString(R.string.error)}: $mensaje")
-                                            coroutineScope.launch(Dispatchers.Main) {
-                                                navController.navigate("errorScreen/$encodedMsg")
-                                            }
-                                        }
-                                    )
-                                } catch (e: Exception) {
-                                    val error = AndroidUri.encode("${context.getString(R.string.unexpected_error)}: ${e.message ?: ""}")
-                                    coroutineScope.launch(Dispatchers.Main) {
-                                        navController.navigate("errorScreen/$error")
-                                    }
-                                } finally {
-                                    loading.value = false
-                                }
-                            }
-                        },
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)
-                        ),
-                        elevation = CardDefaults.cardElevation(4.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                            .padding(vertical = 8.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(surfaceColor.copy(alpha = 0.4f))
+                            .border(
+                                width = 1.dp,
+                                color = primaryColor.copy(alpha = 0.3f),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .clickable {
+                                if (!imageFile.exists() || !maskFile.exists()) {
+                                    val error = AndroidUri.encode(context.getString(R.string.missing_image_mask))
+                                    navController.navigate("errorScreen/$error")
+                                    return@clickable
+                                }
+                                coroutineScope.launch {
+                                    loading.value = true
+                                    try {
+                                        CapiluxApi.generarEstilo(
+                                            context = context,
+                                            imageUri = AndroidUri.fromFile(imageFile),
+                                            mascaraFile = maskFile,
+                                            prompt = opcion.promptTecnico,
+                                            onSuccess = { resultado ->
+                                                val resultFile = File(context.filesDir, "resultado_sd.png")
+                                                resultFile.writeBytes(resultado)
+
+                                                sharedViewModel.updateSelectedPrompt(opcion.nombreVisible)
+                                                sharedViewModel.updateSelectedPromptText(opcion.promptTecnico)
+
+                                                val encodedPath = AndroidUri.encode(resultFile.absolutePath)
+                                                coroutineScope.launch(Dispatchers.Main) {
+                                                    navController.navigate("generatedImage/$encodedPath") {
+                                                        popUpTo("main") { inclusive = false }
+                                                    }
+                                                }
+                                            },
+                                            onError = { mensaje ->
+                                                val encodedMsg = AndroidUri.encode("${context.getString(R.string.error)}: $mensaje")
+                                                coroutineScope.launch(Dispatchers.Main) {
+                                                    navController.navigate("errorScreen/$encodedMsg")
+                                                }
+                                            }
+                                        )
+                                    } catch (e: Exception) {
+                                        val error = AndroidUri.encode("${context.getString(R.string.unexpected_error)}: ${e.message ?: ""}")
+                                        coroutineScope.launch(Dispatchers.Main) {
+                                            navController.navigate("errorScreen/$error")
+                                        }
+                                    } finally {
+                                        loading.value = false
+                                    }
+                                }
+                            }
                     ) {
-                        Box(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(
-                                    brush = Brush.verticalGradient(
-                                        colors = listOf(
-                                            primaryColor.copy(alpha = 0.1f),
-                                            Color.Transparent
-                                        )
-                                    )
-                                )
-                                .padding(16.dp)
+                                .padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
                                 text = opcion.nombreVisible,
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.White // <- letras blancas
+                                ),
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .height(1.dp)
+                                    .fillMaxWidth(0.6f)
+                                    .background(primaryColor.copy(alpha = 0.3f))
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = stringResource(R.string.tap_to_preview),
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    color = Color.White // <- letras blancas
+                                )
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
             if (loading.value) {
@@ -266,7 +299,6 @@ fun PromptSelectionScreen(
         }
     }
 }
-
 fun getPrompts(key: String): List<PromptOpcion> {
     return when (key) {
         "OVALADO" -> listOf(

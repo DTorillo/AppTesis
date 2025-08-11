@@ -19,6 +19,7 @@
     <string name="incorrect_data">Datos incorrectos</string>
     <string name="generated_style_default">Estilo generado</string>
     <string name="generated_style_applied">Estilo aplicado: %1$s</string>
+    <string name="generated_result_title">Resultado generado</string>
     <string name="generated_image_not_found">❌ No se encontró la imagen generada</string>
     <string name="back_to_home">Volver al inicio</string>
     <string name="save_image">Guardar imagen</string>
@@ -38,7 +39,7 @@
     <string name="drawer_settings">Configuración</string>
     <string name="drawer_help_support">Ayuda y soporte</string>
     <string name="drawer_logout">Cerrar sesión</string>
-    <string name="drawer_version">Capilux v0.27.0</string>
+    <string name="drawer_version">Capilux v1.0.0</string>
     <string name="drawer_copyright">© 2025 Capilux. Todos los derechos reservados.</string>
     <string name="open_menu">Abrir menú</string>
     <string name="gallery">Galería</string>
@@ -112,7 +113,7 @@
     <string name="secret_answer">Respuesta secreta</string>
     <string name="finish">Finalizar</string>
     <string name="welcome_desc_prefix">Descubre el </string>
-    <string name="welcome_desc_highlight">corte perfecto</string>
+    <string name="welcome_desc_highlight"> corte perfecto </string>
     <string name="welcome_desc_suffix"> para tu tipo de rostro con nuestra tecnología de análisis facial</string>
     <string name="welcome_step_take_photo">Toma o sube una foto de tu rostro</string>
     <string name="welcome_step_analyze">Analizamos tu estructura facial</string>
@@ -138,5 +139,35 @@
     <string name="security_question_food">¿Cuál es tu comida favorita?</string>
     <string name="security_question_friend">¿Cuál es el nombre de tu mejor amigo de la infancia?</string>
     <string name="setup_security_title">Configurar preguntas de seguridad</string>
+    <string name="photo_recommendation_title">Recomendaciones para tomar tu foto</string>
+    <string name="photo_recommendation_1">1. Centra tu rostro en el encuadre.</string>
+    <string name="photo_recommendation_2">2. Asegúrate de que tu rostro esté bien iluminado.</string>
+    <string name="photo_recommendation_3">3. Mira hacia adelante y no muevas la cabeza.</string>
+    <string name="photo_recommendation_4">4. Asegúrate de que tu cabello esté suelto.</string>
+    <string name="close">Cerrar</string>
+    <string name="support_contact_prompt">¿Necesitas ayuda? Contáctanos en:</string>
+    <string name="support_email">soporte@capilux.com</string>
+    <string name="support_phone">Teléfono: +1 234 567 890</string>
+    <string name="support_logo_description">Logo Capilux</string>
+    <string name="support_terms_link">Ver términos y condiciones</string>
+    <string name="photo_ok_question">¿La foto está bien?</string>
+    <string name="retake_photo">Volver a tomar</string>
+    <string name="next">Siguiente</string>
+    <string name="image_not_found_message">No se encontró la imagen, vuelve a tomarla o selecciona otra.</string>
+    <string name="mask_preview_title">Previsualización</string>
+    <string name="original_image">Imagen Original</string>
+    <string name="no_original_image">Sin imagen original</string>
+    <string name="transformation_applied">Transformación aplicada</string>
+    <string name="generated_mask">Máscara Generada</string>
+    <string name="mask_not_available">Máscara no disponible</string>
+    <string name="confirm_and_continue">Confirmar y Continuar</string>
+    <string name="generate_new_mask">Generar Nueva Máscara</string>
+    <string name="selected_style">Estilo seleccionado</string>
+    <string name="style_selection_title">Selecciona un estilo</string>
+    <string name="recommended_styles">Estilos recomendados</string>
+    <string name="recommended_styles_for">Estilos recomendados para %1$s</string>
+    <string name="missing_image_mask">No se encontró la imagen o la máscara.</string>
+    <string name="tap_to_preview">Toca para ver la vista previa</string>
+    <string name="select_style_prompt" translatable="false">Selecciona un estilo para personalizar tu foto</string>
 </resources>
 

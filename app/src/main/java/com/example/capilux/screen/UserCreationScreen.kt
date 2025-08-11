@@ -237,7 +237,10 @@ fun UserCreationScreen(navController: NavHostController, useAltTheme: Boolean, u
 
             if (showTermsDialog) {
                 TermsAndConditionsDialog(
-                    onDismiss = { showTermsDialog = false },
+                    onAccept = {
+                        showTermsDialog = false
+                        isTermsAccepted = true
+                    },
                     useAltTheme = useAltTheme
                 )
             }

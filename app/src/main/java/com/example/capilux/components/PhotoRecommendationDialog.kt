@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.res.stringResource
+import com.example.capilux.R
 
 @Composable
 fun PhotoRecommendationDialog(onDismiss: () -> Unit) {
@@ -45,7 +47,7 @@ fun PhotoRecommendationDialog(onDismiss: () -> Unit) {
             ) {
                 // Encabezado
                 Text(
-                    "Recomendaciones para tomar tu foto",
+                    stringResource(R.string.photo_recommendation_title),
                     color = Color.White,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
@@ -55,9 +57,10 @@ fun PhotoRecommendationDialog(onDismiss: () -> Unit) {
 
                 // Contenido del diálogo con las recomendaciones
                 listOf(
-                    "1. Centra tu rostro en el encuadre.",
-                    "2. Asegúrate de que tu rostro esté bien iluminado.",
-                    "3. Mira hacia adelante y no muevas la cabeza."
+                    stringResource(R.string.photo_recommendation_1),
+                    stringResource(R.string.photo_recommendation_2),
+                    stringResource(R.string.photo_recommendation_3),
+                    stringResource(R.string.photo_recommendation_4)
                 ).forEach { recommendation ->
                     Text(
                         text = recommendation,
@@ -78,7 +81,7 @@ fun PhotoRecommendationDialog(onDismiss: () -> Unit) {
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                 ) {
                     Text(
-                        "Cerrar",
+                        stringResource(R.string.close),
                         color = Color(0xFF2D0C5A),
                         fontWeight = FontWeight.Bold
                     )

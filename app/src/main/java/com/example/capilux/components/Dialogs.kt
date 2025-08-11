@@ -51,7 +51,7 @@ import com.example.capilux.ui.theme.PrimaryButton
 import com.example.capilux.ui.theme.backgroundGradient
 
 @Composable
-fun TermsAndConditionsDialog(onDismiss: () -> Unit, useAltTheme: Boolean) {
+fun TermsAndConditionsDialog(onAccept: () -> Unit, useAltTheme: Boolean) {
     // Gradiente para el fondo principal que respeta la configuración
     val gradient = backgroundGradient(useAltTheme)
 
@@ -59,8 +59,8 @@ fun TermsAndConditionsDialog(onDismiss: () -> Unit, useAltTheme: Boolean) {
     val scrollState = rememberScrollState()
 
     Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = false)
+        onDismissRequest = {},
+        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
     ) {
         Surface(
             modifier = Modifier
@@ -179,7 +179,7 @@ fun TermsAndConditionsDialog(onDismiss: () -> Unit, useAltTheme: Boolean) {
                 ) {
                     PrimaryButton(
                         text = stringResource(R.string.accept_terms_button),
-                        onClick = onDismiss
+                        onClick = onAccept
                     )
                 }
             }
