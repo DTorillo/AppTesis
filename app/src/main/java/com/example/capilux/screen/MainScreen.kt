@@ -1,4 +1,3 @@
-// MainScreen.kt  (frontal por defecto + máxima calidad)
 package com.example.capilux.screen
 
 import android.content.Context
@@ -100,7 +99,6 @@ import com.example.capilux.utils.takePhoto
 import kotlinx.coroutines.launch
 import androidx.compose.material3.AlertDialog as MaterialAlertDialog
 
-// ===== Preferencias simples para recordar si ya mostramos el diálogo =====
 fun setDialogShown(context: Context, shown: Boolean) {
     val sharedPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     sharedPrefs.edit().putBoolean("dialog_shown", shown).apply()

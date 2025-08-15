@@ -20,9 +20,6 @@ import java.util.concurrent.Executor
 import kotlin.math.abs
 import kotlin.math.max
 
-/**
- * Estados de guía para UI.
- */
 data class GuidanceStatus(
     val centered: Boolean,
     val distanceOk: Boolean,
@@ -42,25 +39,13 @@ private fun buildDetector(): FaceDetector {
     return FaceDetection.getClient(opts)
 }
 
-/**
- * Configura el controller para CAPTURE + ANALYSIS y prioriza calidad.
- */
 fun configureController(controller: LifecycleCameraController) {
     controller.setEnabledUseCases(
         CameraController.IMAGE_CAPTURE or CameraController.IMAGE_ANALYSIS
     )
     controller.imageAnalysisBackpressureStrategy = ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
     controller.setImageCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-
-    // Mantener aspecto 4:5 para rostro vertical; ajusta si tu UI exige otro ratio
-    // Ya no se recomienda usar imageAnalysisTargetSize y imageCaptureTargetSize
-    // CameraX seleccionará automáticamente el tamaño más adecuado.
 }
-
-/**
- * Inicia análisis guiado. Llama a onGuidance en cada frame. Si autoCapture=true,
- * dispara la foto cuando se cumplan criterios N veces seguidas.
- */
 @OptIn(ExperimentalGetImage::class)
 fun startGuidedAnalysis(
     context: Context,

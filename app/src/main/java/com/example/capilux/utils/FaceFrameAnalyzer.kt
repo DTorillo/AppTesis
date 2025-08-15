@@ -8,10 +8,6 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 
-/**
- * Analizador que detecta si hay un rostro en el cuadro.
- * Llama a [onResult] con true cuando se detecta al menos un rostro.
- */
 class FaceFrameAnalyzer(private val onResult: (Boolean) -> Unit) : ImageAnalysis.Analyzer {
     private val detector = FaceDetection.getClient(
         FaceDetectorOptions.Builder()

@@ -14,11 +14,11 @@ import java.util.concurrent.TimeUnit
 
 object CapiluxApi {
 
-    private const val BASE_URL = "https://89eec2bba3c9.ngrok-free.app"
+    private const val BASE_URL = "https://02c069521ea7.ngrok-free.app"
     private val client = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
         .build()
 
     // --- 1. Análisis de simetría/tipo de rostro ---

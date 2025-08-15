@@ -1,4 +1,3 @@
-// MaskPreviewScreen.kt
 package com.example.capilux.screen.mask
 
 import android.net.Uri
